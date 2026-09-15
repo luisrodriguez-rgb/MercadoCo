@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date": "2026-09-15T04:57:11.305Z",
+    "date": "2026-09-15T05:11:40.127Z",
     "experimentType": "MILP vs RH-1 Heuristic vs Monostores Benchmark (V4-A)",
     "city": "Cali, Colombia",
     "sampleSize": "60 runs across 12 scenarios"
@@ -13,41 +13,105 @@
     "dominancePct": 100,
     "paretoDominantCount": 12,
     "runtime": {
-      "p50Ms": 0.21,
-      "p95Ms": 14.67,
-      "maxMs": 14.67
+      "p50Ms": 0.24,
+      "p95Ms": 15.72,
+      "maxMs": 15.72
     }
   },
-  "sensitivityAnalysis": [
-    {
-      "lambdaWaste": 0.2,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 145120,
-      "notes": "Tolera mayor excedente perecedero"
-    },
-    {
-      "lambdaWaste": 0.5,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 144990,
-      "notes": "Balance óptimo estándar"
-    },
-    {
-      "lambdaWaste": 0.9,
-      "solutionStability": "Óptima (Base)",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 144990,
-      "notes": "Penalización biológica rigurosa"
-    },
-    {
-      "lambdaWaste": 1.2,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 145830,
-      "notes": "Forzaría báscula Éxito si delta de precio baja"
-    }
-  ],
+  "sensitivityAnalysis": {
+    "lambdaSensitivity": [
+      {
+        "lambdaWaste": 0.2,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Tolera mayor excedente perecedero"
+      },
+      {
+        "lambdaWaste": 0.5,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Balance óptimo estándar"
+      },
+      {
+        "lambdaWaste": 0.9,
+        "solutionStability": "Óptima (Base)",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Penalización biológica rigurosa de referencia"
+      },
+      {
+        "lambdaWaste": 1.2,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Aversión extrema a excedentes perecederos"
+      }
+    ],
+    "wasteProbabilitySensitivity": [
+      {
+        "wasteProbabilityHigh": 0.5,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 6871,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 42422,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.6,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 7433,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 41860,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.7,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 7995,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 41298,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.8,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 8557,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 40736,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.9,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 9120,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 40173,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      }
+    ]
+  },
   "scenariosExcerpt": [
     {
       "name": "E1: $150k | Granada | Balanceado",

@@ -1,6 +1,7 @@
 {
   "totalScenarios": 12,
   "totalRuns": 60,
+  "allComparisonsSymmetric": true,
   "scenarios": [
     {
       "id": "scenario_1",
@@ -9,8 +10,38 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 14.67,
+      "runtimeMs": 15.72,
       "optimizationScore": 1.1669,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 150000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 1.1669,
+        "bestBound": 1.1669,
+        "lpLowerBound": 0.6714,
+        "relaxationGapPct": 42.46,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 15.72
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -87,8 +118,38 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.43,
+      "runtimeMs": 0.47,
       "optimizationScore": 1.1451,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 150000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 1.1451,
+        "bestBound": 1.1451,
+        "lpLowerBound": 0.6805,
+        "relaxationGapPct": 40.57,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.47
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -165,8 +226,38 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.7,
+      "runtimeMs": 0.71,
       "optimizationScore": 1.1815,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 150000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 1.1815,
+        "bestBound": 1.1815,
+        "lpLowerBound": 0.6797,
+        "relaxationGapPct": 42.47,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.71
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -243,8 +334,38 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.34,
+      "runtimeMs": 0.33,
       "optimizationScore": 1.1597,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 150000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 1.1597,
+        "bestBound": 1.1597,
+        "lpLowerBound": 0.6889,
+        "relaxationGapPct": 40.6,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.33
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -321,8 +442,38 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.21,
+      "runtimeMs": 0.24,
       "optimizationScore": 0.7956,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 220000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.7956,
+        "bestBound": 0.7956,
+        "lpLowerBound": 0.4578,
+        "relaxationGapPct": 42.46,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.24
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -399,8 +550,38 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.2,
+      "runtimeMs": 0.22,
       "optimizationScore": 0.7808,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 220000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.7808,
+        "bestBound": 0.7808,
+        "lpLowerBound": 0.464,
+        "relaxationGapPct": 40.57,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.22
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -477,8 +658,38 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.42,
+      "runtimeMs": 0.3,
       "optimizationScore": 0.8056,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 220000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.8056,
+        "bestBound": 0.8056,
+        "lpLowerBound": 0.4634,
+        "relaxationGapPct": 42.48,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.3
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -555,8 +766,38 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.18,
+      "runtimeMs": 0.19,
       "optimizationScore": 0.7907,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 220000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.7907,
+        "bestBound": 0.7907,
+        "lpLowerBound": 0.4697,
+        "relaxationGapPct": 40.6,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.19
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -633,8 +874,38 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.16,
+      "runtimeMs": 0.19,
       "optimizationScore": 0.6251,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 280000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.6251,
+        "bestBound": 0.6251,
+        "lpLowerBound": 0.3597,
+        "relaxationGapPct": 42.46,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.19
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -711,8 +982,38 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.21,
+      "runtimeMs": 0.23,
       "optimizationScore": 0.6135,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 280000,
+        "zone": "CALI_GRANADA_VERSALLES",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.6135,
+        "bestBound": 0.6135,
+        "lpLowerBound": 0.3646,
+        "relaxationGapPct": 40.57,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.23
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -789,8 +1090,38 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.15,
+      "runtimeMs": 0.17,
       "optimizationScore": 0.633,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 280000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.633,
+        "bestBound": 0.633,
+        "lpLowerBound": 0.3641,
+        "relaxationGapPct": 42.48,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.17
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -867,8 +1198,38 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.14,
+      "runtimeMs": 0.24,
       "optimizationScore": 0.6213,
+      "scenarioFingerprint": {
+        "catalogVersion": "CALI_ESSENTIAL_33_SKU_V2",
+        "priceVersion": "PRICES_CALI_2026_Q1",
+        "packagingVersion": "PACKAGING_TAXONOMY_V2",
+        "pantryState": "prod_aceite_vegetal,prod_sal_refinada",
+        "nutritionProfile": "WEEKLY_NUTRITION_2PAX",
+        "budget": 280000,
+        "zone": "CALI_SAN_FERNANDO",
+        "availabilityRules": "D1_ARA_EXITO_ACTIVE_33SKU",
+        "feasibilityRules": "DEMAND_NON_NEGATIVE_AND_CASH_SOLVENT"
+      },
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "solverTelemetry": {
+        "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+        "candidateVariables": 99,
+        "activeDecisionVariables": 93,
+        "integerVariables": 60,
+        "continuousVariables": 30,
+        "binaryVariables": 3,
+        "totalVariables": 99,
+        "constraintsCount": 34,
+        "objectiveValue": 0.6213,
+        "bestBound": 0.6213,
+        "lpLowerBound": 0.369,
+        "relaxationGapPct": 40.61,
+        "optimalityGapPct": 0,
+        "isGlobalOptimum": true,
+        "numericalTolerance": 0.00001,
+        "runtimeMs": 0.24
+      },
       "strategies": {
         "D1": {
           "name": "D1",
@@ -947,39 +1308,118 @@
     "dominancePct": 100,
     "paretoDominantCount": 12,
     "runtime": {
-      "p50Ms": 0.21,
-      "p95Ms": 14.67,
-      "maxMs": 14.67
+      "p50Ms": 0.24,
+      "p95Ms": 15.72,
+      "maxMs": 15.72
     }
   },
-  "sensitivityAnalysis": [
-    {
-      "lambdaWaste": 0.2,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 145120,
-      "notes": "Tolera mayor excedente perecedero"
-    },
-    {
-      "lambdaWaste": 0.5,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 144990,
-      "notes": "Balance óptimo estándar"
-    },
-    {
-      "lambdaWaste": 0.9,
-      "solutionStability": "Óptima (Base)",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 144990,
-      "notes": "Penalización biológica rigurosa"
-    },
-    {
-      "lambdaWaste": 1.2,
-      "solutionStability": "Estable",
-      "storePair": "D1 + Ara",
-      "avgCostCOP": 145830,
-      "notes": "Forzaría báscula Éxito si delta de precio baja"
-    }
-  ]
+  "solverTelemetry": {
+    "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+    "candidateVariables": 99,
+    "activeDecisionVariables": 93,
+    "integerVariables": 60,
+    "continuousVariables": 30,
+    "binaryVariables": 3,
+    "constraintsCount": 34,
+    "lpLowerBound": 0.6714,
+    "bestBound": 1.1669,
+    "relaxationGapPct": 42.46,
+    "optimalityGapPct": 0,
+    "isGlobalOptimum": true,
+    "numericalTolerance": 0.00001
+  },
+  "sensitivityAnalysis": {
+    "lambdaSensitivity": [
+      {
+        "lambdaWaste": 0.2,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Tolera mayor excedente perecedero"
+      },
+      {
+        "lambdaWaste": 0.5,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Balance óptimo estándar"
+      },
+      {
+        "lambdaWaste": 0.9,
+        "solutionStability": "Óptima (Base)",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Penalización biológica rigurosa de referencia"
+      },
+      {
+        "lambdaWaste": 1.2,
+        "solutionStability": "Estable",
+        "storePair": "Ara + Éxito",
+        "avgCostCOP": 163715,
+        "notes": "Aversión extrema a excedentes perecederos"
+      }
+    ],
+    "wasteProbabilitySensitivity": [
+      {
+        "wasteProbabilityHigh": 0.5,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 6871,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 42422,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.6,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 7433,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 41860,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.7,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 7995,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 41298,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.8,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 8557,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 40736,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      },
+      {
+        "wasteProbabilityHigh": 0.9,
+        "solutionId": "ARA+EXITO",
+        "effectiveCost": 163715,
+        "expectedWaste": 9120,
+        "storesVisited": 2,
+        "friction": 1531,
+        "futureInventory": 40173,
+        "proteinAdequacy": 100,
+        "solutionChanged": false,
+        "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      }
+    ]
+  }
 }

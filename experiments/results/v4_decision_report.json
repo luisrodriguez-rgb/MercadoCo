@@ -1,0 +1,386 @@
+{
+  "metadata": {
+    "reportTitle": "Mercado Colombia — V4 Decision Report",
+    "date": "2026-09-15T05:17:41.340Z",
+    "city": "Cali, Colombia",
+    "benchmarkTarget": "Exact Separable MILP vs. Reasonable Human Heuristic (RH-1)",
+    "version": "4.0.0-AUDITED"
+  },
+  "experimentDesign": {
+    "scenariosCount": 12,
+    "strategiesPerScenario": 5,
+    "totalExecutions": 60,
+    "dimensions": {
+      "budgetsCOP": [
+        150000,
+        220000,
+        280000
+      ],
+      "zones": [
+        "Granada - Versalles (Norte)",
+        "San Fernando - Tequendama (Centro-Sur)"
+      ],
+      "nutritionalProfiles": [
+        "Balanceado",
+        "Alta Proteína"
+      ]
+    }
+  },
+  "solverTelemetry": {
+    "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
+    "candidateVariables": 99,
+    "activeDecisionVariables": 93,
+    "integerVariables": 60,
+    "continuousVariables": 30,
+    "binaryVariables": 3,
+    "constraintsCount": 34,
+    "lpLowerBound": 0.6714,
+    "bestBound": 1.1669,
+    "relaxationGapPct": 42.46,
+    "optimalityGapPct": 0,
+    "isGlobalOptimum": true,
+    "numericalTolerance": 0.00001
+  },
+  "scenarioResults": [
+    {
+      "id": "scenario_1",
+      "name": "E1: $150k | Granada | Balanceado",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 15.53,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.8,
+      "netSavingsVsBestMonoCOP": 24910,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 163715,
+      "humanCostCOP": 189881,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_2",
+      "name": "E2: $150k | Granada | Proteína",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.93,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.3,
+      "netSavingsVsBestMonoCOP": 23513,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 162022,
+      "humanCostCOP": 186791,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_3",
+      "name": "E3: $150k | San Fdo | Balanceado",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.38,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.6,
+      "netSavingsVsBestMonoCOP": 23972,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 165903,
+      "humanCostCOP": 192069,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_4",
+      "name": "E4: $150k | San Fdo | Proteína",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.34,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.1,
+      "netSavingsVsBestMonoCOP": 22575,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 164210,
+      "humanCostCOP": 188979,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_5",
+      "name": "E5: $220k | Granada | Balanceado",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.23,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.8,
+      "netSavingsVsBestMonoCOP": 24910,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 163715,
+      "humanCostCOP": 189881,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_6",
+      "name": "E6: $220k | Granada | Proteína",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.22,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.3,
+      "netSavingsVsBestMonoCOP": 23513,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 162022,
+      "humanCostCOP": 186791,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_7",
+      "name": "E7: $220k | San Fdo | Balanceado",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.22,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.6,
+      "netSavingsVsBestMonoCOP": 23972,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 165903,
+      "humanCostCOP": 192069,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_8",
+      "name": "E8: $220k | San Fdo | Proteína",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.2,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.1,
+      "netSavingsVsBestMonoCOP": 22575,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 164210,
+      "humanCostCOP": 188979,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_9",
+      "name": "E9: $280k | Granada | Balanceado",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.2,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.8,
+      "netSavingsVsBestMonoCOP": 24910,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 163715,
+      "humanCostCOP": 189881,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_10",
+      "name": "E10: $280k | Granada | Proteína",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.24,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.3,
+      "netSavingsVsBestMonoCOP": 23513,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 162022,
+      "humanCostCOP": 186791,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_11",
+      "name": "E11: $280k | San Fdo | Balanceado",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.36,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.6,
+      "netSavingsVsBestMonoCOP": 23972,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 165903,
+      "humanCostCOP": 192069,
+      "milpWasteRiskCOP": 7995,
+      "humanWasteRiskCOP": 21894,
+      "paretoDominant": true
+    },
+    {
+      "id": "scenario_12",
+      "name": "E12: $280k | San Fdo | Proteína",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.18,
+      "comparisonStatus": "VALID_SYMMETRIC",
+      "improvementVsHumanPct": 13.1,
+      "netSavingsVsBestMonoCOP": 22575,
+      "bestMonoStore": "Tiendas Ara",
+      "milpCostCOP": 164210,
+      "humanCostCOP": 188979,
+      "milpWasteRiskCOP": 6673,
+      "humanWasteRiskCOP": 20015,
+      "paretoDominant": true
+    }
+  ],
+  "aggregateResults": {
+    "meanImprovementPct": 13.4,
+    "medianImprovementPct": 13.6,
+    "minImprovementPct": 13.1,
+    "maxImprovementPct": 13.8,
+    "rangePct": 0.7
+  },
+  "paretoAnalysis": {
+    "dominantScenariosCount": 12,
+    "totalScenarios": 12,
+    "dominancePercentage": 100,
+    "strictInequalityVerified": true
+  },
+  "lambdaSensitivity": [
+    {
+      "lambdaWaste": 0.2,
+      "solutionStability": "Estable",
+      "storePair": "Ara + Éxito",
+      "avgCostCOP": 163715,
+      "notes": "Tolera mayor excedente perecedero"
+    },
+    {
+      "lambdaWaste": 0.5,
+      "solutionStability": "Estable",
+      "storePair": "Ara + Éxito",
+      "avgCostCOP": 163715,
+      "notes": "Balance óptimo estándar"
+    },
+    {
+      "lambdaWaste": 0.9,
+      "solutionStability": "Óptima (Base)",
+      "storePair": "Ara + Éxito",
+      "avgCostCOP": 163715,
+      "notes": "Penalización biológica rigurosa de referencia"
+    },
+    {
+      "lambdaWaste": 1.2,
+      "solutionStability": "Estable",
+      "storePair": "Ara + Éxito",
+      "avgCostCOP": 163715,
+      "notes": "Aversión extrema a excedentes perecederos"
+    }
+  ],
+  "wasteProbabilitySensitivity": [
+    {
+      "wasteProbabilityHigh": 0.5,
+      "solutionId": "ARA+EXITO",
+      "effectiveCost": 163715,
+      "expectedWaste": 6871,
+      "storesVisited": 2,
+      "friction": 1531,
+      "futureInventory": 42422,
+      "proteinAdequacy": 100,
+      "solutionChanged": false,
+      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+    },
+    {
+      "wasteProbabilityHigh": 0.6,
+      "solutionId": "ARA+EXITO",
+      "effectiveCost": 163715,
+      "expectedWaste": 7433,
+      "storesVisited": 2,
+      "friction": 1531,
+      "futureInventory": 41860,
+      "proteinAdequacy": 100,
+      "solutionChanged": false,
+      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+    },
+    {
+      "wasteProbabilityHigh": 0.7,
+      "solutionId": "ARA+EXITO",
+      "effectiveCost": 163715,
+      "expectedWaste": 7995,
+      "storesVisited": 2,
+      "friction": 1531,
+      "futureInventory": 41298,
+      "proteinAdequacy": 100,
+      "solutionChanged": false,
+      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+    },
+    {
+      "wasteProbabilityHigh": 0.8,
+      "solutionId": "ARA+EXITO",
+      "effectiveCost": 163715,
+      "expectedWaste": 8557,
+      "storesVisited": 2,
+      "friction": 1531,
+      "futureInventory": 40736,
+      "proteinAdequacy": 100,
+      "solutionChanged": false,
+      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+    },
+    {
+      "wasteProbabilityHigh": 0.9,
+      "solutionId": "ARA+EXITO",
+      "effectiveCost": 163715,
+      "expectedWaste": 9120,
+      "storesVisited": 2,
+      "friction": 1531,
+      "futureInventory": 40173,
+      "proteinAdequacy": 100,
+      "solutionChanged": false,
+      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+    }
+  ],
+  "symmetryAudit": {
+    "allScenariosSymmetric": true,
+    "auditVerification": "MILP fingerprint === RH-1 fingerprint en el 100% de las 60 corridas.",
+    "fingerprintSchema": [
+      "catalogVersion",
+      "priceVersion",
+      "packagingVersion",
+      "pantryState",
+      "nutritionProfile",
+      "budget",
+      "zone",
+      "availabilityRules",
+      "feasibilityRules"
+    ]
+  },
+  "runtimeBenchmark": {
+    "p50Ms": 0.24,
+    "p95Ms": 15.53,
+    "maxMs": 15.53,
+    "environment": "Local V8 / Node.js runtime"
+  },
+  "limitations": [
+    "Catálogo acotado a 33 SKUs esenciales de canasta básica de Cali.",
+    "Precios correspondientes al entorno empírico experimental de Cali (Q1 2026).",
+    "Probabilidades de desperdicio tratadas como parámetros experimentales de riesgo biológico calibrados, no frecuencias observadas.",
+    "RH-1 representa una aproximación modelada del comprador informado, no un panel de compradores humanos en vivo."
+  ],
+  "conclusion": {
+    "algorithmicStatus": "VALIDATED_STRICT_DOMINANCE",
+    "recommendation": "Proceder con la fase comportamental V4-B sobre 20-50 participantes responsables de compra en Cali."
+  }
+}
