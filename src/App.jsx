@@ -5,6 +5,7 @@ import { PRICES_CALI } from './data/prices_cali.js';
 import { ESSENTIAL_PRODUCTS } from './data/products.js';
 import { STORES, CONFIDENCE_LEVELS, CITIES, PANTRY_STAPLE_IDS, TRANSPORT_MODES } from './domain/types.js';
 import { LogoD1, LogoAra, LogoExito, FlagColombia } from './ui/StoreLogos.jsx';
+import { EXPERIMENTAL_V4_SUMMARY } from './data/experimental_v4_summary.js';
 import { 
   SlidersHorizontal, 
   CalendarDays, 
@@ -33,7 +34,9 @@ import {
   Bus,
   Bike,
   HelpCircle,
-  ShieldAlert
+  ShieldAlert,
+  FlaskConical,
+  Award
 } from 'lucide-react';
 
 export function App() {
@@ -202,7 +205,7 @@ export function App() {
               <h1>
                 <span>Mercado Colombia</span>
               </h1>
-              <div className="brand-tagline">Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V3)</div>
+              <div className="brand-tagline">Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V4)</div>
             </div>
           </div>
 
@@ -639,13 +642,13 @@ export function App() {
               </div>
             </div>
 
-            {/* V3: Tarjeta de Ahorro Auditable con Calculadora vs Mejor Monotienda y Benchmark Humano */}
+            {/* V4: Tarjeta de Ahorro Auditable con Calculadora vs Mejor Monotienda y Benchmark Humano */}
             <div className="audit-benchmark-box">
               <div className="audit-benchmark-header">
                 <span>Auditoría de Ahorro vs. Mejor Monotienda ({optimization.bestMonoStore.storeName})</span>
                 <span className="heuristic-pill">
                   <TrendingDown size={12} />
-                  Optimality Gap MILP: {optimization.heuristicBenchmark.optimalityGap}% vs. Humano Razonable ({formatCOP(optimization.heuristicBenchmark.effectiveCost)})
+                  +{optimization.heuristicBenchmark.heuristicImprovementPct}% de mejora vs. Heurística RH-1 ({formatCOP(optimization.heuristicBenchmark.effectiveCost)})
                 </span>
               </div>
               <div className="audit-benchmark-row">
@@ -737,6 +740,15 @@ export function App() {
           >
             <Database size={16} />
             <span>5. Registro de Precios Normalizados (Cali)</span>
+          </button>
+
+          <button 
+            id="tab-experiments"
+            className={`tab-trigger ${activeTab === 'experiments' ? 'active' : ''}`}
+            onClick={() => setActiveTab('experiments')}
+          >
+            <FlaskConical size={16} />
+            <span>6. Batería Experimental V4 (60 Corridas)</span>
           </button>
         </nav>
 
@@ -1067,6 +1079,171 @@ export function App() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA 6: BATERIA EXPERIMENTAL V4 (60 CORRIDAS COMPUTACIONALES) */}
+        {activeTab === 'experiments' && (
+          <div className="surface-panel">
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FlaskConical size={18} color="var(--color-brand-emerald)" />
+                    <span>Línea V4-A: Batería Experimental de 60 Corridas (12 Escenarios × 5 Estrategias)</span>
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                    Evaluación determinista, simétrica y reproducible en Santiago de Cali. Compara el modelo MILP V4 frente a Monotiendas (D1, Ara, Éxito) y la Heurística Humana Razonable (RH-1).
+                  </p>
+                </div>
+                <div className="heuristic-pill" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.3)', color: 'var(--highlight-text)' }}>
+                  <Award size={13} />
+                  <span>Dominancia de Pareto: 100% (12/12)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjetas de Métricas Maestras */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Mejora Media vs. Heurística RH-1</div>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
+                  +{EXPERIMENTAL_V4_SUMMARY.metrics.meanImprovementPct}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  Rango: {EXPERIMENTAL_V4_SUMMARY.metrics.minImprovementPct}% – {EXPERIMENTAL_V4_SUMMARY.metrics.maxImprovementPct}% (Mediana: {EXPERIMENTAL_V4_SUMMARY.metrics.medianImprovementPct}%)
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Tasa de Dominancia de Pareto</div>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#38bdf8' }} className="num-tabular">
+                  {EXPERIMENTAL_V4_SUMMARY.metrics.dominanceRatePct}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  MILP domina estrictamente en costo y desperdicio (12 de 12)
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Runtime de Optimización</div>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
+                  {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p50Ms} ms
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  Percentil p50: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p50Ms}ms | p95: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p95Ms}ms | max: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.maxMs}ms
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Validación Humana (V4-B)</div>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#ca8a04' }} className="num-tabular">
+                  20–50
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  Hogares de Cali (Piloto de Comportamiento Real)
+                </div>
+              </div>
+            </div>
+
+            {/* Matriz de los 12 Escenarios Experimentales */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.65rem' }}>
+                Tabla de Resultados Consolidados (12 Escenarios Combinatorios × 5 Estrategias = 60 Ejecuciones)
+              </div>
+              <div className="price-registry-container">
+                <table className="price-registry-table">
+                  <thead>
+                    <tr>
+                      <th># Escenario Experimental</th>
+                      <th>Presupuesto</th>
+                      <th>Costo MILP V4</th>
+                      <th>Costo Humano RH-1</th>
+                      <th>Mejora vs. Heurística</th>
+                      <th>Ahorro vs. Mejor Monotienda</th>
+                      <th>Dominancia Pareto</th>
+                      <th>Diagnóstico</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {EXPERIMENTAL_V4_SUMMARY.scenarios.map(sc => (
+                      <tr key={sc.id}>
+                        <td><strong>{sc.name}</strong></td>
+                        <td className="num-tabular">{formatCOP(sc.budget)}</td>
+                        <td className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
+                          {formatCOP(sc.milpCost)}
+                        </td>
+                        <td className="num-tabular" style={{ color: 'var(--color-text-secondary)' }}>
+                          {formatCOP(sc.humanCost)}
+                        </td>
+                        <td>
+                          <span className="heuristic-pill" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>
+                            +{sc.improvementPct}%
+                          </span>
+                        </td>
+                        <td className="num-tabular" style={{ fontWeight: 600 }}>
+                          +{formatCOP(sc.savingsVsBestMono)}
+                        </td>
+                        <td>
+                          <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem' }}>
+                            ✓ Dominante
+                          </span>
+                        </td>
+                        <td style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
+                          {sc.status}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Análisis de Sensibilidad Paramétrica & Protocolo V4-B */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+              {/* Sensibilidad */}
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <TrendingDown size={14} color="var(--color-brand-emerald)" />
+                  <span>Análisis de Sensibilidad de Ponderadores (λ Desperdicio)</span>
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.75rem' }}>
+                  {EXPERIMENTAL_V4_SUMMARY.sensitivityAnalysis.map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.5rem', background: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)' }}>
+                      <div>
+                        <strong>λ_waste = {item.lambdaWaste}:</strong> <span style={{ color: 'var(--color-text-secondary)' }}>{item.notes}</span>
+                      </div>
+                      <div className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
+                        {item.solutionStability} ({item.storePair})
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '0.65rem' }}>
+                  Conclusión: La asignación óptima D1 + Ara se mantiene invariante ante oscilaciones de λ entre 0.2 y 1.2, evidenciando alta robustez estructural.
+                </div>
+              </div>
+
+              {/* Protocolo de Validación Humana V4-B */}
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <MapPin size={14} color="#ca8a04" />
+                  <span>Línea V4-B: Protocolo de Validación en Cali (20–50 Hogares)</span>
+                </h4>
+                <p style={{ fontSize: '0.73rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                  No se evalúan encuestas hipotéticas de disposición a pagar. Se confronta al consumidor con una decisión de compra terminada:
+                </p>
+                <div style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-xs)', padding: '0.5rem', margin: '0.5rem 0', fontSize: '0.71rem' }}>
+                  <strong>Hipótesis Central:</strong> Presupuesto ($200k) → Menú (14 platos) → Canasta ($171.8k en D1+Ara con $14.6k de ahorro neto).
+                  <div style={{ marginTop: '0.25rem', color: 'var(--highlight-text)' }}>
+                    Pregunta Clave: "¿Harías esta compra tal cual? ¿Qué tendría que cambiar para que la hicieras?"
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
+                  Documento formal de campo: <code>protocolo_validacion_cali_v4.md</code>
+                </div>
+              </div>
             </div>
           </div>
         )}
