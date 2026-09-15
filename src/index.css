@@ -984,3 +984,202 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: space-between;
   }
 }
+
+/* --- V3: Descomposición Presupuestal Waterfall --- */
+.waterfall-panel {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.waterfall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.waterfall-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.waterfall-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--highlight-text);
+}
+
+.waterfall-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+}
+
+.waterfall-stage-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.55rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.waterfall-stage-lbl {
+  font-size: 0.68rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.waterfall-stage-val {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.waterfall-stage-pct {
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.waterfall-bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-base);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+
+.waterfall-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width var(--transition-smooth);
+}
+
+/* --- V3: Tarjeta de Ahorro Auditable vs Mejor Monotienda --- */
+.audit-benchmark-box {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.audit-benchmark-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+}
+
+.audit-benchmark-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+.audit-benchmark-divider {
+  height: 1px;
+  background: var(--color-border-subtle);
+  margin: 0.2rem 0;
+}
+
+.audit-benchmark-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--highlight-text);
+}
+
+/* --- V3: Explicabilidad Inmediata en Dashboard --- */
+.quick-explain-deck {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.quick-explain-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.quick-explain-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+}
+
+.quick-explain-item {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.73rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.quick-explain-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.quick-explain-verdict-bar {
+  font-size: 0.72rem;
+  color: var(--highlight-text);
+  background: var(--color-brand-emerald-dim);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-xs);
+  padding: 0.4rem 0.6rem;
+  font-weight: 600;
+}
+
+/* --- V3: Heuristic Benchmark Pill --- */
+.heuristic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-xs);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-size: 0.72rem;
+  font-weight: 600;
+}

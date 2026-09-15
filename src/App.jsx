@@ -202,7 +202,7 @@ export function App() {
               <h1>
                 <span>Mercado Colombia</span>
               </h1>
-              <div className="brand-tagline">Sistema de Optimización Presupuestal y Planificación de Menú (V2)</div>
+              <div className="brand-tagline">Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V3)</div>
             </div>
           </div>
 
@@ -460,11 +460,12 @@ export function App() {
                 </h2>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                {/* Badge de Confianza de Precios */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Badge de Calidad y Cobertura de Datos (Reemplazo conceptual formal) */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
                   <ShieldCheck size={14} color="#10b981" />
-                  <span>Confianza del Catálogo: <strong className="num-tabular" style={{ color: 'var(--highlight-text)' }}>{(activeConfidence * 100).toFixed(1)}%</strong></span>
+                  <span>Calidad de Datos: <strong className="num-tabular" style={{ color: 'var(--highlight-text)' }}>{optimization.dataQuality.coveragePercentage}%</strong></span>
+                  <span style={{ color: 'var(--color-text-tertiary)', marginLeft: '4px' }}>({optimization.dataQuality.verifiedSKUsCount}/{optimization.dataQuality.totalSKUsCount} verificados)</span>
                 </div>
 
                 <div className={`badge-verdict ${isWithinBudget ? 'in-budget' : 'deficit'}`}>
@@ -479,7 +480,7 @@ export function App() {
             </div>
 
             {/* Desglose Analítico Riguroso: Desembolso vs Consumo vs Inventario Útil vs Desperdicio */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.65rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
               <div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Desembolso Total en Caja</div>
                 <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
@@ -492,14 +493,14 @@ export function App() {
                 <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
                   {formatCOP(activeCost - (activeFutureInventory + activeWasteRisk))}
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>14 servicios ingeridos</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>14 raciones ingeridas</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Inventario Útil Futuro</div>
                 <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#38bdf8' }} className="num-tabular">
                   {formatCOP(activeFutureInventory)}
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Arroz, aceite, legumbres</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Granos, aceite, legumbres (activo)</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Riesgo de Desperdicio</div>
@@ -510,7 +511,62 @@ export function App() {
               </div>
             </div>
 
-            {/* Matriz Comparativa de Tiendas con Logos Oficiales */}
+            {/* V3: Gráfico Waterfall de Descomposición Presupuestal */}
+            <div className="waterfall-panel">
+              <div className="waterfall-header">
+                <div className="waterfall-title">
+                  <TrendingDown size={14} color="var(--color-brand-emerald)" />
+                  <span>Descomposición de Flujo Presupuestal (Waterfall de Desembolso)</span>
+                </div>
+                <div className="waterfall-meta num-tabular">
+                  Caja Libre Neta: {formatCOP(budgetCOP - activeCost)} ({(Math.max(0, (budgetCOP - activeCost) / budgetCOP) * 100).toFixed(1)}%)
+                </div>
+              </div>
+
+              <div className="waterfall-bars-grid">
+                {/* 1. Presupuesto Total */}
+                <div className="waterfall-stage-card">
+                  <span className="waterfall-stage-lbl">1. Presupuesto Asignado</span>
+                  <span className="waterfall-stage-val num-tabular">{formatCOP(budgetCOP)}</span>
+                  <span className="waterfall-stage-pct" style={{ color: 'var(--color-text-tertiary)' }}>Base: 100.0%</span>
+                  <div className="waterfall-bar-track">
+                    <div className="waterfall-bar-fill" style={{ width: '100%', background: '#64748b' }}></div>
+                  </div>
+                </div>
+
+                {/* 2. Desembolso en Productos */}
+                <div className="waterfall-stage-card">
+                  <span className="waterfall-stage-lbl">2. Salida en Productos</span>
+                  <span className="waterfall-stage-val num-tabular" style={{ color: '#fbbf24' }}>-{formatCOP(activeCost)}</span>
+                  <span className="waterfall-stage-pct" style={{ color: '#fbbf24' }}>{((activeCost / budgetCOP) * 100).toFixed(1)}% del presupuesto</span>
+                  <div className="waterfall-bar-track">
+                    <div className="waterfall-bar-fill" style={{ width: `${Math.min(100, (activeCost / budgetCOP) * 100)}%`, background: '#fbbf24' }}></div>
+                  </div>
+                </div>
+
+                {/* 3. Fricción Logística Imputada */}
+                <div className="waterfall-stage-card">
+                  <span className="waterfall-stage-lbl">3. Fricción Logística F</span>
+                  <span className="waterfall-stage-val num-tabular" style={{ color: '#f87171' }}>-{formatCOP(selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0))}</span>
+                  <span className="waterfall-stage-pct" style={{ color: '#f87171' }}>{(((selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0)) / budgetCOP) * 100).toFixed(1)}% del presupuesto</span>
+                  <div className="waterfall-bar-track">
+                    <div className="waterfall-bar-fill" style={{ width: `${Math.min(100, (((selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0)) / budgetCOP) * 100) * 10)}%`, background: '#f87171' }}></div>
+                  </div>
+                </div>
+
+                {/* 4. Caja Libre Disponible */}
+                <div className="waterfall-stage-card">
+                  <span className="waterfall-stage-lbl">4. Caja Libre Disponible</span>
+                  <span className="waterfall-stage-val num-tabular" style={{ color: 'var(--highlight-text)' }}>+{formatCOP(budgetCOP - activeCost)}</span>
+                  <span className="waterfall-stage-pct" style={{ color: 'var(--highlight-text)' }}>{(((budgetCOP - activeCost) / budgetCOP) * 100).toFixed(1)}% de liquidez</span>
+                  <div className="waterfall-bar-track">
+                    <div className="waterfall-bar-fill" style={{ width: `${Math.max(0, ((budgetCOP - activeCost) / budgetCOP) * 100)}%`, background: '#10b981' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Matriz Comparativa de Tiendas con Contabilidad Simétrica (Productos + Fricción) */}
             <div className="store-comparative-matrix">
               {/* Combinación Multitienda */}
               <div 
@@ -525,9 +581,9 @@ export function App() {
                   </div>
                   <span className="store-title-label">Híbrido D1 + Ara</span>
                 </div>
-                <div className="store-metric-price num-tabular">{formatCOP(optimization.multiStore.totalCost)}</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.multiStore.effectiveCost)}</div>
                 <div className="store-submetric-note">
-                  Ahorro neto deducida fricción: <strong style={{ color: 'var(--highlight-text)' }}>{formatCOP(optimization.multiStore.netSavings)}</strong>
+                  {formatCOP(optimization.multiStore.itemsCost)} prod. + {formatCOP(optimization.multiStore.frictionPenaltyCOP)} fricción
                 </div>
               </div>
 
@@ -542,8 +598,10 @@ export function App() {
                   </div>
                   <span className="store-title-label">Monotienda D1</span>
                 </div>
-                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.D1.totalCost)}</div>
-                <div className="store-submetric-note">Cero fricción logística</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.D1.effectiveCost)}</div>
+                <div className="store-submetric-note">
+                  {formatCOP(optimization.monoStores.D1.itemsCost)} prod. + {formatCOP(optimization.monoStores.D1.frictionCOP)} fricción
+                </div>
               </div>
 
               {/* Monotienda Ara */}
@@ -557,8 +615,10 @@ export function App() {
                   </div>
                   <span className="store-title-label">Monotienda Ara</span>
                 </div>
-                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.ARA.totalCost)}</div>
-                <div className="store-submetric-note">Marcas propias directas</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.ARA.effectiveCost)}</div>
+                <div className="store-submetric-note">
+                  {formatCOP(optimization.monoStores.ARA.itemsCost)} prod. + {formatCOP(optimization.monoStores.ARA.frictionCOP)} fricción
+                </div>
               </div>
 
               {/* Monotienda Éxito */}
@@ -572,19 +632,62 @@ export function App() {
                   </div>
                   <span className="store-title-label">Grupo Éxito</span>
                 </div>
-                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.EXITO.totalCost)}</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.EXITO.effectiveCost)}</div>
                 <div className="store-submetric-note">
-                  Granel exacto en báscula
+                  {formatCOP(optimization.monoStores.EXITO.itemsCost)} prod. + {formatCOP(optimization.monoStores.EXITO.frictionCOP)} fricción
                 </div>
               </div>
             </div>
 
-            {/* Análisis de Fricción Paramétrica */}
-            <div className="friction-analysis-bar">
-              <Info size={16} color="var(--color-text-secondary)" />
-              <span>
-                <strong>Fricción Paramétrica ({optimization.transportMode.name}):</strong> Costo imputado de <strong>{formatCOP(optimization.multiStore.frictionPenaltyCOP)}</strong> (transporte + valor tiempo en {optimization.currentZone.name}). Ahorro bruto multitienda: <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>. Veredicto: {optimization.multiStore.isWorthIt ? 'El beneficio en caja supera con creces el costo de desplazamiento.' : 'Se aconseja monotienda para evitar fricción innecesaria.'}
-              </span>
+            {/* V3: Tarjeta de Ahorro Auditable con Calculadora vs Mejor Monotienda y Benchmark Humano */}
+            <div className="audit-benchmark-box">
+              <div className="audit-benchmark-header">
+                <span>Auditoría de Ahorro vs. Mejor Monotienda ({optimization.bestMonoStore.storeName})</span>
+                <span className="heuristic-pill">
+                  <TrendingDown size={12} />
+                  Optimality Gap MILP: {optimization.heuristicBenchmark.optimalityGap}% vs. Humano Razonable ({formatCOP(optimization.heuristicBenchmark.effectiveCost)})
+                </span>
+              </div>
+              <div className="audit-benchmark-row">
+                <span>Mejor monotienda ({optimization.bestMonoStore.storeName}): {formatCOP(optimization.bestMonoStore.itemsCost)} productos + {formatCOP(optimization.bestMonoStore.frictionCOP)} fricción</span>
+                <span className="num-tabular" style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{formatCOP(optimization.bestMonoStore.effectiveCost)}</span>
+              </div>
+              <div className="audit-benchmark-row">
+                <span>Mercado Colombia Híbrido: {formatCOP(optimization.multiStore.itemsCost)} productos + {formatCOP(optimization.multiStore.frictionPenaltyCOP)} fricción</span>
+                <span className="num-tabular" style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>-{formatCOP(optimization.multiStore.effectiveCost)}</span>
+              </div>
+              <div className="audit-benchmark-divider"></div>
+              <div className="audit-benchmark-total">
+                <span>Ahorro Neto Real Auditable:</span>
+                <span className="num-tabular">{formatCOP(optimization.multiStore.netSavings)}</span>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
+                Fórmula de conciliación contable: Ahorro bruto en góndola ({formatCOP(optimization.multiStore.grossSavings)}) - Fricción logística adicional ({formatCOP(optimization.multiStore.deltaFriction)}) = Ahorro neto ({formatCOP(optimization.multiStore.netSavings)}).
+              </div>
+            </div>
+
+            {/* V3: Explicabilidad Inmediata en la Pantalla Principal ("¿Por qué D1 + Ara?") */}
+            <div className="quick-explain-deck">
+              <div className="quick-explain-title">
+                <HelpCircle size={15} color="var(--color-brand-emerald)" />
+                <span>¿Por qué la combinación {optimization.multiStore.activeStores.join(' + ')}? (Decisiones determinantes)</span>
+              </div>
+              <div className="quick-explain-list">
+                {optimization.multiStore.explanations.slice(0, 3).map((exp, idx) => (
+                  <div key={idx} className="quick-explain-item">
+                    <div className="quick-explain-item-head">
+                      <span>{idx + 1}. {exp.productName} → {exp.assignedStore}</span>
+                      {exp.savingsVsRunnerUp > 0 && (
+                        <span style={{ color: 'var(--highlight-text)', fontWeight: 700 }}>+{formatCOP(exp.savingsVsRunnerUp)}</span>
+                      )}
+                    </div>
+                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.71rem' }}>{exp.reason}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="quick-explain-verdict-bar">
+                Veredicto analítico: El ahorro bruto en góndola ({formatCOP(optimization.multiStore.grossSavings)}) supera con holgura la fricción logística de desplazamiento ({formatCOP(optimization.multiStore.deltaFriction)}), justificando plenamente la asignación híbrida.
+              </div>
             </div>
           </section>
         </div>
