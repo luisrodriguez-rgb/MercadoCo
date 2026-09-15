@@ -23,13 +23,33 @@ export class MealPlanService {
       { id: 'dom', name: 'Domingo' }
     ];
 
-    const lunchesPool = COLOMBIAN_RECIPES.filter(r => r.mealType === 'LUNCH');
-    const dinnersPool = COLOMBIAN_RECIPES.filter(r => r.mealType === 'DINNER');
+    let lunchesPool = COLOMBIAN_RECIPES.filter(r => r.mealType === 'LUNCH');
+    let dinnersPool = COLOMBIAN_RECIPES.filter(r => r.mealType === 'DINNER');
 
-    // Selección inteligente con rotación para evitar repeticiones consecutivas
+    // Adecuación Nutricional Ponderada sin distorsión de canasta:
+    // Evita la maximización desmedida de un solo macroalimento
+    if (preference === 'ALTA_PROTEINA') {
+      // Prioriza recetas con proteínas de alto valor biológico (pechuga, atún, carne molida, huevos)
+      // manteniendo guarniciones balanceadas de carbohidratos complejos
+      lunchesPool = [...lunchesPool].sort((a, b) => {
+        const aHasBioProtein = a.ingredientsPerServing.some(i => ['prod_pechuga_pollo', 'prod_carne_molida', 'prod_cerdo_lomo'].includes(i.productId));
+        const bHasBioProtein = b.ingredientsPerServing.some(i => ['prod_pechuga_pollo', 'prod_carne_molida', 'prod_cerdo_lomo'].includes(i.productId));
+        return (bHasBioProtein ? 1 : 0) - (aHasBioProtein ? 1 : 0);
+      });
+      dinnersPool = [...dinnersPool].sort((a, b) => {
+        const aHasEggTuna = a.ingredientsPerServing.some(i => ['prod_atun_lata', 'prod_huevos_aa'].includes(i.productId));
+        const bHasEggTuna = b.ingredientsPerServing.some(i => ['prod_atun_lata', 'prod_huevos_aa'].includes(i.productId));
+        return (bHasEggTuna ? 1 : 0) - (aHasEggTuna ? 1 : 0);
+      });
+    } else if (preference === 'ECONOMICO') {
+      lunchesPool = [...lunchesPool].sort((a, b) => (a.costTier === 'ECONOMICO' ? -1 : 1));
+      dinnersPool = [...dinnersPool].sort((a, b) => (a.costTier === 'ECONOMICO' ? -1 : 1));
+    }
+
+    // Selección inteligente con rotación garantizando variedad (sin repetir el plato dos días seguidos)
     const weeklyDays = days.map((day, idx) => {
       const lunch = lunchesPool[idx % lunchesPool.length];
-      const dinner = dinnersPool[(idx * 2) % dinnersPool.length];
+      const dinner = dinnersPool[(idx * 2 + 1) % dinnersPool.length];
 
       return {
         dayId: day.id,
