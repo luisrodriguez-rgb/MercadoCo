@@ -1,29 +1,48 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MealPlanService } from './application/MealPlanService.js';
 import { BasketOptimizer } from './application/BasketOptimizer.js';
 import { PRICES_CALI } from './data/prices_cali.js';
 import { ESSENTIAL_PRODUCTS } from './data/products.js';
 import { STORES, CONFIDENCE_LEVELS } from './domain/types.js';
+import { LogoD1, LogoAra, LogoExito, FlagColombia } from './ui/StoreLogos.jsx';
 import { 
-  ShoppingBag, 
-  Calendar, 
-  Sparkles, 
+  SlidersHorizontal, 
+  CalendarDays, 
+  CheckSquare, 
+  PackageSearch, 
+  Database, 
   TrendingDown, 
-  Store, 
-  Users, 
-  DollarSign, 
-  CheckCircle2, 
   ShieldCheck, 
-  Archive, 
-  Search,
-  MapPin,
-  Clock,
-  ChevronRight,
-  AlertCircle
+  AlertCircle, 
+  SunMedium, 
+  MoonStar, 
+  Timer, 
+  CircleDollarSign, 
+  Copy, 
+  Check, 
+  Search, 
+  ArrowRightLeft, 
+  Info,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export function App() {
-  // Parámetros de usuario
+  // Modo de color (Oscuro / Claro)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('mc_theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mc_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Parámetros de simulación
   const [peopleCount, setPeopleCount] = useState(2);
   const [budgetCOP, setBudgetCOP] = useState(220000);
   const [preference, setPreference] = useState('BALANCEADO');
@@ -31,18 +50,19 @@ export function App() {
   const [selectedBasketMode, setSelectedBasketMode] = useState('MULTI'); // 'MULTI' | 'D1' | 'ARA' | 'EXITO'
   const [checkedItems, setCheckedItems] = useState({});
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
+  const [copiedNotification, setCopiedNotification] = useState(false);
 
-  // 1. Generar Menú Semanal Consolidado
+  // 1. Invocación de Generador de Menú
   const weeklyPlan = useMemo(() => {
     return MealPlanService.generateWeeklyPlan({ peopleCount, budgetCOP, preference });
   }, [peopleCount, budgetCOP, preference]);
 
-  // 2. Optimizar Canastas con Precios de Cali
+  // 2. Invocación de Solver de Canasta
   const optimization = useMemo(() => {
     return BasketOptimizer.optimize(weeklyPlan.ingredients, budgetCOP);
   }, [weeklyPlan, budgetCOP]);
 
-  // Formateador de moneda colombiana
+  // Formato monetario estricto en pesos colombianos
   const formatCOP = (val) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -51,7 +71,7 @@ export function App() {
     }).format(val);
   };
 
-  // Toggle checkbox en lista de compras
+  // Toggle checklist
   const toggleItemCheck = (id) => {
     setCheckedItems(prev => ({
       ...prev,
@@ -67,7 +87,7 @@ export function App() {
     return optimization.monoStores[selectedBasketMode]?.items || [];
   }, [optimization, selectedBasketMode]);
 
-  // Agrupar items de la canasta por tienda para compras ordenadas
+  // Agrupamiento por tienda para logística de compra
   const groupedBasketByStore = useMemo(() => {
     const groups = {};
     activeBasketItems.forEach(item => {
@@ -79,7 +99,7 @@ export function App() {
     return groups;
   }, [activeBasketItems]);
 
-  // Filtrado de precios en el monitor
+  // Filtrado de la matriz de precios
   const filteredPrices = useMemo(() => {
     if (!priceSearchQuery.trim()) return PRICES_CALI;
     const q = priceSearchQuery.toLowerCase();
@@ -96,64 +116,121 @@ export function App() {
 
   const isWithinBudget = activeCost <= budgetCOP;
 
+  // Renderizador de logos oficiales
+  const renderStoreLogo = (storeId, width = 38, height = 24) => {
+    switch (storeId) {
+      case 'D1':
+        return <LogoD1 width={width} height={height} />;
+      case 'ARA':
+        return <LogoAra width={width} height={height} />;
+      case 'EXITO':
+        return <LogoExito width={width} height={height} />;
+      default:
+        return null;
+    }
+  };
+
+  // Copiar lista de compras para exportación a mensajería
+  const copyShoppingList = () => {
+    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas)\nPresupuesto: ${formatCOP(budgetCOP)} | Total Compra: ${formatCOP(activeCost)}\n\n`;
+    Object.entries(groupedBasketByStore).forEach(([storeId, items]) => {
+      const storeName = STORES[storeId]?.name || storeId;
+      text += `[${storeName.toUpperCase()}]\n`;
+      items.forEach(item => {
+        text += `- ${item.productName} (${item.brand}) x ${item.packageUnits} paq (${item.packageSize}${item.unit}): ${formatCOP(item.totalCost)}\n`;
+      });
+      text += '\n';
+    });
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedNotification(true);
+      setTimeout(() => setCopiedNotification(false), 2500);
+    });
+  };
+
   return (
-    <div className="app-layout">
-      {/* Header Principal */}
-      <header className="app-header">
-        <div className="header-container">
-          <div className="brand-badge">
-            <div className="brand-logo-icon">🇨🇴</div>
-            <div className="brand-text">
-              <h1>Mercado<span className="accent">CO</span></h1>
-              <div className="brand-subtitle">Optimizador de Mercado y Menú Semanal con Precios Reales</div>
+    <div>
+      {/* Header Institucional */}
+      <header className="site-header">
+        <div className="site-header-inner">
+          <div className="brand-section">
+            <div className="brand-symbol">
+              <FlagColombia width={22} height={14} />
+            </div>
+            <div className="brand-titles">
+              <h1>
+                <span>Mercado Colombia</span>
+              </h1>
+              <div className="brand-tagline">Sistema de Optimización Presupuestal y Planificación de Menú</div>
             </div>
           </div>
 
-          <div className="city-pill-selector">
-            <MapPin size={15} color="var(--color-primary-light)" />
-            <span>Ciudad activa:</span>
-            <span className="city-active-badge">Cali (Valle)</span>
+          <div className="header-controls-strip">
+            <div className="status-badge active-region">
+              <div className="dot-indicator"></div>
+              <span>Cali, Valle del Cauca</span>
+            </div>
+
+            <button 
+              id="btn-theme-toggle"
+              className="theme-toggle-btn" 
+              onClick={toggleTheme}
+              aria-label="Alternar modo de color"
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun size={14} />
+                  <span>Modo Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={14} />
+                  <span>Modo Oscuro</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Cuerpo Principal */}
-      <main className="main-wrapper">
-        <div className="hub-grid">
-          {/* Panel de Controles / Parámetros */}
-          <section className="glass-panel controls-card">
-            <div className="controls-title">
-              <Sparkles size={18} color="var(--color-primary)" />
-              <span>Configuración del Hogar</span>
+      {/* Contenedor Principal */}
+      <main className="app-container">
+        <div className="top-deck-grid">
+          {/* Panel de Configuración de Parámetros */}
+          <section className="surface-panel">
+            <div className="panel-header-title">
+              <h2>
+                <SlidersHorizontal size={16} />
+                <span>Parámetros del Hogar</span>
+              </h2>
             </div>
 
             {/* Selector de Comensales */}
-            <div className="control-group">
-              <label className="control-label">
-                <span>Personas que comen en casa:</span>
-                <span className="value-highlight">{peopleCount} {peopleCount === 1 ? 'persona' : 'personas'}</span>
-              </label>
-              <div className="people-selector">
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span>Comensales habituales</span>
+                <span className="field-val-display num-tabular">{peopleCount} personas</span>
+              </div>
+              <div className="people-grid">
                 {[1, 2, 3, 4].map(num => (
                   <button
                     key={num}
                     id={`btn-people-${num}`}
-                    className={`people-btn ${peopleCount === num ? 'active' : ''}`}
+                    className={`option-select-btn ${peopleCount === num ? 'active' : ''}`}
                     onClick={() => setPeopleCount(num)}
                   >
-                    <span className="count">{num}</span>
-                    <span className="label">{num === 2 ? 'Pareja' : num === 1 ? 'Solo' : 'Familia'}</span>
+                    <span className="main-label num-tabular">{num}</span>
+                    <span className="sub-label">{num === 2 ? 'Pareja' : num === 1 ? 'Individual' : 'Familia'}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Presupuesto Semanal */}
-            <div className="control-group">
-              <label className="control-label">
-                <span>Presupuesto Semanal:</span>
-                <span className="value-highlight">{formatCOP(budgetCOP)}</span>
-              </label>
+            {/* Selector de Presupuesto Semanal */}
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span>Presupuesto Asignado</span>
+                <span className="field-val-display num-tabular">{formatCOP(budgetCOP)}</span>
+              </div>
               <input
                 id="slider-budget"
                 type="range"
@@ -162,25 +239,27 @@ export function App() {
                 step="10000"
                 value={budgetCOP}
                 onChange={(e) => setBudgetCOP(Number(e.target.value))}
-                className="range-slider"
+                className="slider-control"
               />
-              <div className="presets-container">
+              <div className="presets-strip">
                 {[150000, 200000, 250000, 300000].map(val => (
                   <button
                     key={val}
-                    className={`preset-chip ${budgetCOP === val ? 'active' : ''}`}
+                    className={`preset-button ${budgetCOP === val ? 'active' : ''}`}
                     onClick={() => setBudgetCOP(val)}
                   >
-                    ${val / 1000}k
+                    ${val / 1000}k COP
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Enfoque del Menú */}
-            <div className="control-group">
-              <label className="control-label">Enfoque de Alimentación:</label>
-              <div className="diet-selector">
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span>Enfoque Nutricional / Financiero</span>
+              </div>
+              <div className="segmented-switch">
                 {[
                   { id: 'BALANCEADO', label: 'Balanceado' },
                   { id: 'ECONOMICO', label: 'Máx. Ahorro' },
@@ -188,7 +267,7 @@ export function App() {
                 ].map(item => (
                   <button
                     key={item.id}
-                    className={`diet-btn ${preference === item.id ? 'active' : ''}`}
+                    className={`segment-item ${preference === item.id ? 'active' : ''}`}
                     onClick={() => setPreference(item.id)}
                   >
                     {item.label}
@@ -197,197 +276,212 @@ export function App() {
               </div>
             </div>
 
-            {/* Resumen Rápido de Canasta */}
-            <div className="savings-breakdown-box">
-              <div className="savings-stat">
-                <span className="num positive">{weeklyPlan.days.length * 2}</span>
-                <span className="lbl">Comidas Plan</span>
+            {/* Métricas de Cobertura */}
+            <div className="panel-kpi-row">
+              <div className="kpi-cell">
+                <span className="val highlight num-tabular">{weeklyPlan.days.length * 2}</span>
+                <span className="lbl">Comidas Planificadas</span>
               </div>
-              <div className="savings-stat">
-                <span className="num">{weeklyPlan.ingredients.length}</span>
-                <span className="lbl">Ingredientes</span>
+              <div className="kpi-cell">
+                <span className="val num-tabular">{weeklyPlan.ingredients.length}</span>
+                <span className="lbl">SKUs Requeridos</span>
               </div>
-              <div className="savings-stat">
-                <span className="num positive">{formatCOP(activeCost / (weeklyPlan.days.length * 2 * peopleCount))}</span>
+              <div className="kpi-cell">
+                <span className="val highlight num-tabular">{formatCOP(activeCost / (weeklyPlan.days.length * 2 * peopleCount))}</span>
                 <span className="lbl">Costo / Plato</span>
               </div>
             </div>
           </section>
 
-          {/* Tarjeta Ejecutiva de Veredicto Financiero y Comparativa de Tiendas */}
-          <section className="glass-panel summary-card">
-            <div className="summary-header">
-              <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Diagnóstico de Ahorro para {peopleCount} {peopleCount === 1 ? 'persona' : 'personas'} en Cali
-                </div>
-                <h2 style={{ fontSize: '1.4rem', marginTop: '0.2rem' }}>
+          {/* Tablero Ejecutivo Financiero */}
+          <section className="surface-panel diagnostic-board">
+            <div className="board-top-status">
+              <div className="headline-wrap">
+                <div className="eyebrow">Diagnóstico Financiero de Canasta (Cali)</div>
+                <h2>
                   {isWithinBudget ? (
-                    <span style={{ color: 'var(--color-primary-light)' }}>
-                      ¡Tu presupuesto cubre la semana completa!
+                    <span style={{ color: 'var(--highlight-text)' }}>
+                      Presupuesto suficiente para 14 raciones semanales
                     </span>
                   ) : (
-                    <span style={{ color: 'var(--color-accent)' }}>
-                      Ajuste sugerido: Faltan {formatCOP(activeCost - budgetCOP)}
+                    <span style={{ color: '#fbbf24' }}>
+                      Déficit presupuestal de {formatCOP(activeCost - budgetCOP)}
                     </span>
                   )}
                 </h2>
               </div>
 
-              <div className={`verdict-pill ${isWithinBudget ? 'success' : 'warning'}`}>
-                {isWithinBudget ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                <span>
+              <div className={`badge-verdict ${isWithinBudget ? 'in-budget' : 'deficit'}`}>
+                {isWithinBudget ? <ShieldCheck size={16} /> : <AlertCircle size={16} />}
+                <span className="num-tabular">
                   {isWithinBudget 
-                    ? `Sobrante: ${formatCOP(budgetCOP - activeCost)}` 
-                    : 'Aumentar Presupuesto'}
+                    ? `Margen disponible: ${formatCOP(budgetCOP - activeCost)}` 
+                    : 'Ajuste requerido'}
                 </span>
               </div>
             </div>
 
-            {/* Comparativa de Opciones de Tiendas en Cali */}
-            <div className="comparison-grid">
-              {/* Combinación Óptima */}
+            {/* Matriz Comparativa de Tiendas con Logos Oficiales */}
+            <div className="store-comparative-matrix">
+              {/* Combinación Multitienda */}
               <div 
-                className={`store-card ${selectedBasketMode === 'MULTI' ? 'highlight' : ''}`}
+                className={`matrix-store-tile ${selectedBasketMode === 'MULTI' ? 'selected' : ''}`}
                 onClick={() => setSelectedBasketMode('MULTI')}
-                style={{ cursor: 'pointer' }}
               >
-                <div className="badge-rec">⭐ Recomendado</div>
-                <div className="store-name">
-                  <Sparkles size={14} color="var(--color-primary)" />
-                  <span>D1 + Ara (Híbrido)</span>
+                <div className="tile-system-badge">Asignación Óptima</div>
+                <div className="store-header-row">
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <LogoD1 width={24} height={16} />
+                    <LogoAra width={24} height={16} />
+                  </div>
+                  <span className="store-title-label">Híbrido D1 + Ara</span>
                 </div>
-                <div className="store-price">{formatCOP(optimization.multiStore.totalCost)}</div>
-                <div className="store-diff">
-                  Ahorro neto: <strong style={{ color: 'var(--color-primary-light)' }}>{formatCOP(optimization.multiStore.netSavings)}</strong>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.multiStore.totalCost)}</div>
+                <div className="store-submetric-note">
+                  Ahorro neto: <strong style={{ color: 'var(--highlight-text)' }}>{formatCOP(optimization.multiStore.netSavings)}</strong>
                 </div>
               </div>
 
-              {/* Solo D1 */}
+              {/* Monotienda D1 */}
               <div 
-                className={`store-card ${selectedBasketMode === 'D1' ? 'highlight' : ''}`}
+                className={`matrix-store-tile ${selectedBasketMode === 'D1' ? 'selected' : ''}`}
                 onClick={() => setSelectedBasketMode('D1')}
-                style={{ cursor: 'pointer' }}
               >
-                <div className="store-name">
-                  <div className="store-dot" style={{ backgroundColor: 'var(--store-d1)' }}></div>
-                  <span>Todo en D1</span>
+                <div className="store-header-row">
+                  <div className="store-logo-wrapper">
+                    <LogoD1 width={32} height={20} />
+                  </div>
+                  <span className="store-title-label">Monotienda D1</span>
                 </div>
-                <div className="store-price">{formatCOP(optimization.monoStores.D1.totalCost)}</div>
-                <div className="store-diff">Sin desplazamientos extra</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.D1.totalCost)}</div>
+                <div className="store-submetric-note">Sin fricción logística</div>
               </div>
 
-              {/* Solo Ara */}
+              {/* Monotienda Ara */}
               <div 
-                className={`store-card ${selectedBasketMode === 'ARA' ? 'highlight' : ''}`}
+                className={`matrix-store-tile ${selectedBasketMode === 'ARA' ? 'selected' : ''}`}
                 onClick={() => setSelectedBasketMode('ARA')}
-                style={{ cursor: 'pointer' }}
               >
-                <div className="store-name">
-                  <div className="store-dot" style={{ backgroundColor: 'var(--store-ara)' }}></div>
-                  <span>Todo en Ara</span>
+                <div className="store-header-row">
+                  <div className="store-logo-wrapper">
+                    <LogoAra width={32} height={20} />
+                  </div>
+                  <span className="store-title-label">Monotienda Ara</span>
                 </div>
-                <div className="store-price">{formatCOP(optimization.monoStores.ARA.totalCost)}</div>
-                <div className="store-diff">Variedad marcas propias</div>
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.ARA.totalCost)}</div>
+                <div className="store-submetric-note">Marcas propias directas</div>
               </div>
 
-              {/* Solo Éxito */}
+              {/* Monotienda Éxito */}
               <div 
-                className={`store-card ${selectedBasketMode === 'EXITO' ? 'highlight' : ''}`}
+                className={`matrix-store-tile ${selectedBasketMode === 'EXITO' ? 'selected' : ''}`}
                 onClick={() => setSelectedBasketMode('EXITO')}
-                style={{ cursor: 'pointer' }}
               >
-                <div className="store-name">
-                  <div className="store-dot" style={{ backgroundColor: 'var(--store-exito)' }}></div>
-                  <span>Todo en Éxito</span>
+                <div className="store-header-row">
+                  <div className="store-logo-wrapper">
+                    <LogoExito width={32} height={20} />
+                  </div>
+                  <span className="store-title-label">Grupo Éxito</span>
                 </div>
-                <div className="store-price">{formatCOP(optimization.monoStores.EXITO.totalCost)}</div>
-                <div className="store-diff" style={{ color: 'var(--danger)' }}>
-                  +{formatCOP(optimization.monoStores.EXITO.totalCost - optimization.multiStore.totalCost)} vs. D1/Ara
+                <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.EXITO.totalCost)}</div>
+                <div className="store-submetric-note" style={{ color: '#ef4444' }}>
+                  +{formatCOP(optimization.monoStores.EXITO.totalCost - optimization.multiStore.totalCost)} vs. Discounters
                 </div>
               </div>
             </div>
 
-            {/* Desglose de Fricción vs Ahorro Real */}
-            <div style={{ fontSize: '0.82rem', color: 'var(--color-text-dim)', borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck size={16} color="var(--color-primary-light)" />
+            {/* Análisis de Fricción de Desplazamiento */}
+            <div className="friction-analysis-bar">
+              <Info size={16} color="var(--color-text-secondary)" />
               <span>
-                <strong>Cálculo de Ahorro Real:</strong> El algoritmo contempla una penalización de $5.000 COP por desplazamiento entre tiendas. Comprar en D1 + Ara te ahorra <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong> brutos ({formatCOP(optimization.multiStore.netSavings)} netos).
+                <strong>Modelo de Fricción:</strong> Se deduce una penalización fija de $5.000 COP por desplazamiento y costo de tiempo entre tiendas en Cali. El ahorro bruto de comprar en D1 + Ara es de <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>, produciendo un ahorro neto real de <strong>{formatCOP(optimization.multiStore.netSavings)}</strong>.
               </span>
             </div>
           </section>
         </div>
 
-        {/* Barra de Pestañas de Navegación */}
-        <nav className="tabs-header">
+        {/* Pestañas de Trabajo */}
+        <nav className="workspace-tabs">
           <button 
             id="tab-menu"
-            className={`tab-btn ${activeTab === 'menu' ? 'active' : ''}`}
+            className={`tab-trigger ${activeTab === 'menu' ? 'active' : ''}`}
             onClick={() => setActiveTab('menu')}
           >
-            <Calendar size={18} />
-            <span>1. Menú Semanal (Lunes a Domingo)</span>
+            <CalendarDays size={16} />
+            <span>1. Planificación Semanal (Lunes a Domingo)</span>
           </button>
 
           <button 
             id="tab-basket"
-            className={`tab-btn ${activeTab === 'basket' ? 'active' : ''}`}
+            className={`tab-trigger ${activeTab === 'basket' ? 'active' : ''}`}
             onClick={() => setActiveTab('basket')}
           >
-            <ShoppingBag size={18} />
-            <span>2. Lista de Compras para el Supermercado ({activeBasketItems.length} items)</span>
+            <CheckSquare size={16} />
+            <span>2. Matriz de Abastecimiento ({activeBasketItems.length} SKUs)</span>
           </button>
 
           <button 
             id="tab-pantry"
-            className={`tab-btn ${activeTab === 'pantry' ? 'active' : ''}`}
+            className={`tab-trigger ${activeTab === 'pantry' ? 'active' : ''}`}
             onClick={() => setActiveTab('pantry')}
           >
-            <Archive size={18} />
-            <span>3. Auditoría de Despensa & Sobrantes</span>
+            <PackageSearch size={16} />
+            <span>3. Auditoría de Despensa Residual</span>
           </button>
 
           <button 
             id="tab-prices"
-            className={`tab-btn ${activeTab === 'prices' ? 'active' : ''}`}
+            className={`tab-trigger ${activeTab === 'prices' ? 'active' : ''}`}
             onClick={() => setActiveTab('prices')}
           >
-            <Store size={18} />
-            <span>4. Transparencia de Precios (Cali)</span>
+            <Database size={16} />
+            <span>4. Registro de Precios Normalizados (Cali)</span>
           </button>
         </nav>
 
-        {/* VISTA 1: CALENDARIO DE MENÚ SEMANAL */}
+        {/* PESTAÑA 1: PLANIFICACION SEMANAL */}
         {activeTab === 'menu' && (
-          <div className="menu-grid">
+          <div className="schedule-grid">
             {weeklyPlan.days.map((day) => (
-              <div key={day.dayId} className="glass-panel day-card">
-                <div className="day-header">
-                  <h3 className="day-title">{day.dayName}</h3>
-                  <span className="day-tag">2 Comidas</span>
+              <div key={day.dayId} className="schedule-day-tile">
+                <div className="day-header-band">
+                  <h3>{day.dayName}</h3>
+                  <span className="day-coverage-pill">2 Servicios Diarios</span>
                 </div>
 
                 {/* Almuerzo */}
-                <div className="meal-block">
-                  <div className="meal-badge">☀️ Almuerzo</div>
-                  <div className="meal-name">{day.lunch.name}</div>
-                  <div className="meal-desc">{day.lunch.description}</div>
-                  <div className="meal-meta">
-                    <span>⏱️ {day.lunch.prepTimeMinutes} min</span>
+                <div className="service-slot">
+                  <div className="slot-tag-row">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <SunMedium size={14} />
+                      <span>Almuerzo</span>
+                    </span>
+                    <span style={{ color: 'var(--color-text-tertiary)' }}>{day.lunch.costTier}</span>
+                  </div>
+                  <div className="slot-recipe-title">{day.lunch.name}</div>
+                  <div className="slot-recipe-desc">{day.lunch.description}</div>
+                  <div className="slot-meta-strip">
+                    <span><Timer size={13} style={{ verticalAlign: 'middle', marginRight: '3px' }} />{day.lunch.prepTimeMinutes} min</span>
                     <span>• {day.lunch.difficulty}</span>
-                    <span>• {day.lunch.category}</span>
+                    <span>• {day.lunch.nutritionalFocus}</span>
                   </div>
                 </div>
 
                 {/* Cena */}
-                <div className="meal-block dinner">
-                  <div className="meal-badge">🌙 Cena</div>
-                  <div className="meal-name">{day.dinner.name}</div>
-                  <div className="meal-desc">{day.dinner.description}</div>
-                  <div className="meal-meta">
-                    <span>⏱️ {day.dinner.prepTimeMinutes} min</span>
+                <div className="service-slot dinner-slot">
+                  <div className="slot-tag-row">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <MoonStar size={14} />
+                      <span>Cena</span>
+                    </span>
+                    <span style={{ color: 'var(--color-text-tertiary)' }}>{day.dinner.costTier}</span>
+                  </div>
+                  <div className="slot-recipe-title">{day.dinner.name}</div>
+                  <div className="slot-recipe-desc">{day.dinner.description}</div>
+                  <div className="slot-meta-strip">
+                    <span><Timer size={13} style={{ verticalAlign: 'middle', marginRight: '3px' }} />{day.dinner.prepTimeMinutes} min</span>
                     <span>• {day.dinner.difficulty}</span>
-                    <span>• {day.dinner.category}</span>
+                    <span>• {day.dinner.nutritionalFocus}</span>
                   </div>
                 </div>
               </div>
@@ -395,79 +489,103 @@ export function App() {
           </div>
         )}
 
-        {/* VISTA 2: LISTA DE COMPRAS OPTIMIZADA */}
+        {/* PESTAÑA 2: MATRIZ DE ABASTECIMIENTO / LISTA DE COMPRAS */}
         {activeTab === 'basket' && (
-          <div className="shopping-container">
+          <div className="procurement-stack">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem' }}>Lista de Supermercado Lista para Llevar</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                  Modo actual: <strong>{selectedBasketMode === 'MULTI' ? 'Combinación Óptima (D1 + Ara)' : STORES[selectedBasketMode]?.name}</strong>. Marca los productos en tu celular mientras estás en la tienda.
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Lista de Adquisición en Punto de Venta</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>
+                  Estrategia activa: <strong>{selectedBasketMode === 'MULTI' ? 'Asignación Óptima Multitienda' : STORES[selectedBasketMode]?.name}</strong>. Marca los artículos en punto de compra.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {['MULTI', 'D1', 'ARA', 'EXITO'].map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setSelectedBasketMode(mode)}
-                    style={{
-                      padding: '0.4rem 0.8rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-border)',
-                      background: selectedBasketMode === mode ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.05)',
-                      color: selectedBasketMode === mode ? '#0b0f19' : 'var(--color-text-main)',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {mode === 'MULTI' ? '⭐ Combinada' : STORES[mode].name}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={copyShoppingList}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    background: 'var(--color-bg-elevated)',
+                    border: '1px solid var(--color-border-subtle)',
+                    color: 'var(--color-text-primary)',
+                    padding: '0.45rem 0.85rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {copiedNotification ? <Check size={14} color="var(--highlight-text)" /> : <Copy size={14} />}
+                  <span>{copiedNotification ? 'Copiado al Portapapeles' : 'Exportar Lista'}</span>
+                </button>
+
+                <div style={{ display: 'flex', gap: '0.3rem', background: 'var(--color-bg-base)', padding: '0.2rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
+                  {['MULTI', 'D1', 'ARA', 'EXITO'].map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => setSelectedBasketMode(mode)}
+                      style={{
+                        padding: '0.35rem 0.65rem',
+                        borderRadius: 'var(--radius-xs)',
+                        border: 'none',
+                        background: selectedBasketMode === mode ? 'var(--color-brand-emerald)' : 'transparent',
+                        color: selectedBasketMode === mode ? '#ffffff' : 'var(--color-text-secondary)',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {mode === 'MULTI' ? 'Óptima' : STORES[mode].shortName}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Listado agrupado por tienda */}
+            {/* Agrupamiento por Tienda con Logos Oficiales */}
             {Object.entries(groupedBasketByStore).map(([storeId, items]) => {
               const storeInfo = STORES[storeId] || { name: storeId, color: '#10b981' };
               const storeSubtotal = items.reduce((acc, i) => acc + i.totalCost, 0);
 
               return (
-                <div key={storeId} className="glass-panel shopping-store-section" style={{ padding: '1.25rem' }}>
-                  <div className="shopping-store-title" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
-                    <div className="store-dot" style={{ backgroundColor: storeInfo.color }}></div>
-                    <span>Comprar en {storeInfo.name}</span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: 'auto' }}>
-                      Subtotal: <strong style={{ color: 'var(--color-text-main)' }}>{formatCOP(storeSubtotal)}</strong> ({items.length} productos)
-                    </span>
+                <div key={storeId} className="store-batch-panel">
+                  <div className="batch-title-bar">
+                    <div className="batch-store-id">
+                      {renderStoreLogo(storeId, 36, 22)}
+                      <span>{storeInfo.name}</span>
+                    </div>
+                    <div className="batch-subtotal-meta">
+                      Subtotal asignado: <strong className="num-tabular">{formatCOP(storeSubtotal)}</strong> ({items.length} SKUs)
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                     {items.map(item => {
                       const isChecked = !!checkedItems[item.productId];
                       return (
-                        <div key={item.productId} className={`item-row ${isChecked ? 'checked' : ''}`}>
-                          <div className="item-left">
+                        <div key={item.productId} className={`procurement-row ${isChecked ? 'procured' : ''}`}>
+                          <div className="procurement-left">
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleItemCheck(item.productId)}
-                              className="item-checkbox"
+                              className="procure-checkbox"
                             />
-                            <div className="item-info">
-                              <span className="item-title">{item.productName}</span>
-                              <span className="item-specs">
-                                Marca sugerida: <strong>{item.brand}</strong> • Presentación: {item.packageSize}{item.unit}
+                            <div className="sku-detail-cell">
+                              <span className="sku-title">{item.productName}</span>
+                              <span className="sku-subtext">
+                                Marca sugerida: <strong>{item.brand}</strong> • Presentación unitaria: {item.packageSize}{item.unit}
                               </span>
                             </div>
                           </div>
 
-                          <div className="item-right">
-                            <div className="item-packages">
-                              {item.packageUnits} {item.packageUnits === 1 ? 'paquete' : 'paquetes'}
+                          <div className="procurement-right">
+                            <div className="package-counter-badge num-tabular">
+                              {item.packageUnits} {item.packageUnits === 1 ? 'unidad comercial' : 'unidades comerciales'}
                             </div>
-                            <div className="item-price">
+                            <div className="sku-cost-display num-tabular">
                               {formatCOP(item.totalCost)}
                             </div>
                             <span className={CONFIDENCE_LEVELS[item.confidence]?.badgeClass || 'badge-recent'}>
@@ -484,29 +602,29 @@ export function App() {
           </div>
         )}
 
-        {/* VISTA 3: AUDITORÍA DE DESPENSA Y SOBRANTES */}
+        {/* PESTAÑA 3: AUDITORIA DE DESPENSA RESIDUAL */}
         {activeTab === 'pantry' && (
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div className="surface-panel">
             <div style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Archive size={20} color="var(--color-accent)" />
-                <span>¿Por qué tu dinero no se pierde? (Excedentes de Despensa)</span>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <PackageSearch size={18} color="#d97706" />
+                <span>Inventario Residual por Empaque Indivisible</span>
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '0.3rem' }}>
-                Como en los supermercados se compran paquetes enteros (1kg de arroz, botella de 900ml de aceite, cubeta de 30 huevos), el menú no consume el 100% de todo. Los siguientes ingredientes te quedarán listos para la próxima semana:
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                En el canal retail los alimentos se adquieren en formatos comerciales estandarizados (1.000g, 900ml, 30 huevos). Las cantidades no consumidas por el menú quedan como inventario activo de despensa para la semana siguiente:
               </p>
             </div>
 
-            <div className="pantry-grid">
+            <div className="residual-grid">
               {activeBasketItems
                 .filter(item => item.pantrySurplus > 0)
                 .map(item => (
-                  <div key={item.productId} className="pantry-card">
-                    <span className="name">{item.productName}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)' }}>
-                      Requerido: {item.totalRequired} {item.unit} • Comprado: {item.totalPurchasedAmount} {item.unit}
+                  <div key={item.productId} className="residual-tile">
+                    <span className="residual-title">{item.productName}</span>
+                    <span className="residual-formula">
+                      Requerimiento semanal: {item.totalRequired} {item.unit} | Adquirido: {item.totalPurchasedAmount} {item.unit}
                     </span>
-                    <span className="surplus">
+                    <span className="residual-stock num-tabular">
                       + {item.pantrySurplus.toFixed(1)} {item.unit} disponibles en despensa
                     </span>
                   </div>
@@ -515,47 +633,39 @@ export function App() {
           </div>
         )}
 
-        {/* VISTA 4: TRANSPARENCIA DE PRECIOS EN CALI */}
+        {/* PESTAÑA 4: REGISTRO DE PRECIOS NORMALIZADOS */}
         {activeTab === 'prices' && (
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+          <div className="surface-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem' }}>Catálogo de Precios Verificados en Cali</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                  Matriz curada de precios en D1, Ara y Éxito normalizados por gramo, mililitro o unidad.
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Registro de Precios y Normalización de Catálogo</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un).
                 </p>
               </div>
 
-              <div style={{ position: 'relative', minWidth: '260px' }}>
-                <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+              <div style={{ position: 'relative', minWidth: '280px' }}>
+                <Search size={15} color="var(--color-text-tertiary)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
-                  placeholder="Buscar producto, marca o tienda..."
+                  placeholder="Filtrar por SKU, marca o cadena..."
                   value={priceSearchQuery}
                   onChange={(e) => setPriceSearchQuery(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 0.8rem 0.5rem 2rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
-                    fontSize: '0.85rem'
-                  }}
+                  className="search-input-field"
                 />
               </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+            <div className="price-registry-container">
+              <table className="price-registry-table">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-dim)' }}>
-                    <th style={{ padding: '0.6rem' }}>Tienda</th>
-                    <th style={{ padding: '0.6rem' }}>Producto / Marca</th>
-                    <th style={{ padding: '0.6rem' }}>Presentación</th>
-                    <th style={{ padding: '0.6rem' }}>Precio COP</th>
-                    <th style={{ padding: '0.6rem' }}>Precio / Unidad</th>
-                    <th style={{ padding: '0.6rem' }}>Vigencia</th>
+                  <tr>
+                    <th>Canal / Retailer</th>
+                    <th>Producto / Marca Comercial</th>
+                    <th>Formato Empaque</th>
+                    <th>Precio Nominal COP</th>
+                    <th>Valor Normalizado</th>
+                    <th>Confianza / Vigencia</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -563,30 +673,27 @@ export function App() {
                     const prod = ESSENTIAL_PRODUCTS.find(p => p.id === row.productId);
                     const store = STORES[row.storeId];
                     return (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                        <td style={{ padding: '0.6rem' }}>
-                          <span style={{ 
-                            fontWeight: 700, 
-                            color: store?.color || 'white',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px'
-                          }}>
-                            {store?.name || row.storeId}
-                          </span>
+                      <tr key={idx}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {renderStoreLogo(row.storeId, 28, 18)}
+                            <span style={{ fontWeight: 700, fontSize: '0.75rem' }}>
+                              {store?.shortName || row.storeId}
+                            </span>
+                          </div>
                         </td>
-                        <td style={{ padding: '0.6rem' }}>
+                        <td>
                           <strong>{prod?.name || row.productId}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)' }}>{row.brand}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>{row.brand}</div>
                         </td>
-                        <td style={{ padding: '0.6rem' }}>{row.packageSize} {row.unit}</td>
-                        <td style={{ padding: '0.6rem', fontWeight: 700, color: 'var(--color-primary-light)' }}>
+                        <td className="num-tabular">{row.packageSize} {row.unit}</td>
+                        <td className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
                           {formatCOP(row.priceCOP)}
                         </td>
-                        <td style={{ padding: '0.6rem', color: 'var(--color-text-muted)' }}>
+                        <td className="num-tabular" style={{ color: 'var(--color-text-secondary)' }}>
                           ${row.pricePerUnit.toFixed(2)} COP/{row.unit}
                         </td>
-                        <td style={{ padding: '0.6rem' }}>
+                        <td>
                           <span className={CONFIDENCE_LEVELS[row.confidence]?.badgeClass || 'badge-recent'}>
                             {CONFIDENCE_LEVELS[row.confidence]?.label || 'Verificado'}
                           </span>

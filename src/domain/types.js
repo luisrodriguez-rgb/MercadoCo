@@ -1,25 +1,26 @@
 /**
  * Domain Types & Definitions for Mercado Colombia Optimizer
+ * Strict financial and retail domain model without informal emojis.
  */
 
 export const CITIES = {
-  CALI: { id: 'CALI', name: 'Cali', department: 'Valle del Cauca' },
-  BOGOTA: { id: 'BOGOTA', name: 'Bogotá D.C.', department: 'Cundinamarca' },
-  MEDELLIN: { id: 'MEDELLIN', name: 'Medellín', department: 'Antioquia' }
+  CALI: { id: 'CALI', name: 'Cali', department: 'Valle del Cauca', active: true },
+  BOGOTA: { id: 'BOGOTA', name: 'Bogotá D.C.', department: 'Cundinamarca', active: false },
+  MEDELLIN: { id: 'MEDELLIN', name: 'Medellín', department: 'Antioquia', active: false }
 };
 
 export const STORES = {
-  D1: { id: 'D1', name: 'Tiendas D1', color: '#E30613', tag: 'Discounter Líder' },
-  ARA: { id: 'ARA', name: 'Tiendas Ara', color: '#FF7900', tag: 'Discounter Frecuente' },
-  EXITO: { id: 'EXITO', name: 'Éxito', color: '#FFE600', tag: 'Supermercado Tradicional' }
+  D1: { id: 'D1', name: 'Tiendas D1', shortName: 'D1', color: '#E30613', tag: 'Hard Discounter' },
+  ARA: { id: 'ARA', name: 'Tiendas Ara', shortName: 'Ara', color: '#FF7900', tag: 'Hard Discounter' },
+  EXITO: { id: 'EXITO', name: 'Grupo Éxito', shortName: 'Éxito', color: '#FFE600', tag: 'Supermercado Tradicional' }
 };
 
 export const CATEGORIES = {
-  PROTEINS: { id: 'PROTEINS', name: 'Proteínas y Carnes', icon: '🍗' },
-  GRAINS: { id: 'GRAINS', name: 'Granos y Cereales', icon: '🌾' },
-  PRODUCE: { id: 'PRODUCE', name: 'Frutas y Verduras', icon: '🥑' },
-  DAIRY: { id: 'DAIRY', name: 'Lácteos y Huevos', icon: '🥚' },
-  PANTRY: { id: 'PANTRY', name: 'Despensa y Abarrotes', icon: '🧂' }
+  PROTEINS: { id: 'PROTEINS', name: 'Proteínas y Cárnicos', iconName: 'Beef' },
+  GRAINS: { id: 'GRAINS', name: 'Granos y Cereales', iconName: 'Wheat' },
+  PRODUCE: { id: 'PRODUCE', name: 'Frutas y Vegetales', iconName: 'Apple' },
+  DAIRY: { id: 'DAIRY', name: 'Lácteos y Huevos', iconName: 'Milk' },
+  PANTRY: { id: 'PANTRY', name: 'Abarrotes y Despensa', iconName: 'Package' }
 };
 
 export const STANDARD_UNITS = {
@@ -29,7 +30,7 @@ export const STANDARD_UNITS = {
 };
 
 export const CONFIDENCE_LEVELS = {
-  VERIFIED_TODAY: { level: 'VERIFIED_TODAY', label: 'Verificado Hoy', badgeClass: 'badge-verified' },
+  VERIFIED_TODAY: { level: 'VERIFIED_TODAY', label: 'Verificado hoy', badgeClass: 'badge-verified' },
   RECENT_WEEK: { level: 'RECENT_WEEK', label: 'Actualizado esta semana', badgeClass: 'badge-recent' },
-  ESTIMATED: { level: 'ESTIMATED', label: 'Precio Estimado', badgeClass: 'badge-estimated' }
+  ESTIMATED: { level: 'ESTIMATED', label: 'Precio estimado', badgeClass: 'badge-estimated' }
 };

@@ -1,18 +1,19 @@
 /**
- * Catálogo Maestro de Recetas Típicas Colombianas Cuantificadas por Porción
- * Cada ingrediente especifica la cantidad necesaria por comensal en unidades estándar (g, ml, un).
+ * Catálogo Maestro de Recetas Colombianas Cuantificadas por Porción
+ * Cantidades unitarias en unidades estándar (g, ml, un) para formulación exacta de canasta.
  */
 
 export const COLOMBIAN_RECIPES = [
   {
     id: 'rec_lentejas_arroz_huevo',
-    name: 'Lentejas caseras con arroz, huevo y tajadas',
+    name: 'Lentejas guisadas con arroz blanco, huevo y tajadas',
     category: 'Almuerzo tradicional',
     mealType: 'LUNCH',
-    description: 'Lentejas guisadas con hogao criollo, acompañadas de arroz blanco, huevo frito y tajadas de plátano maduro.',
+    description: 'Lentejas cocidas a fuego lento con hogao tradicional de cebolla y tomate, servidas con arroz blanco, huevo y plátano maduro.',
     difficulty: 'Fácil',
     prepTimeMinutes: 35,
-    costTier: 'ECONOMICO', // ECONOMICO | MEDIO | PREMIUM
+    costTier: 'ECONOMICO',
+    nutritionalFocus: 'Alto contenido de hierro y fibra vegetal',
     ingredientsPerServing: [
       { productId: 'prod_lentejas', amount: 80, unit: 'g' },
       { productId: 'prod_arroz_blanco', amount: 80, unit: 'g' },
@@ -27,13 +28,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_pechuga_pure_ensalada',
-    name: 'Pechuga a la plancha con puré de papa y ensalada',
+    name: 'Pechuga a la plancha con puré de papa y ensalada fresca',
     category: 'Almuerzo balanceado',
     mealType: 'LUNCH',
-    description: 'Filete de pechuga dorada con puré suave de papa pastusa con toque de mantequilla y ensalada de tomate y cebolla.',
+    description: 'Filete magro de pechuga sellado con puré de papa pastusa enriquecido y ensalada fresca de tomate y cebolla aliñada con limón.',
     difficulty: 'Fácil',
     prepTimeMinutes: 30,
     costTier: 'MEDIO',
+    nutritionalFocus: 'Alto contenido proteico bajo en grasa saturada',
     ingredientsPerServing: [
       { productId: 'prod_pechuga_pollo', amount: 160, unit: 'g' },
       { productId: 'prod_papa_pastusa', amount: 250, unit: 'g' },
@@ -48,13 +50,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_pollo_sudado_papa_arroz',
-    name: 'Pollo sudado criollo con papa y arroz',
-    category: 'Almuerzo reconfortante',
+    name: 'Pollo sudado criollo con papa pastusa y arroz',
+    category: 'Almuerzo rendidor',
     mealType: 'LUNCH',
-    description: 'Pernil o muslo de pollo cocinado a fuego lento en hogao de tomate, cebolla y cilantro con papas tiernas y arroz.',
+    description: 'Pernil de pollo estofado en caldo reducido de tomate chonto, cebolla junca y cilantro fresco con papas cocidas.',
     difficulty: 'Media',
     prepTimeMinutes: 45,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Proteína completa con colágeno y carbohidratos complejos',
     ingredientsPerServing: [
       { productId: 'prod_muslos_pollo', amount: 250, unit: 'g' },
       { productId: 'prod_papa_pastusa', amount: 200, unit: 'g' },
@@ -68,13 +71,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_frijoles_arroz_molida',
-    name: 'Fríjoles colombianos con arroz, molida y aguacate',
-    category: 'Plato fuerte paisa',
+    name: 'Cazuela de fríjoles rojos con carne molida y aguacate',
+    category: 'Plato regional',
     mealType: 'LUNCH',
-    description: 'Cazuelita de fríjoles rojos espesos acompañados de arroz blanco, carne molida sofrita y tajada de aguacate.',
+    description: 'Fríjoles cargamanto caldosos con sofrito criollo, acompañados de porción de carne molida magra, arroz blanco y aguacate fresco.',
     difficulty: 'Media',
     prepTimeMinutes: 50,
     costTier: 'MEDIO',
+    nutritionalFocus: 'Proteína dual animal/vegetal y grasas monoinsaturadas',
     ingredientsPerServing: [
       { productId: 'prod_frijol_cargamanto', amount: 90, unit: 'g' },
       { productId: 'prod_carne_molida', amount: 110, unit: 'g' },
@@ -88,13 +92,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_espagueti_carne_molida',
-    name: 'Espaguetis con salsa bolognesa criolla y queso',
-    category: 'Pasta rinde mucho',
+    name: 'Pasta espagueti con boloñesa criolla y queso gratinado',
+    category: 'Pasta y carne',
     mealType: 'LUNCH',
-    description: 'Pasta al dente con carne molida guisada en salsa de tomate natural, hogao y queso fundido encima.',
+    description: 'Pasta espagueti salteada con salsa reducida de carne molida, pasta de tomate y hogao, terminada con queso doble crema.',
     difficulty: 'Fácil',
     prepTimeMinutes: 25,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Energía sostenida y densidad calórica controlada',
     ingredientsPerServing: [
       { productId: 'prod_pasta_espagueti', amount: 100, unit: 'g' },
       { productId: 'prod_carne_molida', amount: 100, unit: 'g' },
@@ -108,13 +113,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_arroz_atun_verduras',
-    name: 'Arroz con atún, zanahoria y huevo cocido',
-    category: 'Rápido y rendidor',
+    name: 'Arroz salteado con atún, zanahoria y huevo cocido',
+    category: 'Cena rápida',
     mealType: 'DINNER',
-    description: 'Arroz sofrito con lomitos de atún, zanahoria rallada, cebollita y huevo cocido tajado.',
-    difficulty: 'Muy Fácil',
+    description: 'Arroz blanco salteado con lomitos de atún escurrido, julianas de zanahoria, cebolla y huevo cocido tajado.',
+    difficulty: 'Fácil',
     prepTimeMinutes: 20,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Omega 3 y proteína de alto valor biológico',
     ingredientsPerServing: [
       { productId: 'prod_atun_lata', amount: 70, unit: 'g' },
       { productId: 'prod_arroz_blanco', amount: 90, unit: 'g' },
@@ -128,13 +134,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_lomo_cerdo_arepa_ensalada',
-    name: 'Lomo de cerdo a la plancha con arepa y ensalada',
-    category: 'Cena o Almuerzo ligero',
+    name: 'Lomo de cerdo a la plancha con arepa de maíz y ensalada',
+    category: 'Cena ligera',
     mealType: 'DINNER',
-    description: 'Filete magro de lomo de cerdo sellado con arepa de maíz blanco asada y ensalada fresca de tomate con aguacate.',
+    description: 'Filete magro de lomo de cerdo sellado a fuego alto con arepa de maíz blanco asada y ensalada de tomate y aguacate.',
     difficulty: 'Fácil',
     prepTimeMinutes: 20,
     costTier: 'MEDIO',
+    nutritionalFocus: 'Tiamina, zinc y proteína magra con mínimo carbohidrato',
     ingredientsPerServing: [
       { productId: 'prod_cerdo_lomo', amount: 150, unit: 'g' },
       { productId: 'prod_arepas_maiz', amount: 1.5, unit: 'un' },
@@ -147,13 +154,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_huevos_pericos_arepa_queso',
-    name: 'Huevos pericos con arepa de maíz y queso campesino',
-    category: 'Desayuno o Cena tradicional',
+    name: 'Huevos pericos tradicionales con arepa y queso campesino',
+    category: 'Cena o desayuno',
     mealType: 'DINNER',
-    description: 'Huevos revueltos con tomate y cebolla larga bien sofrita, arepa caliente con mantequilla y tajada de queso cuajada.',
-    difficulty: 'Muy Fácil',
+    description: 'Huevos revueltos preparados en hogao de cebolla larga y tomate fresco, servidos con arepa de maíz caliente y queso campesino.',
+    difficulty: 'Fácil',
     prepTimeMinutes: 15,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Calcio y proteína de rápida digestión',
     ingredientsPerServing: [
       { productId: 'prod_huevos_aa', amount: 2, unit: 'un' },
       { productId: 'prod_tomate_chonto', amount: 40, unit: 'g' },
@@ -166,13 +174,14 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_arroz_salchicha_platano',
-    name: 'Arroz con salchicha guisada y tajadas de maduro',
-    category: 'Clásico familiar económico',
+    name: 'Arroz con salchicha guisada y tajadas de plátano',
+    category: 'Cena económica',
     mealType: 'DINNER',
-    description: 'Salchichas en rodajas doradas integradas al arroz con sofrito criollo y dulces tajadas de maduro.',
+    description: 'Arroz salteado con rodajas doradas de salchicha, sofrito de tomate y cebolla junca con tajadas horneadas de plátano maduro.',
     difficulty: 'Fácil',
     prepTimeMinutes: 25,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Carbohidratos complejos y saciedad eficiente',
     ingredientsPerServing: [
       { productId: 'prod_salchicha_manguera', amount: 90, unit: 'g' },
       { productId: 'prod_arroz_blanco', amount: 80, unit: 'g' },
@@ -185,15 +194,16 @@ export const COLOMBIAN_RECIPES = [
   },
   {
     id: 'rec_sandwich_salchicha_queso_cafe',
-    name: 'Sándwich tostado de queso doble crema y salchicha + Café con leche',
+    name: 'Sándwich tostado de queso doble crema y café con leche',
     category: 'Cena rápida',
     mealType: 'DINNER',
-    description: 'Pan tajado dorado con salchicha dorada y queso derretido, acompañado de café con leche colombiano caliente.',
-    difficulty: 'Muy Fácil',
+    description: 'Sándwich de pan de molde tostado con salchicha dorada y queso doble crema fundido, acompañado de café con leche campesino.',
+    difficulty: 'Fácil',
     prepTimeMinutes: 12,
     costTier: 'ECONOMICO',
+    nutritionalFocus: 'Preparación express de bajo costo unitario',
     ingredientsPerServing: [
-      { productId: 'prod_pan_tajado', amount: 70, unit: 'g' }, // ~2 tajadas
+      { productId: 'prod_pan_tajado', amount: 70, unit: 'g' },
       { productId: 'prod_queso_doble_crema', amount: 40, unit: 'g' },
       { productId: 'prod_salchicha_manguera', amount: 60, unit: 'g' },
       { productId: 'prod_mantequilla_margarina', amount: 10, unit: 'g' },
