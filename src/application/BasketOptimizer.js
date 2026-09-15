@@ -105,19 +105,17 @@ export class BasketOptimizer {
         pantrySurplus = totalPurchasedAmount - req.effectiveAmount;
       }
 
-      // Desglose Formal de Excedentes:
-      // Surplus = UsefulFutureInventory (granos/aceite/no perecederos) + ExpectedWasteRisk (hortalizas/perecederos)
+      // Partición Probabilística Continua de Excedentes:
+      // ExpectedWaste_i = Surplus_i * WasteProbability_i
+      // UsefulFutureInventory_i = Surplus_i - ExpectedWaste_i = Surplus_i * (1 - WasteProbability_i)
+      // La perecibilidad alimenta la probabilidad de pérdida biológica, no una clasificación binaria rígida.
       const surplusValue = pantrySurplus > 0 ? Math.round(pantrySurplus * priceItem.pricePerUnit) : 0;
       const productPerishability = product?.perishability || PERISHABILITY.MEDIUM.id;
-      
-      let expectedWasteRisk = 0;
-      let futureUsefulInventory = 0;
+      const perishabilityConfig = PERISHABILITY[productPerishability] || PERISHABILITY.MEDIUM;
+      const wasteProb = perishabilityConfig.wasteProbability !== undefined ? perishabilityConfig.wasteProbability : 0.20;
 
-      if (productPerishability === PERISHABILITY.HIGH.id) {
-        expectedWasteRisk = surplusValue;
-      } else {
-        futureUsefulInventory = surplusValue;
-      }
+      const expectedWasteRisk = Math.round(surplusValue * wasteProb);
+      const futureUsefulInventory = Math.max(0, surplusValue - expectedWasteRisk);
 
       return {
         productId: req.productId,
@@ -193,8 +191,8 @@ export class BasketOptimizer {
       };
     });
 
-    // 5. Asignación Híbrida Multitienda Óptima con Función Objetivo Multiobjetivo
-    // min (CashOutlay + lambda_1 * ExpectedWaste + lambda_2 * ImmediateOverbuy)
+    // 5. Asignación Híbrida Multitienda Óptima con Función Objetivo Multiobjetivo Normalizada
+    // Min Score = (CashOutlay / Budget) + lambda_w * (ExpectedWaste / Budget) + lambda_f * (FutureInv / Budget)
     let multiStoreItemsCost = 0;
     let multiStoreSurplus = 0;
     let multiStoreWasteRisk = 0;
@@ -211,13 +209,13 @@ export class BasketOptimizer {
 
       const validOptions = [d1Opt, araOpt, exitoOpt].filter(Boolean);
       if (validOptions.length > 0) {
-        // Función Objetivo con Ponderadores Lambda:
-        // lambda_waste = 0.9 (alta penalización a desperdicio de perecederos)
-        // lambda_future = 0.1 (penalización mínima a inventario útil porque es activo del hogar)
+        // Función Objetivo Normalizada por el Presupuesto Base:
+        // lambda_waste = 0.90 (castigo severo a perecederos con riesgo biológico de pérdida)
+        // lambda_future = 0.10 (ponderación mínima para inventario útil que es activo almacenable)
         validOptions.sort((a, b) => {
-          const scoreA = a.totalCost + (a.expectedWasteRisk * 0.9) + (a.futureUsefulInventory * 0.1);
-          const scoreB = b.totalCost + (b.expectedWasteRisk * 0.9) + (b.futureUsefulInventory * 0.1);
-          return scoreA - scoreB;
+          const normA = (a.totalCost / budgetCOP) + (0.90 * (a.expectedWasteRisk / budgetCOP)) + (0.10 * (a.futureUsefulInventory / budgetCOP));
+          const normB = (b.totalCost / budgetCOP) + (0.90 * (b.expectedWasteRisk / budgetCOP)) + (0.10 * (b.futureUsefulInventory / budgetCOP));
+          return normA - normB;
         });
 
         const bestOption = validOptions[0];
@@ -267,7 +265,15 @@ export class BasketOptimizer {
 
     const multiStoreEffectiveCost = multiStoreItemsCost + actualMultiFrictionCOP;
 
-    // 6. Benchmark de Heurística Humana Razonable:
+    // Cálculo del Score de Optimización Escalar Adimensional (Separado del resultado contable financiero)
+    const optimizationScore = Number((
+      (multiStoreItemsCost / budgetCOP) + 
+      (0.90 * (multiStoreWasteRisk / budgetCOP)) + 
+      (1.00 * (actualMultiFrictionCOP / budgetCOP)) + 
+      (0.10 * (multiStoreFutureInventory / budgetCOP))
+    ).toFixed(4));
+
+    // 6. Benchmark de Heurística Humana Razonable (RH-1):
     // Simula a un consumidor informado que compra en la tienda de mejor precio general (Ara) 
     // pero visita una segunda tienda (D1) solo para los 2 productos con mayor descuento visible,
     // incurriendo en empaques cerrados y fricción sin optimizar báscula continua en hortalizas.
@@ -283,7 +289,10 @@ export class BasketOptimizer {
     });
     const heuristicFrictionCOP = multiStoreFrictionCOP;
     const heuristicEffectiveCost = heuristicItemsCost + heuristicFrictionCOP;
-    const optimalityGap = heuristicEffectiveCost > 0 
+    
+    // Métrica de Investigación de Operaciones Formal:
+    // Mejora Porcentual frente a la Heurística Humana (Heuristic Improvement Gap)
+    const heuristicImprovementPct = heuristicEffectiveCost > 0 
       ? Math.max(0, ((heuristicEffectiveCost - multiStoreEffectiveCost) / heuristicEffectiveCost) * 100) 
       : 0;
 
@@ -314,6 +323,16 @@ export class BasketOptimizer {
       pantryStockIds,
       monoStores,
       bestMonoStore,
+      optimizationScore,
+      financialSummary: {
+        budgetCOP,
+        effectiveCost: multiStoreEffectiveCost,
+        itemsCost: multiStoreItemsCost,
+        frictionCOP: actualMultiFrictionCOP,
+        freeCashCOP: budgetCOP - multiStoreItemsCost,
+        grossSavingsCOP: grossSavings,
+        netSavingsCOP: netSavings
+      },
       multiStore: {
         totalCost: multiStoreItemsCost, // Desembolso en caja
         itemsCost: multiStoreItemsCost,
@@ -336,11 +355,12 @@ export class BasketOptimizer {
         activeStores: activeStoresInHybrid
       },
       heuristicBenchmark: {
-        name: 'Heurística Humana Razonable',
+        name: 'Heurística Humana Razonable (RH-1)',
         itemsCost: heuristicItemsCost,
         frictionCOP: heuristicFrictionCOP,
         effectiveCost: heuristicEffectiveCost,
-        optimalityGap: Number(optimalityGap.toFixed(1))
+        heuristicImprovementPct: Number(heuristicImprovementPct.toFixed(1)),
+        heuristicToMILPGap: Number(heuristicImprovementPct.toFixed(1))
       },
       dataQuality: {
         coverageScore: averageConfidence,

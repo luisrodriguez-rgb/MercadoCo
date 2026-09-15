@@ -110,9 +110,9 @@ export const PACKAGING_TYPES = {
 };
 
 export const PERISHABILITY = {
-  HIGH: { id: 'HIGH', label: 'Alta perecibilidad (<5 días)', wasteRiskFactor: 0.85 },
-  MEDIUM: { id: 'MEDIUM', label: 'Media perecibilidad (1-2 semanas)', wasteRiskFactor: 0.20 },
-  STABLE: { id: 'STABLE', label: 'No perecedero / Larga vida (>2 meses)', wasteRiskFactor: 0.00 }
+  HIGH: { id: 'HIGH', label: 'Alta perecibilidad (<5 días)', wasteProbability: 0.70, wasteRiskFactor: 0.70 },
+  MEDIUM: { id: 'MEDIUM', label: 'Media perecibilidad (1-2 semanas)', wasteProbability: 0.18, wasteRiskFactor: 0.18 },
+  STABLE: { id: 'STABLE', label: 'No perecedero / Despensa seca (>2 meses)', wasteProbability: 0.02, wasteRiskFactor: 0.02 }
 };
 
 export const CATEGORIES = {
