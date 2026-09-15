@@ -1,9 +1,10 @@
-import { CONFIDENCE_LEVELS } from '../domain/types.js';
+import { CONFIDENCE_LEVELS, PACKAGING_TYPES } from '../domain/types.js';
 
 /**
- * Matriz de Precios Reales y Referenciados en Cali (Valle del Cauca)
+ * Matriz de Precios Reales Normalizados en Cali (Valle del Cauca)
  * Tiendas: D1, Tiendas Ara, Grupo Éxito
- * Incluye modelado de empaque discreto (malla/bolsa sellada) vs. granel continuo (báscula Éxito).
+ * Cada registro modela: packagingType (EXACT_WEIGHT vs FIXED_PACK vs UNIT),
+ * metadatos de auditoría (source, confidenceScore, observedAt, availability).
  */
 export const PRICES_CALI = [
   // --- PECHUGA DE POLLO ---
@@ -15,9 +16,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 13900,
     pricePerUnit: 13.90,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
-    notes: 'Bandeja sellada de peso fijo'
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Bandeja sellada de peso fijo 1kg'
   },
   {
     productId: 'prod_pechuga_pollo',
@@ -27,9 +32,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 14200,
     pricePerUnit: 14.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
-    notes: 'Bolsa congelada de peso fijo'
+    confidenceScore: 0.92,
+    observedAt: '2026-09-12',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Bolsa congelada de peso fijo 1kg'
   },
   {
     productId: 'prod_pechuga_pollo',
@@ -39,9 +48,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 16900,
     pricePerUnit: 16.90,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true, // Se puede pedir por peso exacto en carnicería
-    notes: 'Carnicería Éxito pesada a solicitud'
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Carnicería Éxito pesada a solicitud en báscula'
   },
 
   // --- CARNE MOLIDA ---
@@ -53,8 +66,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 10900,
     pricePerUnit: 21.80,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bandeja atmósfera modificada 500g'
   },
   {
@@ -65,9 +82,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 10500,
     pricePerUnit: 21.00,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
-    notes: 'Bandeja sellada 500g'
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Bandeja sellada 500g magra'
   },
   {
     productId: 'prod_carne_molida',
@@ -77,9 +98,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 13500,
     pricePerUnit: 27.00,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
-    notes: 'Molida en punto por gramo requerido'
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Molida especial pesada en gramaje exacto'
   },
 
   // --- PERNIL / MUSLOS DE POLLO ---
@@ -91,9 +116,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 8900,
     pricePerUnit: 8.90,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
-    notes: 'Pernil con rabadilla bolsa'
+    confidenceScore: 0.95,
+    observedAt: '2026-09-11',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Pernil con rabadilla bolsa sellada'
   },
   {
     productId: 'prod_muslos_pollo',
@@ -103,8 +132,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 8700,
     pricePerUnit: 8.70,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pernil congelado 1kg'
   },
   {
@@ -115,9 +148,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 11200,
     pricePerUnit: 11.20,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
-    notes: 'Mostrador de carnes a granel'
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Mostrador de carnes pesaje a granel'
   },
 
   // --- ATUN EN LATA ---
@@ -129,8 +166,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4890,
     pricePerUnit: 34.92,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Lata estándar 140g'
   },
   {
@@ -141,9 +182,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4790,
     pricePerUnit: 34.21,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
-    notes: 'Lata 140g aceite'
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Lata 140g en aceite'
   },
   {
     productId: 'prod_atun_lata',
@@ -153,8 +198,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 7900,
     pricePerUnit: 49.37,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Lata 160g marca líder'
   },
 
@@ -167,9 +216,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 9900,
     pricePerUnit: 19.80,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
-    notes: 'Bandeja 500g'
+    confidenceScore: 0.95,
+    observedAt: '2026-09-12',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Bandeja sellada 500g'
   },
   {
     productId: 'prod_cerdo_lomo',
@@ -179,8 +232,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 9600,
     pricePerUnit: 19.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bandeja 500g filetes'
   },
   {
@@ -191,9 +248,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 12400,
     pricePerUnit: 24.80,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.ESTIMATED.level,
-    isBulkWeighed: true,
-    notes: 'Lomo porción cortada en báscula'
+    confidenceScore: 0.88,
+    observedAt: '2026-09-10',
+    source: 'EXITO_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Corte magro en báscula carnes'
   },
 
   // --- SALCHICHA ---
@@ -205,8 +266,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5490,
     pricePerUnit: 12.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete manguera sellado'
   },
   {
@@ -217,8 +282,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5600,
     pricePerUnit: 11.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete sellado 500g'
   },
   {
@@ -229,8 +298,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 8900,
     pricePerUnit: 19.77,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete Zenú'
   },
 
@@ -243,8 +316,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 15900,
     pricePerUnit: 530.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Panal cubeta x30'
   },
   {
@@ -255,8 +332,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 15400,
     pricePerUnit: 513.33,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Cubeta x30 huevos AA'
   },
   {
@@ -267,8 +348,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 18900,
     pricePerUnit: 630.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Cubeta x30'
   },
 
@@ -281,8 +366,12 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 3690,
     pricePerUnit: 3.69,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1L UHT'
   },
   {
@@ -293,8 +382,12 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 3490,
     pricePerUnit: 3.87,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 900ml'
   },
   {
@@ -305,8 +398,12 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 4400,
     pricePerUnit: 4.40,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1000ml'
   },
 
@@ -319,8 +416,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 6890,
     pricePerUnit: 17.22,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bloque sellado 400g'
   },
   {
@@ -331,8 +432,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 6700,
     pricePerUnit: 16.75,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.93,
+    observedAt: '2026-09-13',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bloque sellado 400g'
   },
   {
@@ -343,8 +448,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 9900,
     pricePerUnit: 22.00,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.ESTIMATED.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.88,
+    observedAt: '2026-09-11',
+    source: 'EXITO_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Corte en balanza lácteos'
   },
 
@@ -357,8 +466,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 7490,
     pricePerUnit: 24.96,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete tajado 300g'
   },
   {
@@ -369,8 +482,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 7290,
     pricePerUnit: 24.30,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete tajado 300g'
   },
   {
@@ -381,8 +498,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 11900,
     pricePerUnit: 37.18,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Empaque Alpina 320g'
   },
 
@@ -395,8 +516,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3390,
     pricePerUnit: 13.56,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pote 250g con sal'
   },
   {
@@ -407,8 +532,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3290,
     pricePerUnit: 13.16,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pote 250g suave'
   },
   {
@@ -419,8 +548,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5600,
     pricePerUnit: 22.40,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pote Rama 250g'
   },
 
@@ -433,8 +566,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3990,
     pricePerUnit: 3.99,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg sellada'
   },
   {
@@ -445,8 +582,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3950,
     pricePerUnit: 3.95,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg sellada'
   },
   {
@@ -457,8 +598,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4900,
     pricePerUnit: 4.90,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg marca líder'
   },
 
@@ -471,8 +616,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3290,
     pricePerUnit: 6.58,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
   {
@@ -483,8 +632,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3190,
     pricePerUnit: 6.38,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
   {
@@ -495,8 +648,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4200,
     pricePerUnit: 8.40,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
 
@@ -509,8 +666,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5490,
     pricePerUnit: 10.98,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
   {
@@ -521,8 +682,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5390,
     pricePerUnit: 10.78,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
   {
@@ -533,8 +698,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 7100,
     pricePerUnit: 14.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 500g'
   },
 
@@ -547,8 +716,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2690,
     pricePerUnit: 5.38,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete 500g'
   },
   {
@@ -559,8 +732,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2590,
     pricePerUnit: 5.18,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete 500g'
   },
   {
@@ -571,8 +748,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4100,
     pricePerUnit: 8.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete Doria 500g'
   },
 
@@ -585,8 +766,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2990,
     pricePerUnit: 7.47,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 400g'
   },
   {
@@ -597,8 +782,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2890,
     pricePerUnit: 7.22,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 400g'
   },
   {
@@ -609,8 +798,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5200,
     pricePerUnit: 13.00,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa Quaker'
   },
 
@@ -623,8 +816,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4190,
     pricePerUnit: 9.31,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 450g'
   },
   {
@@ -635,8 +832,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3990,
     pricePerUnit: 8.87,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 450g'
   },
   {
@@ -647,8 +848,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 7900,
     pricePerUnit: 14.36,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa Bimbo 550g'
   },
 
@@ -661,8 +866,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 3190,
     pricePerUnit: 319.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete x10 unidades'
   },
   {
@@ -673,8 +882,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 2990,
     pricePerUnit: 299.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete x10 unidades'
   },
   {
@@ -685,8 +898,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 4500,
     pricePerUnit: 450.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.93,
+    observedAt: '2026-09-12',
+    source: 'EXITO_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete x10'
   },
 
@@ -699,8 +916,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4990,
     pricePerUnit: 4.99,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false, // D1 vende malla sellada cerrada
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija de 1kg sellada'
   },
   {
@@ -711,8 +932,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4790,
     pricePerUnit: 4.79,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija de 1kg'
   },
   {
@@ -723,8 +948,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5600,
     pricePerUnit: 5.60,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true, // Éxito pesa gramos exactos en báscula
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pesado continuo a granel en báscula'
   },
 
@@ -737,8 +966,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3490,
     pricePerUnit: 3.49,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla sellada de 1kg'
   },
   {
@@ -749,8 +982,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3390,
     pricePerUnit: 3.39,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla 1kg fija'
   },
   {
@@ -761,8 +998,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4300,
     pricePerUnit: 4.30,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'A granel continuo por gramo'
   },
 
@@ -775,8 +1016,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2290,
     pricePerUnit: 4.58,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Atado fijo 500g'
   },
   {
@@ -787,8 +1032,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2190,
     pricePerUnit: 4.38,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Atado fijo 500g'
   },
   {
@@ -799,8 +1048,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2800,
     pricePerUnit: 5.60,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'A granel en báscula'
   },
 
@@ -813,9 +1066,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5990,
     pricePerUnit: 2.995,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
-    notes: 'Bolsa fija de 2kg'
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Bolsa fija de 2kg sellada'
   },
   {
     productId: 'prod_papa_pastusa',
@@ -825,8 +1082,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5890,
     pricePerUnit: 2.945,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa fija de 2kg'
   },
   {
@@ -837,9 +1098,13 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3600,
     pricePerUnit: 3.60,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true, // En Éxito se pesa por kilo o fracción exacta
-    notes: 'A granel continuo en báscula'
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
+    notes: 'A granel continuo en báscula (sin redondeo forzado)'
   },
 
   // --- PLATANO MADURO (x3 unidades) ---
@@ -851,8 +1116,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 4290,
     pricePerUnit: 1430.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bandeja fija x3'
   },
   {
@@ -863,8 +1132,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 3990,
     pricePerUnit: 1330.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bandeja fija x3'
   },
   {
@@ -875,8 +1148,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 1700,
     pricePerUnit: 1700.0,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Unidades individuales en báscula'
   },
 
@@ -889,8 +1166,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3100,
     pricePerUnit: 3.10,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa fija 1kg'
   },
   {
@@ -901,8 +1182,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2990,
     pricePerUnit: 2.99,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa fija 1kg'
   },
   {
@@ -913,8 +1198,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3800,
     pricePerUnit: 3.80,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'A granel continuo en báscula'
   },
 
@@ -927,8 +1216,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 5490,
     pricePerUnit: 2745.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x2'
   },
   {
@@ -939,8 +1232,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 5290,
     pricePerUnit: 2645.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x2'
   },
   {
@@ -951,8 +1248,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 3400,
     pricePerUnit: 3400.0,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Unidad individual por gramaje'
   },
 
@@ -965,8 +1266,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 3500,
     pricePerUnit: 583.33,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x6'
   },
   {
@@ -977,8 +1282,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 3390,
     pricePerUnit: 565.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x6'
   },
   {
@@ -989,8 +1298,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 4400,
     pricePerUnit: 733.33,
+    packagingType: PACKAGING_TYPES.EXACT_WEIGHT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: true,
+    confidenceScore: 0.93,
+    observedAt: '2026-09-12',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'A granel por kilo en báscula'
   },
 
@@ -1003,8 +1316,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 2190,
     pricePerUnit: 730.0,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x3'
   },
   {
@@ -1015,8 +1332,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 2090,
     pricePerUnit: 696.67,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla fija x3'
   },
   {
@@ -1027,8 +1348,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 2900,
     pricePerUnit: 966.67,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-12',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Malla x3'
   },
 
@@ -1041,8 +1366,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 1290,
     pricePerUnit: 1290.0,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Atado sellado'
   },
   {
@@ -1053,8 +1382,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 1190,
     pricePerUnit: 1190.0,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.96,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Atado sellado'
   },
   {
@@ -1065,8 +1398,12 @@ export const PRICES_CALI = [
     unit: 'un',
     priceCOP: 1800,
     pricePerUnit: 1800.0,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.93,
+    observedAt: '2026-09-13',
+    source: 'EXITO_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Atado fresco'
   },
 
@@ -1079,8 +1416,12 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 6890,
     pricePerUnit: 7.65,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Botella 900ml'
   },
   {
@@ -1091,8 +1432,12 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 6790,
     pricePerUnit: 7.54,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Botella 900ml'
   },
   {
@@ -1103,9 +1448,13 @@ export const PRICES_CALI = [
     unit: 'ml',
     priceCOP: 9800,
     pricePerUnit: 10.88,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
-    notes: 'Botella 900ml'
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
+    notes: 'Botella 900ml marca premium'
   },
 
   // --- PANELA (1000g) ---
@@ -1117,8 +1466,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4690,
     pricePerUnit: 4.69,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pastilla 1kg'
   },
   {
@@ -1129,8 +1482,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 4590,
     pricePerUnit: 4.59,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Pastilla 1kg'
   },
   {
@@ -1141,8 +1498,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 5900,
     pricePerUnit: 5.90,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Paquete 1kg'
   },
 
@@ -1155,8 +1516,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 1490,
     pricePerUnit: 1.49,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.99,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg'
   },
   {
@@ -1167,8 +1532,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 1390,
     pricePerUnit: 1.39,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg'
   },
   {
@@ -1179,8 +1548,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 2200,
     pricePerUnit: 2.20,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 1kg'
   },
 
@@ -1193,8 +1566,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 6890,
     pricePerUnit: 27.56,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 250g'
   },
   {
@@ -1205,8 +1582,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 6790,
     pricePerUnit: 27.16,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 250g'
   },
   {
@@ -1217,8 +1598,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 8900,
     pricePerUnit: 35.60,
+    packagingType: PACKAGING_TYPES.FIXED_PACK.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.95,
+    observedAt: '2026-09-14',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Bolsa 250g'
   },
 
@@ -1231,8 +1616,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 1990,
     pricePerUnit: 9.95,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.98,
+    observedAt: '2026-09-14',
+    source: 'D1_DIGITAL_CATALOG_CALI',
+    availability: 'IN_STOCK',
     notes: 'Doypack 200g'
   },
   {
@@ -1243,8 +1632,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 1890,
     pricePerUnit: 9.45,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.97,
+    observedAt: '2026-09-14',
+    source: 'ARA_STORE_SURVEY_CALI',
+    availability: 'IN_STOCK',
     notes: 'Doypack 200g'
   },
   {
@@ -1255,8 +1648,12 @@ export const PRICES_CALI = [
     unit: 'g',
     priceCOP: 3200,
     pricePerUnit: 16.00,
+    packagingType: PACKAGING_TYPES.UNIT.id,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    isBulkWeighed: false,
+    confidenceScore: 0.94,
+    observedAt: '2026-09-13',
+    source: 'EXITO_COMMERCE_CALI',
+    availability: 'IN_STOCK',
     notes: 'Doypack Fruco'
   }
 ];
