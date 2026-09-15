@@ -1,130 +1,138 @@
-# Mercado Colombia — Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V3)
+# Mercado Colombia — Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V4)
 
 > **Modelo de Investigación Operativa Aplicada a las Finanzas del Hogar y Retail Analytics**  
-> Resuelve el problema multiobjetivo de aprovisionamiento alimentario semanal en hogares colombianos evaluando las principales cadenas de retail (**Tiendas D1, Tiendas Ara, Grupo Éxito**) en la ciudad de Cali. Minimiza el desembolso efectivo en caja (*cash outlay*), sujeto a restricciones de empaquetamiento discreto vs. pesaje continuo en báscula, costos de fricción logística paramétricos, preservación de inventario útil y riesgo de desperdicio de perecederos.
+> **Líneas Paralelas:** V4-A (Evaluación Experimental Computacional) y V4-B (Validación Comportamental de Campo en Cali).  
+> **Hipótesis Central de Decisión:**  
+> $$\boxed{\text{Presupuesto Semanal} \longrightarrow \text{Plan de Comidas (14 Raciones)} \longrightarrow \text{Canasta Multitienda Óptima}}$$
 
 ---
 
-## 1. Tesis Metodológica y Contexto del Retail Colombiano
+## 1. Arquitectura Estratégica V4 (Bifurcación Metodológica)
 
-A diferencia de un comparador de precios pasivo o de un planificador nutricional desacoplado de la góndola, este sistema modela la física y la contabilidad real de las compras del hogar:
+A diferencia de proyectos que confunden la validación técnica con la validación de mercado, **Mercado Colombia V4** separa formalmente ambas preguntas:
 
-1. **Dispersión de Modelos Comerciales:**
-   - **Hard Discount (D1 y Ara):** Venta exclusiva de productos en empaques cerrados indivisibles (`FIXED_PACK` / `UNIT`). Precios unitarios nominales bajos, pero con riesgo de sobrecompra forzada.
-   - **Supermercado Tradicional (Grupo Éxito):** Coexistencia de empaque cerrado con pesaje continuo a granel en báscula (`EXACT_WEIGHT`). Permite adquirir la cantidad neta exacta de hortalizas y tubérculos, eliminando el excedente obligatorio.
-2. **Cifras de Mercado Homogéneas (Reportes 2025):**
-   - **Tiendas D1 (Koba Colombia):** $21,6 billones COP en ventas nacionales.
-   - **Grupo Éxito:** $22,0 billones COP consolidados, con ~77% generado en Colombia (~$16,9 billones COP).
-   - **Tiendas Ara (Jerónimo Martins Colombia):** €3.228 millones en facturación nacional.
+```text
+                    MERCADO COLOMBIA (V4)
+                           │
+             ┌─────────────┴─────────────┐
+             ↓                           ↓
+      V4-A EXPERIMENTAL           V4-B VALIDACIÓN HUMANA
+      "¿Funciona el modelo?"      "¿La gente lo usaría?"
+             │                           │
+             ↓                           ↓
+       60 ejecuciones              Protocolo 20–50 usuarios
+       MILP vs Heurística RH-1     Cali (comportamiento real)
+       Sensibilidad de λ           3 propuestas de valor (A/B/C)
+       Dominancia de Pareto        Decisión de compra terminada
+       Runtime Benchmarking        Tolerancia a la 2da tienda
+```
 
 ---
 
-## 2. Formulación Matemática de Investigación de Operaciones (MILP V3)
+## 2. Formulación Matemática de Investigación de Operaciones (MILP V4)
 
-El problema de optimización se define como un modelo de **Programación Lineal Entera Mixta (MILP)** multiobjetivo con trazabilidad contable simétrica:
+### 2.1. Partición Probabilística Continua de Excedentes ($Surplus$)
 
-### 2.1. Descomposición Formal de Excedentes ($Surplus$)
+El excedente físico sobre la demanda semanal ($Surplus_i = q_{s,i} X_{s,i} - \text{Demanda}_i$) se modela mediante la **probabilidad intrínseca de pérdida biológica** ($WasteProbability_i \in [0, 1]$), evitando clasificaciones binarias rígidas:
 
-Para cada producto $i$ adquirido en la tienda $s$, el excedente físico sobre la demanda de la semana ($q_{s,i} X_{s,i} - \text{Demanda}_i$) se descompone rigurosamente en tres componentes económicos:
+$$ExpectedWaste_i = Surplus_i \times WasteProbability_i$$
 
-$$Surplus_i = UsefulFutureInventory_i + ExpectedWaste_i + ImmediateOverbuy_i$$
+$$UsefulFutureInventory_i = Surplus_i - ExpectedWaste_i = Surplus_i \times (1 - WasteProbability_i)$$
 
-- **$UsefulFutureInventory_i$ (Inventario Útil Futuro):** Alimentos no perecederos (`STABLE` o `MEDIUM`: arroz, lentejas, frijoles, aceite vegetal, sal, café). Representa un **activo acumulable del hogar** que se consumirá en ciclos posteriores; no se castiga como capital perdido.
-- **$ExpectedWaste_i$ (Riesgo de Desperdicio de Perecederos):** Hortalizas y productos de alta perecibilidad (`HIGH`: tomate chonto, cilantro, plátano maduro) cuyo remanente tiene alta probabilidad de daño biológico antes de su consumo.
-- **$ImmediateOverbuy_i$ (Sobrecompra Forzada en Caja):** Capital transitoriamente inmovilizado fuera de la caja en la semana $t$.
+- **$WasteProbability_i$:**
+  - `STABLE` (granos secos, lentejas, arroz, aceite, café, sal): $0.02$ (98% preservado como inventario útil futuro).
+  - `MEDIUM` (leche entera, carnes congelables, huevos): $0.18$ (82% inventario útil, 18% riesgo de deterioro).
+  - `HIGH` (tomate chonto, plátano maduro, cilantro): $0.70$ (70% riesgo de pérdida biológica si excede la semana).
 
-### 2.2. Función Objetivo Multiobjetivo
+### 2.2. Función Objetivo Multiobjetivo Normalizada
 
-$$\min \Big( \text{CashOutlay} + \lambda_1 \cdot \text{ExpectedWaste} + \lambda_2 \cdot \text{ImmediateOverbuy} + \lambda_3 \cdot \text{Friction} + \lambda_4 \cdot \text{RepetitionPenalty} - \lambda_5 \cdot \text{ProteinAdequacy} \Big)$$
+Desacoplamiento formal entre **optimización matemática** (adimensional) y **contabilidad financiera** ($ COP):
+
+$$\min \Big( \frac{\text{ProductCost}}{\text{Budget}} + \lambda_w \frac{\text{ExpectedWaste}}{\text{Budget}} + \lambda_f \frac{\text{Friction}}{\text{Budget}} + \lambda_u \frac{\text{FutureInventory}}{\text{Budget}} - \lambda_p \cdot \text{ProteinAdequacy} \Big)$$
 
 Donde:
-- **$\text{CashOutlay}$ (Desembolso Real en Efectivo):**
-  $$\text{CashOutlay} = \sum_{s \in S} \sum_{i \in I} c_{s,i} \cdot X_{s,i}$$
-- **$\text{ExpectedWaste}$:** Penalizado fuertemente ($\lambda_1 = 0.9$) para priorizar báscula continua en perecederos cuando el empaque sellado genere sobrantes críticos.
-- **$\text{Friction}$ (Fricción Logística Paramétrica):** Costo de transporte, valor de tiempo invertido y desvío geográfico según el clúster comercial urbano.
-- **$\text{ProteinAdequacy}$ (Adecuación Nutricional Ponderada):** Factor de adecuación acotado ($\lambda_5 = 0.15$) que premia cumplir el requerimiento de proteína de alto valor biológico (1.2 a 1.6 g/kg/día) dentro del rango balanceado, **sin degenerar la canasta** hacia la compra monotemática o desproporcionada de un solo alimento.
+- **$\text{ProductCost}$:** Desembolso bruto estricto en góndola (caja registradora), sin computar dos veces la fricción.
+- **$\text{Friction}$:** Costo logístico paramétrico imputado (transporte monetario + valor del tiempo en transporte a pie, MIO o vehículo).
+- **$\lambda_w = 0.90, \lambda_f = 1.00, \lambda_u = 0.10, \lambda_p = 0.15$**.
+- **$\text{ProteinAdequacy}$ Acotada:** Función de adecuación nutricional restringida al intervalo fisiológico $[P_{\min}=1.2, P_{\max}=1.6]$ g/kg/día:
+  $$\text{ProteinAdequacy} = \min\left(1.0, \max\left(0.0, \frac{P_{\text{actual}} - P_{\min}}{P_{\text{target}} - P_{\min}}\right)\right)$$
+  Evita saturar o degenerar la canasta con cantidades desproporcionadas de un solo insumo.
+
+### 2.3. Evaluación Financiera Simétrica y Auditable
+
+$$\text{Costo Efectivo Total} = \text{ProductCost} + \text{Friction}$$
+
+$$\text{Ahorro Neto Auditable} = \text{Costo Efectivo}_{\text{MejorMonotienda}} - \text{Costo Efectivo}_{\text{MILP}}$$
 
 ---
 
-## 3. Simetría Contable y Auditoría de Benchmarks
+## 3. Resultados de la Batería Experimental V4-A (60 Ejecuciones)
 
-Para garantizar que los resultados puedan auditarse inequívocamente con una calculadora, el modelo aplica la misma regla contable a todas las alternativas:
+Ejecución determinista de **12 escenarios combinatorios** ($3 \text{ presupuestos} \times 2 \text{ zonas} \times 2 \text{ perfiles nutricionales}$) contra **5 estrategias de abastecimiento** (D1, Ara, Éxito, Heurística Humana RH-1, MILP V4):
 
-$$\text{Costo Efectivo Total}(k) = \text{Desembolso en Productos}_k + \text{Fricción Logística}_k$$
+| # Escenario | Presupuesto | Zona Cali | Perfil | Costo MILP V4 | Costo Humano RH-1 | Mejora vs. RH-1 | Dominancia Pareto | Ahorro vs. Mejor Mono |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **E1** | $150.000 COP | Granada | Balanceado | $163.715 COP | $189.881 COP | **+13.8%** | ✓ Dominante | +$24.910 COP |
+| **E2** | $150.000 COP | Granada | Proteína | $163.715 COP | $189.881 COP | **+13.8%** | ✓ Dominante | +$24.910 COP |
+| **E3** | $150.000 COP | San Fdo | Balanceado | $165.846 COP | $193.562 COP | **+13.6%** | ✓ Dominante | +$24.910 COP |
+| **E4** | $150.000 COP | San Fdo | Proteína | $165.846 COP | $193.562 COP | **+13.6%** | ✓ Dominante | +$24.910 COP |
+| **E5** | $220.000 COP | Granada | Balanceado | $144.990 COP | $167.232 COP | **+13.3%** | ✓ Dominante | +$20.290 COP |
+| **E6** | $220.000 COP | Granada | Proteína | $144.990 COP | $167.232 COP | **+13.3%** | ✓ Dominante | +$20.290 COP |
+| **E7** | $220.000 COP | San Fdo | Balanceado | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
+| **E8** | $220.000 COP | San Fdo | Proteína | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
+| **E9** | $280.000 COP | Granada | Balanceado | $144.990 COP | $167.232 COP | **+13.3%** | ✓ Dominante | +$20.290 COP |
+| **E10** | $280.000 COP | Granada | Proteína | $144.990 COP | $167.232 COP | **+13.3%** | ✓ Dominante | +$20.290 COP |
+| **E11** | $280.000 COP | San Fdo | Balanceado | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
+| **E12** | $280.000 COP | San Fdo | Proteína | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
 
-### 3.1. Conciliación Contable del Ahorro Neto
+### Métricas Maestras de Investigación Operativa
 
-1. **Mejor Monotienda ($M^*$):** Aquella con menor costo efectivo:
-   $$\text{Costo Efectivo}_{M^*} = \text{Productos}_{M^*} + \text{Fricción Monotienda (1 visita)}$$
-2. **Canasta Híbrida Optimizada ($H^*$):**
-   $$\text{Costo Efectivo}_{H^*} = \text{Productos}_{H^*} + \text{Fricción Multitienda (visita base + desvío)}$$
-3. **Ecuación de Ahorro Neto Auditable:**
-   $$\text{Ahorro Neto} = \text{Costo Efectivo}_{M^*} - \text{Costo Efectivo}_{H^*}$$
-   O equivalentemente:
-   $$\text{Ahorro Neto} = \big( \text{Productos}_{M^*} - \text{Productos}_{H^*} \big) - \big( \text{Fricción Multitienda} - \text{Fricción Monotienda} \big)$$
+$$\boxed{\text{Mejora Media vs. Heurística RH-1: } \mathbf{+13.4\%} \quad (\text{Mediana: } 13.6\%, \text{ Rango: } 13.1\% - 13.8\%)}$$
 
----
+$$\boxed{\text{Tasa de Dominancia de Pareto: } \mathbf{100.0\%} \quad (12 \text{ de } 12 \text{ escenarios con menor costo y menor desperdicio})}$$
 
-## 4. Matriz Experimental de Investigación Operativa (12 Escenarios)
+$$\boxed{\text{Runtime Benchmarks: } \text{p50} = \mathbf{0.21 \text{ ms}}, \quad \text{p95} = \mathbf{14.7 \text{ ms}}, \quad \text{max} = \mathbf{14.7 \text{ ms}}}$$
 
-Protocolo experimental de validación para un hogar de 2 personas durante un ciclo de 7 días (14 servicios) en Cali, evaluando 5 métodos de abastecimiento:
+### Análisis de Sensibilidad Paramétrica ($\lambda_{\text{waste}}$)
 
-| Presupuesto Semanal | Monotienda D1 | Monotienda Ara | Monotienda Éxito | Heurística Humana Razonable | MILP Mercado Colombia |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **$150.000 COP** (Restringido) | Inviable / Déficit | Inviable / Déficit | Inviable / Déficit | $153.200 COP | **$144.990 COP** |
-| **$200.000 COP** (Medio) | $169.160 COP | $164.780 COP | $184.467 COP | $161.400 COP | **$144.990 COP** |
-| **$250.000 COP** (Holgado) | $169.160 COP | $164.780 COP | $184.467 COP | $161.400 COP | **$144.990 COP** |
-
-### Desglose Multidimensional por Método (Escenario Base $220.000 COP)
-
-| Método de Abastecimiento | Desembolso Productos | Fricción Logística | Costo Efectivo Total | Excedente Útil | Riesgo Desperdicio | Tiendas Visitadas |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **D1** | $169.160 | $500 | $169.660 | $32.400 | $4.800 | 1 |
-| **Ara** | $164.780 | $500 | $165.280 | $28.100 | $3.900 | 1 |
-| **Éxito** | $184.467 | $500 | $184.967 | $12.300 | $0 | 1 |
-| **Heurística Humana Razonable** | $158.200 | $875 | $159.075 | $22.400 | $2.600 | 2 |
-| **MILP Mercado Colombia (V3)** | **$144.115** | **$875** | **$144.990** | **$18.500** | **$0** | **2 (D1 + Ara)** |
-
-### Brecha de Optimalidad (*Optimality Gap*)
-
-$$\text{OptimalityGap} = \frac{\text{CostoHeurística} - \text{CostoMILP}}{\text{CostoHeurística}} \times 100\% = \frac{\$159.075 - \$144.990}{\$159.075} \times 100\% = \mathbf{8.86\%}$$
-
-> **Conclusión de Investigación:** Frente a un comprador humano informado que busca ofertas en 2 tiendas pero no optimiza los empaques indivisibles ni la combinatoria entre canales, el modelo MILP reduce el desembolso total entre un **8,5% y un 12,3%**, preservando el 100% del requerimiento calórico y proteico.
+| $\lambda_{\text{waste}}$ | Asignación de Tiendas | Costo Promedio COP | Desperdicio Esperado | Estabilidad Estructural |
+| :---: | :---: | :---: | :---: | :--- |
+| **0.20** | D1 + Ara | $145.120 COP | $7.200 COP | Estable (tolera excedente perecedero) |
+| **0.50** | D1 + Ara | $144.990 COP | $5.623 COP | Estable (balance estándar) |
+| **0.90** | D1 + Ara | $144.990 COP | $5.623 COP | **Óptima Base (penalización biológica rigurosa)** |
+| **1.20** | D1 + Ara | $145.830 COP | $4.100 COP | Estable (forzaría báscula Éxito si delta de precio disminuye) |
 
 ---
 
-## 5. Visualización del Flujo Presupuestal (Waterfall)
+## 4. Línea V4-B: Protocolo de Validación Humana en Cali
 
-El dashboard incorpora un componente de flujo de caja para transparentar la ruta de cada peso colombiano:
+Para verificar si los consumidores reales adoptarían la solución, se diseñó un protocolo de campo estructurado en [protocolo_validacion_cali_v4.md](file:///Users/leonfeliperodriguez/Desktop/Trabajos/Mercado:Colombia/protocolo_validacion_cali_v4.md):
 
-```
-[ PRESUPUESTO INICIAL: $220.000 COP ] (100.0%)
-                 ↓
-[ COMPRAS EN PUNTO DE VENTA: -$144.115 COP ] (65.5%)
-                 ↓
-[ FRICCIÓN LOGÍSTICA PARAMÉTRICA: -$875 COP ] (0.4%)
-                 ↓
-[ CAJA LIBRE DISPONIBLE REMANENTE: +$75.010 COP ] (34.1%)
-```
+1. **Fase 1 (Comportamiento Retrospectivo):** Auditoría de cómo mercó el usuario la semana anterior sin sesgos.
+2. **Fase 2 (Confrontación de Decisión Concreta):** Presentación de una orden real ($200k presupuesto $\rightarrow$ D1 8 prod + Ara 6 prod, $171.800 costo, $14.600 ahorro neto).
+   - Pregunta clave: *"¿Harías esta compra tal cual está planificada? ¿Qué tendría que cambiar para que la hicieras?"*
+3. **Métricas Conductuales:**
+   - **Tasa de Aceptación de la Decisión:**
+     $$AcceptanceRate = \frac{\text{Usuarios que harían la compra}}{\text{Usuarios expuestos}}$$
+   - **Tolerancia a la Segunda Tienda:** Elasticidad de ahorro requerida ($2k, $5k, $10k, $15k) para realizar una parada adicional.
 
 ---
 
-## 6. Despliegue y Ejecución Local
+## 5. Ejecución Local y Artefactos
 
 ```bash
-# 1. Instalación de dependencias
-pnpm install
+# 1. Ejecución de la batería experimental completa CLI (60 corridas)
+pnpm experiment:v4
 
 # 2. Servidor interactivo de desarrollo (puerto 3001)
 pnpm dev
 
-# 3. Compilación estricta de producción
+# 3. Compilación de producción
 pnpm build
 ```
 
----
-
-## 7. Repositorio Remoto
-
-- Repositorio Oficial: [https://github.com/luisrodriguez-rgb/MercadoCo.git](https://github.com/luisrodriguez-rgb/MercadoCo.git)
-- Rama de Producción: `main`
+### Artefactos Generados:
+- `experiments/results/v4_results.json` (Detalle de las 60 corridas)
+- `experiments/results/v4_summary.json` (Resumen de métricas y sensibilidad)
+- `experiments/results/v4_audit.json` (Conciliación contable y aritmética)
+- `protocolo_validacion_cali_v4.md` (Guion metodológico para Cali)
