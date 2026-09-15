@@ -1,0 +1,985 @@
+{
+  "totalScenarios": 12,
+  "totalRuns": 60,
+  "scenarios": [
+    {
+      "id": "scenario_1",
+      "index": 1,
+      "name": "E1: $150k | Granada | Balanceado",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 14.67,
+      "optimizationScore": 1.1669,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 199395,
+          "productCost": 198520,
+          "friction": 875,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 188625,
+          "productCost": 187750,
+          "friction": 875,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208516,
+          "productCost": 207641,
+          "friction": 875,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 189881,
+          "productCost": 188350,
+          "friction": 1531,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": false
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 163715,
+          "productCost": 162184,
+          "friction": 1531,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": false,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_2",
+      "index": 2,
+      "name": "E2: $150k | Granada | Proteína",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.43,
+      "optimizationScore": 1.1451,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 196105,
+          "productCost": 195230,
+          "friction": 875,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 185535,
+          "productCost": 184660,
+          "friction": 875,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 206816,
+          "productCost": 205941,
+          "friction": 875,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 186791,
+          "productCost": 185260,
+          "friction": 1531,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": false
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 162022,
+          "productCost": 160491,
+          "friction": 1531,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": false,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_3",
+      "index": 3,
+      "name": "E3: $150k | San Fdo | Balanceado",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.7,
+      "optimizationScore": 1.1815,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 200645,
+          "productCost": 198520,
+          "friction": 2125,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 189875,
+          "productCost": 187750,
+          "friction": 2125,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 209766,
+          "productCost": 207641,
+          "friction": 2125,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 192069,
+          "productCost": 188350,
+          "friction": 3719,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": false
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 165903,
+          "productCost": 162184,
+          "friction": 3719,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": false,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_4",
+      "index": 4,
+      "name": "E4: $150k | San Fdo | Proteína",
+      "budgetCOP": 150000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.34,
+      "optimizationScore": 1.1597,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 197355,
+          "productCost": 195230,
+          "friction": 2125,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 186785,
+          "productCost": 184660,
+          "friction": 2125,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208066,
+          "productCost": 205941,
+          "friction": 2125,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": false
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 188979,
+          "productCost": 185260,
+          "friction": 3719,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": false
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 164210,
+          "productCost": 160491,
+          "friction": 3719,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": false,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_5",
+      "index": 5,
+      "name": "E5: $220k | Granada | Balanceado",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.21,
+      "optimizationScore": 0.7956,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 199395,
+          "productCost": 198520,
+          "friction": 875,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 188625,
+          "productCost": 187750,
+          "friction": 875,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208516,
+          "productCost": 207641,
+          "friction": 875,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 189881,
+          "productCost": 188350,
+          "friction": 1531,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 163715,
+          "productCost": 162184,
+          "friction": 1531,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_6",
+      "index": 6,
+      "name": "E6: $220k | Granada | Proteína",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.2,
+      "optimizationScore": 0.7808,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 196105,
+          "productCost": 195230,
+          "friction": 875,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 185535,
+          "productCost": 184660,
+          "friction": 875,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 206816,
+          "productCost": 205941,
+          "friction": 875,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 186791,
+          "productCost": 185260,
+          "friction": 1531,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 162022,
+          "productCost": 160491,
+          "friction": 1531,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_7",
+      "index": 7,
+      "name": "E7: $220k | San Fdo | Balanceado",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.42,
+      "optimizationScore": 0.8056,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 200645,
+          "productCost": 198520,
+          "friction": 2125,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 189875,
+          "productCost": 187750,
+          "friction": 2125,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 209766,
+          "productCost": 207641,
+          "friction": 2125,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 192069,
+          "productCost": 188350,
+          "friction": 3719,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 165903,
+          "productCost": 162184,
+          "friction": 3719,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_8",
+      "index": 8,
+      "name": "E8: $220k | San Fdo | Proteína",
+      "budgetCOP": 220000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.18,
+      "optimizationScore": 0.7907,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 197355,
+          "productCost": 195230,
+          "friction": 2125,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 186785,
+          "productCost": 184660,
+          "friction": 2125,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208066,
+          "productCost": 205941,
+          "friction": 2125,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 188979,
+          "productCost": 185260,
+          "friction": 3719,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 164210,
+          "productCost": 160491,
+          "friction": 3719,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_9",
+      "index": 9,
+      "name": "E9: $280k | Granada | Balanceado",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.16,
+      "optimizationScore": 0.6251,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 199395,
+          "productCost": 198520,
+          "friction": 875,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 188625,
+          "productCost": 187750,
+          "friction": 875,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208516,
+          "productCost": 207641,
+          "friction": 875,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 189881,
+          "productCost": 188350,
+          "friction": 1531,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 163715,
+          "productCost": 162184,
+          "friction": 1531,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_10",
+      "index": 10,
+      "name": "E10: $280k | Granada | Proteína",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_GRANADA_VERSALLES",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.21,
+      "optimizationScore": 0.6135,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 196105,
+          "productCost": 195230,
+          "friction": 875,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 185535,
+          "productCost": 184660,
+          "friction": 875,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 206816,
+          "productCost": 205941,
+          "friction": 875,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 186791,
+          "productCost": 185260,
+          "friction": 1531,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 162022,
+          "productCost": 160491,
+          "friction": 1531,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_11",
+      "index": 11,
+      "name": "E11: $280k | San Fdo | Balanceado",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "BALANCEADO",
+      "runtimeMs": 0.15,
+      "optimizationScore": 0.633,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 200645,
+          "productCost": 198520,
+          "friction": 2125,
+          "wasteRisk": 22723,
+          "futureInventory": 72555,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 189875,
+          "productCost": 187750,
+          "friction": 2125,
+          "wasteRisk": 21065,
+          "futureInventory": 66582,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 209766,
+          "productCost": 207641,
+          "friction": 2125,
+          "wasteRisk": 12948,
+          "futureInventory": 61872,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 192069,
+          "productCost": 188350,
+          "friction": 3719,
+          "wasteRisk": 21894,
+          "futureInventory": 69569,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 165903,
+          "productCost": 162184,
+          "friction": 3719,
+          "wasteRisk": 7995,
+          "futureInventory": 41298,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    },
+    {
+      "id": "scenario_12",
+      "index": 12,
+      "name": "E12: $280k | San Fdo | Proteína",
+      "budgetCOP": 280000,
+      "zoneId": "CALI_SAN_FERNANDO",
+      "preference": "ALTA_PROTEINA",
+      "runtimeMs": 0.14,
+      "optimizationScore": 0.6213,
+      "strategies": {
+        "D1": {
+          "name": "D1",
+          "effectiveCost": 197355,
+          "productCost": 195230,
+          "friction": 2125,
+          "wasteRisk": 20810,
+          "futureInventory": 69817,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "ARA": {
+          "name": "Ara",
+          "effectiveCost": 186785,
+          "productCost": 184660,
+          "friction": 2125,
+          "wasteRisk": 19219,
+          "futureInventory": 63960,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "EXITO": {
+          "name": "Éxito",
+          "effectiveCost": 208066,
+          "productCost": 205941,
+          "friction": 2125,
+          "wasteRisk": 11981,
+          "futureInventory": 59285,
+          "storesVisited": 1,
+          "withinBudget": true
+        },
+        "HUMAN_RH1": {
+          "name": "Heurística Humana (RH-1)",
+          "effectiveCost": 188979,
+          "productCost": 185260,
+          "friction": 3719,
+          "wasteRisk": 20015,
+          "futureInventory": 66889,
+          "storesVisited": 2,
+          "withinBudget": true
+        },
+        "MILP_V4": {
+          "name": "MILP Mercado Colombia (V4)",
+          "effectiveCost": 164210,
+          "productCost": 160491,
+          "friction": 3719,
+          "wasteRisk": 6673,
+          "futureInventory": 37423,
+          "storesVisited": 2,
+          "withinBudget": true,
+          "activeStores": [
+            "ARA",
+            "EXITO"
+          ]
+        }
+      },
+      "heuristicImprovementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "bestMonoStoreName": "Tiendas Ara",
+      "paretoAnalysis": {
+        "isDominant": true,
+        "dimensions": {
+          "effectiveCost": true,
+          "wasteRisk": true,
+          "friction": true
+        },
+        "tradeoffSummary": "Dominancia de Pareto estricta sobre la heurística humana en todas las dimensiones."
+      }
+    }
+  ],
+  "summary": {
+    "meanImprovementPct": 13.4,
+    "medianImprovementPct": 13.6,
+    "minImprovementPct": 13.1,
+    "maxImprovementPct": 13.8,
+    "dominancePct": 100,
+    "paretoDominantCount": 12,
+    "runtime": {
+      "p50Ms": 0.21,
+      "p95Ms": 14.67,
+      "maxMs": 14.67
+    }
+  },
+  "sensitivityAnalysis": [
+    {
+      "lambdaWaste": 0.2,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 145120,
+      "notes": "Tolera mayor excedente perecedero"
+    },
+    {
+      "lambdaWaste": 0.5,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 144990,
+      "notes": "Balance óptimo estándar"
+    },
+    {
+      "lambdaWaste": 0.9,
+      "solutionStability": "Óptima (Base)",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 144990,
+      "notes": "Penalización biológica rigurosa"
+    },
+    {
+      "lambdaWaste": 1.2,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 145830,
+      "notes": "Forzaría báscula Éxito si delta de precio baja"
+    }
+  ]
+}

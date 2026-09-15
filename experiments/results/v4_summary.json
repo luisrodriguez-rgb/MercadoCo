@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "date": "2026-09-15T04:57:11.305Z",
+    "experimentType": "MILP vs RH-1 Heuristic vs Monostores Benchmark (V4-A)",
+    "city": "Cali, Colombia",
+    "sampleSize": "60 runs across 12 scenarios"
+  },
+  "summary": {
+    "meanImprovementPct": 13.4,
+    "medianImprovementPct": 13.6,
+    "minImprovementPct": 13.1,
+    "maxImprovementPct": 13.8,
+    "dominancePct": 100,
+    "paretoDominantCount": 12,
+    "runtime": {
+      "p50Ms": 0.21,
+      "p95Ms": 14.67,
+      "maxMs": 14.67
+    }
+  },
+  "sensitivityAnalysis": [
+    {
+      "lambdaWaste": 0.2,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 145120,
+      "notes": "Tolera mayor excedente perecedero"
+    },
+    {
+      "lambdaWaste": 0.5,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 144990,
+      "notes": "Balance óptimo estándar"
+    },
+    {
+      "lambdaWaste": 0.9,
+      "solutionStability": "Óptima (Base)",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 144990,
+      "notes": "Penalización biológica rigurosa"
+    },
+    {
+      "lambdaWaste": 1.2,
+      "solutionStability": "Estable",
+      "storePair": "D1 + Ara",
+      "avgCostCOP": 145830,
+      "notes": "Forzaría báscula Éxito si delta de precio baja"
+    }
+  ],
+  "scenariosExcerpt": [
+    {
+      "name": "E1: $150k | Granada | Balanceado",
+      "budgetCOP": 150000,
+      "milpEffectiveCost": 163715,
+      "humanEffectiveCost": 189881,
+      "improvementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "paretoDominance": true
+    },
+    {
+      "name": "E2: $150k | Granada | Proteína",
+      "budgetCOP": 150000,
+      "milpEffectiveCost": 162022,
+      "humanEffectiveCost": 186791,
+      "improvementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "paretoDominance": true
+    },
+    {
+      "name": "E3: $150k | San Fdo | Balanceado",
+      "budgetCOP": 150000,
+      "milpEffectiveCost": 165903,
+      "humanEffectiveCost": 192069,
+      "improvementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "paretoDominance": true
+    },
+    {
+      "name": "E4: $150k | San Fdo | Proteína",
+      "budgetCOP": 150000,
+      "milpEffectiveCost": 164210,
+      "humanEffectiveCost": 188979,
+      "improvementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "paretoDominance": true
+    },
+    {
+      "name": "E5: $220k | Granada | Balanceado",
+      "budgetCOP": 220000,
+      "milpEffectiveCost": 163715,
+      "humanEffectiveCost": 189881,
+      "improvementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "paretoDominance": true
+    },
+    {
+      "name": "E6: $220k | Granada | Proteína",
+      "budgetCOP": 220000,
+      "milpEffectiveCost": 162022,
+      "humanEffectiveCost": 186791,
+      "improvementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "paretoDominance": true
+    },
+    {
+      "name": "E7: $220k | San Fdo | Balanceado",
+      "budgetCOP": 220000,
+      "milpEffectiveCost": 165903,
+      "humanEffectiveCost": 192069,
+      "improvementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "paretoDominance": true
+    },
+    {
+      "name": "E8: $220k | San Fdo | Proteína",
+      "budgetCOP": 220000,
+      "milpEffectiveCost": 164210,
+      "humanEffectiveCost": 188979,
+      "improvementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "paretoDominance": true
+    },
+    {
+      "name": "E9: $280k | Granada | Balanceado",
+      "budgetCOP": 280000,
+      "milpEffectiveCost": 163715,
+      "humanEffectiveCost": 189881,
+      "improvementPct": 13.8,
+      "netSavingsVsBestMono": 24910,
+      "paretoDominance": true
+    },
+    {
+      "name": "E10: $280k | Granada | Proteína",
+      "budgetCOP": 280000,
+      "milpEffectiveCost": 162022,
+      "humanEffectiveCost": 186791,
+      "improvementPct": 13.3,
+      "netSavingsVsBestMono": 23513,
+      "paretoDominance": true
+    },
+    {
+      "name": "E11: $280k | San Fdo | Balanceado",
+      "budgetCOP": 280000,
+      "milpEffectiveCost": 165903,
+      "humanEffectiveCost": 192069,
+      "improvementPct": 13.6,
+      "netSavingsVsBestMono": 23972,
+      "paretoDominance": true
+    },
+    {
+      "name": "E12: $280k | San Fdo | Proteína",
+      "budgetCOP": 280000,
+      "milpEffectiveCost": 164210,
+      "humanEffectiveCost": 188979,
+      "improvementPct": 13.1,
+      "netSavingsVsBestMono": 22575,
+      "paretoDominance": true
+    }
+  ]
+}

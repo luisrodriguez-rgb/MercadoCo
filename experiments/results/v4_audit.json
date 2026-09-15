@@ -1,0 +1,103 @@
+{
+  "verifiedScenariosCount": 12,
+  "mathematicalConciliationPass": true,
+  "auditRule": "CostoEfectivo = Productos + Fricción; AhorroNeto = CostoEfectivo(MejorMono) - CostoEfectivo(MILP)",
+  "findings": [
+    {
+      "scenario": "E1: $150k | Granada | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 188625,
+      "milpCost": 163715,
+      "netSavings": 24910,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E2: $150k | Granada | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 185535,
+      "milpCost": 162022,
+      "netSavings": 23513,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E3: $150k | San Fdo | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 189875,
+      "milpCost": 165903,
+      "netSavings": 23972,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E4: $150k | San Fdo | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 186785,
+      "milpCost": 164210,
+      "netSavings": 22575,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E5: $220k | Granada | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 188625,
+      "milpCost": 163715,
+      "netSavings": 24910,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E6: $220k | Granada | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 185535,
+      "milpCost": 162022,
+      "netSavings": 23513,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E7: $220k | San Fdo | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 189875,
+      "milpCost": 165903,
+      "netSavings": 23972,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E8: $220k | San Fdo | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 186785,
+      "milpCost": 164210,
+      "netSavings": 22575,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E9: $280k | Granada | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 188625,
+      "milpCost": 163715,
+      "netSavings": 24910,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E10: $280k | Granada | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 185535,
+      "milpCost": 162022,
+      "netSavings": 23513,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E11: $280k | San Fdo | Balanceado",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 189875,
+      "milpCost": 165903,
+      "netSavings": 23972,
+      "arithmeticCheck": true
+    },
+    {
+      "scenario": "E12: $280k | San Fdo | Proteína",
+      "bestMono": "Tiendas Ara",
+      "bestMonoCost": 186785,
+      "milpCost": 164210,
+      "netSavings": 22575,
+      "arithmeticCheck": true
+    }
+  ]
+}
