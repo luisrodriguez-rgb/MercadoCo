@@ -3,7 +3,7 @@ import { MealPlanService } from './application/MealPlanService.js';
 import { BasketOptimizer } from './application/BasketOptimizer.js';
 import { PRICES_CALI } from './data/prices_cali.js';
 import { ESSENTIAL_PRODUCTS } from './data/products.js';
-import { STORES, CONFIDENCE_LEVELS } from './domain/types.js';
+import { STORES, CONFIDENCE_LEVELS, CITIES, PANTRY_STAPLE_IDS } from './domain/types.js';
 import { LogoD1, LogoAra, LogoExito, FlagColombia } from './ui/StoreLogos.jsx';
 import { 
   SlidersHorizontal, 
@@ -24,7 +24,10 @@ import {
   ArrowRightLeft, 
   Info,
   Sun,
-  Moon
+  Moon,
+  MapPin,
+  CheckCircle,
+  Scale
 } from 'lucide-react';
 
 export function App() {
@@ -46,21 +49,35 @@ export function App() {
   const [peopleCount, setPeopleCount] = useState(2);
   const [budgetCOP, setBudgetCOP] = useState(220000);
   const [preference, setPreference] = useState('BALANCEADO');
+  const [selectedZoneId, setSelectedZoneId] = useState('CALI_GRANADA_VERSALLES');
+  const [pantryStockIds, setPantryStockIds] = useState(['prod_sal_refinada', 'prod_aceite_vegetal']);
   const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'basket' | 'pantry' | 'prices'
   const [selectedBasketMode, setSelectedBasketMode] = useState('MULTI'); // 'MULTI' | 'D1' | 'ARA' | 'EXITO'
   const [checkedItems, setCheckedItems] = useState({});
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
   const [copiedNotification, setCopiedNotification] = useState(false);
 
+  // Toggle insumo en despensa preexistente
+  const togglePantryStaple = (id) => {
+    setPantryStockIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
   // 1. Invocación de Generador de Menú
   const weeklyPlan = useMemo(() => {
     return MealPlanService.generateWeeklyPlan({ peopleCount, budgetCOP, preference });
   }, [peopleCount, budgetCOP, preference]);
 
-  // 2. Invocación de Solver de Canasta
+  // 2. Invocación de Solver de Canasta Acoplado
   const optimization = useMemo(() => {
-    return BasketOptimizer.optimize(weeklyPlan.ingredients, budgetCOP);
-  }, [weeklyPlan, budgetCOP]);
+    return BasketOptimizer.optimize({
+      consolidatedIngredients: weeklyPlan.ingredients,
+      budgetCOP,
+      pantryStockIds,
+      zoneId: selectedZoneId
+    });
+  }, [weeklyPlan, budgetCOP, pantryStockIds, selectedZoneId]);
 
   // Formato monetario estricto en pesos colombianos
   const formatCOP = (val) => {
@@ -71,7 +88,7 @@ export function App() {
     }).format(val);
   };
 
-  // Toggle checklist
+  // Toggle checklist de compra
   const toggleItemCheck = (id) => {
     setCheckedItems(prev => ({
       ...prev,
@@ -114,6 +131,10 @@ export function App() {
     ? optimization.multiStore.totalCost 
     : (optimization.monoStores[selectedBasketMode]?.totalCost || 0);
 
+  const activeTrappedCash = selectedBasketMode === 'MULTI'
+    ? optimization.multiStore.totalTrappedCash
+    : (optimization.monoStores[selectedBasketMode]?.totalTrappedCash || 0);
+
   const isWithinBudget = activeCost <= budgetCOP;
 
   // Renderizador de logos oficiales
@@ -132,12 +153,13 @@ export function App() {
 
   // Copiar lista de compras para exportación a mensajería
   const copyShoppingList = () => {
-    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas)\nPresupuesto: ${formatCOP(budgetCOP)} | Total Compra: ${formatCOP(activeCost)}\n\n`;
+    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas | Zona: ${optimization.currentZone.name})\nPresupuesto: ${formatCOP(budgetCOP)} | Desembolso: ${formatCOP(activeCost)}\n\n`;
     Object.entries(groupedBasketByStore).forEach(([storeId, items]) => {
       const storeName = STORES[storeId]?.name || storeId;
       text += `[${storeName.toUpperCase()}]\n`;
       items.forEach(item => {
-        text += `- ${item.productName} (${item.brand}) x ${item.packageUnits} paq (${item.packageSize}${item.unit}): ${formatCOP(item.totalCost)}\n`;
+        const packaging = item.isBulkWeighed ? `(Báscula exacta ${item.totalRequired}${item.unit})` : `(${item.packageUnits} paq x ${item.packageSize}${item.unit})`;
+        text += `- ${item.productName} [${item.brand}] ${packaging}: ${formatCOP(item.totalCost)}\n`;
       });
       text += '\n';
     });
@@ -146,6 +168,9 @@ export function App() {
       setTimeout(() => setCopiedNotification(false), 2500);
     });
   };
+
+  const caliZones = CITIES.CALI.zones;
+  const pantryStapleProducts = ESSENTIAL_PRODUCTS.filter(p => PANTRY_STAPLE_IDS.includes(p.id));
 
   return (
     <div>
@@ -200,8 +225,43 @@ export function App() {
             <div className="panel-header-title">
               <h2>
                 <SlidersHorizontal size={16} />
-                <span>Parámetros del Hogar</span>
+                <span>Parámetros Operativos</span>
               </h2>
+            </div>
+
+            {/* Selector de Zona Urbana de Cali */}
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <MapPin size={13} color="var(--color-brand-emerald)" />
+                  <span>Zona Urbana / Clúster Comercial</span>
+                </span>
+              </div>
+              <select
+                id="select-zone"
+                value={selectedZoneId}
+                onChange={(e) => setSelectedZoneId(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'var(--color-bg-elevated)',
+                  border: '1px solid var(--color-border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--color-text-primary)',
+                  fontSize: '0.8rem',
+                  padding: '0.5rem 0.65rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {caliZones.map(zone => (
+                  <option key={zone.id} value={zone.id}>
+                    {zone.name} (Fricción logística: {formatCOP(zone.frictionCOP)})
+                  </option>
+                ))}
+              </select>
+              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: '0.2rem' }}>
+                {optimization.currentZone.notes}
+              </div>
             </div>
 
             {/* Selector de Comensales */}
@@ -228,7 +288,7 @@ export function App() {
             {/* Selector de Presupuesto Semanal */}
             <div className="form-field-group">
               <div className="field-label-row">
-                <span>Presupuesto Asignado</span>
+                <span>Presupuesto en Efectivo Asignado</span>
                 <span className="field-val-display num-tabular">{formatCOP(budgetCOP)}</span>
               </div>
               <input
@@ -251,6 +311,47 @@ export function App() {
                     ${val / 1000}k COP
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Despensa Preexistente (Insumos que ya tengo en casa) */}
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span>Insumos ya disponibles en casa (Despensa)</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--highlight-text)', fontWeight: 700 }}>
+                  {pantryStockIds.length} marcados
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginTop: '0.2rem' }}>
+                {pantryStapleProducts.map(prod => {
+                  const hasIt = pantryStockIds.includes(prod.id);
+                  return (
+                    <button
+                      key={prod.id}
+                      onClick={() => togglePantryStaple(prod.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        padding: '0.35rem 0.5rem',
+                        borderRadius: 'var(--radius-xs)',
+                        border: '1px solid',
+                        borderColor: hasIt ? 'var(--color-brand-emerald)' : 'var(--color-border-subtle)',
+                        background: hasIt ? 'var(--color-brand-emerald-dim)' : 'var(--color-bg-elevated)',
+                        color: hasIt ? 'var(--highlight-text)' : 'var(--color-text-secondary)',
+                        fontSize: '0.73rem',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <CheckCircle size={12} color={hasIt ? '#10b981' : 'var(--color-text-tertiary)'} />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {prod.name.split(' ')[0]} {prod.name.split(' ')[1] || ''}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -280,15 +381,15 @@ export function App() {
             <div className="panel-kpi-row">
               <div className="kpi-cell">
                 <span className="val highlight num-tabular">{weeklyPlan.days.length * 2}</span>
-                <span className="lbl">Comidas Planificadas</span>
+                <span className="lbl">Raciones Semanales</span>
               </div>
               <div className="kpi-cell">
-                <span className="val num-tabular">{weeklyPlan.ingredients.length}</span>
-                <span className="lbl">SKUs Requeridos</span>
+                <span className="val num-tabular">{activeBasketItems.length}</span>
+                <span className="lbl">SKUs a Comprar</span>
               </div>
               <div className="kpi-cell">
                 <span className="val highlight num-tabular">{formatCOP(activeCost / (weeklyPlan.days.length * 2 * peopleCount))}</span>
-                <span className="lbl">Costo / Plato</span>
+                <span className="lbl">Costo Real / Plato</span>
               </div>
             </div>
           </section>
@@ -297,11 +398,11 @@ export function App() {
           <section className="surface-panel diagnostic-board">
             <div className="board-top-status">
               <div className="headline-wrap">
-                <div className="eyebrow">Diagnóstico Financiero de Canasta (Cali)</div>
+                <div className="eyebrow">Diagnóstico de Liquidez y Asignación ({optimization.currentZone.name})</div>
                 <h2>
                   {isWithinBudget ? (
                     <span style={{ color: 'var(--highlight-text)' }}>
-                      Presupuesto suficiente para 14 raciones semanales
+                      Presupuesto suficiente para las 14 raciones del ciclo
                     </span>
                   ) : (
                     <span style={{ color: '#fbbf24' }}>
@@ -315,9 +416,31 @@ export function App() {
                 {isWithinBudget ? <ShieldCheck size={16} /> : <AlertCircle size={16} />}
                 <span className="num-tabular">
                   {isWithinBudget 
-                    ? `Margen disponible: ${formatCOP(budgetCOP - activeCost)}` 
+                    ? `Margen libre en caja: ${formatCOP(budgetCOP - activeCost)}` 
                     : 'Ajuste requerido'}
                 </span>
+              </div>
+            </div>
+
+            {/* Desglose Analítico de Desembolso vs. Liquidez Atrapada */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Desembolso Total en Caja</div>
+                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
+                  {formatCOP(activeCost)}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Consumo Efectivo de la Semana</div>
+                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
+                  {formatCOP(activeCost - activeTrappedCash)}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Capital Atrapado en Empaques</div>
+                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#d97706' }} className="num-tabular">
+                  {formatCOP(activeTrappedCash)}
+                </div>
               </div>
             </div>
 
@@ -338,7 +461,7 @@ export function App() {
                 </div>
                 <div className="store-metric-price num-tabular">{formatCOP(optimization.multiStore.totalCost)}</div>
                 <div className="store-submetric-note">
-                  Ahorro neto: <strong style={{ color: 'var(--highlight-text)' }}>{formatCOP(optimization.multiStore.netSavings)}</strong>
+                  Ahorro neto deducida fricción: <strong style={{ color: 'var(--highlight-text)' }}>{formatCOP(optimization.multiStore.netSavings)}</strong>
                 </div>
               </div>
 
@@ -354,7 +477,7 @@ export function App() {
                   <span className="store-title-label">Monotienda D1</span>
                 </div>
                 <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.D1.totalCost)}</div>
-                <div className="store-submetric-note">Sin fricción logística</div>
+                <div className="store-submetric-note">Cero fricción logística</div>
               </div>
 
               {/* Monotienda Ara */}
@@ -384,8 +507,8 @@ export function App() {
                   <span className="store-title-label">Grupo Éxito</span>
                 </div>
                 <div className="store-metric-price num-tabular">{formatCOP(optimization.monoStores.EXITO.totalCost)}</div>
-                <div className="store-submetric-note" style={{ color: '#ef4444' }}>
-                  +{formatCOP(optimization.monoStores.EXITO.totalCost - optimization.multiStore.totalCost)} vs. Discounters
+                <div className="store-submetric-note">
+                  Granel exacto en báscula
                 </div>
               </div>
             </div>
@@ -394,7 +517,7 @@ export function App() {
             <div className="friction-analysis-bar">
               <Info size={16} color="var(--color-text-secondary)" />
               <span>
-                <strong>Modelo de Fricción:</strong> Se deduce una penalización fija de $5.000 COP por desplazamiento y costo de tiempo entre tiendas en Cali. El ahorro bruto de comprar en D1 + Ara es de <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>, produciendo un ahorro neto real de <strong>{formatCOP(optimization.multiStore.netSavings)}</strong>.
+                <strong>Fricción Urbana en {optimization.currentZone.name}:</strong> Penalización calculada en <strong>{formatCOP(optimization.currentZone.frictionCOP)}</strong>. Ahorro bruto de comprar en D1 + Ara: <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>. Veredicto: {optimization.multiStore.isWorthIt ? 'Se justifica ampliamente visitar ambas tiendas.' : 'Recomendado compra monotienda por cercanía.'}
               </span>
             </div>
           </section>
@@ -496,7 +619,7 @@ export function App() {
               <div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Lista de Adquisición en Punto de Venta</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>
-                  Estrategia activa: <strong>{selectedBasketMode === 'MULTI' ? 'Asignación Óptima Multitienda' : STORES[selectedBasketMode]?.name}</strong>. Marca los artículos en punto de compra.
+                  Estrategia activa: <strong>{selectedBasketMode === 'MULTI' ? 'Asignación Óptima Multitienda' : STORES[selectedBasketMode]?.name}</strong>. {pantryStockIds.length > 0 && `(${pantryStockIds.length} insumos excluidos por estar en despensa)`}
                 </p>
               </div>
 
@@ -576,15 +699,23 @@ export function App() {
                             <div className="sku-detail-cell">
                               <span className="sku-title">{item.productName}</span>
                               <span className="sku-subtext">
-                                Marca sugerida: <strong>{item.brand}</strong> • Presentación unitaria: {item.packageSize}{item.unit}
+                                Marca: <strong>{item.brand}</strong> • {item.isBulkWeighed ? 'Formato: Granel en báscula' : `Presentación fija: ${item.packageSize}${item.unit}`}
                               </span>
                             </div>
                           </div>
 
                           <div className="procurement-right">
-                            <div className="package-counter-badge num-tabular">
-                              {item.packageUnits} {item.packageUnits === 1 ? 'unidad comercial' : 'unidades comerciales'}
-                            </div>
+                            {item.isBulkWeighed ? (
+                              <div className="package-counter-badge num-tabular" style={{ background: 'rgba(202, 138, 4, 0.15)', color: '#ca8a04' }}>
+                                <Scale size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                {item.totalRequired} {item.unit} exactos
+                              </div>
+                            ) : (
+                              <div className="package-counter-badge num-tabular">
+                                {item.packageUnits} {item.packageUnits === 1 ? 'empaque cerrado' : 'empaques cerrados'}
+                              </div>
+                            )}
+
                             <div className="sku-cost-display num-tabular">
                               {formatCOP(item.totalCost)}
                             </div>
@@ -608,10 +739,10 @@ export function App() {
             <div style={{ marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <PackageSearch size={18} color="#d97706" />
-                <span>Inventario Residual por Empaque Indivisible</span>
+                <span>Auditoría de Despensa Residual y Liquidez Retenida</span>
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                En el canal retail los alimentos se adquieren en formatos comerciales estandarizados (1.000g, 900ml, 30 huevos). Las cantidades no consumidas por el menú quedan como inventario activo de despensa para la semana siguiente:
+                Como en D1 y Ara los alimentos se adquieren en formatos sellados cerrados (1.000g, 900ml, 30 huevos), el sobrante representa capital temporalmente retenido. Si el usuario cuenta con liquidez justa, estos insumos deben rotarse intensivamente:
               </p>
             </div>
 
@@ -622,10 +753,10 @@ export function App() {
                   <div key={item.productId} className="residual-tile">
                     <span className="residual-title">{item.productName}</span>
                     <span className="residual-formula">
-                      Requerimiento semanal: {item.totalRequired} {item.unit} | Adquirido: {item.totalPurchasedAmount} {item.unit}
+                      Requerimiento semanal: {item.totalRequired} {item.unit} | Empaque adquirido: {item.totalPurchasedAmount} {item.unit}
                     </span>
                     <span className="residual-stock num-tabular">
-                      + {item.pantrySurplus.toFixed(1)} {item.unit} disponibles en despensa
+                      + {item.pantrySurplus.toFixed(1)} {item.unit} sobrantes ({formatCOP(item.trappedCash)} retenidos)
                     </span>
                   </div>
                 ))}
@@ -640,7 +771,7 @@ export function App() {
               <div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Registro de Precios y Normalización de Catálogo</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un).
+                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un) y modalidad de báscula.
                 </p>
               </div>
 
@@ -662,6 +793,7 @@ export function App() {
                   <tr>
                     <th>Canal / Retailer</th>
                     <th>Producto / Marca Comercial</th>
+                    <th>Modalidad Venta</th>
                     <th>Formato Empaque</th>
                     <th>Precio Nominal COP</th>
                     <th>Valor Normalizado</th>
@@ -685,6 +817,11 @@ export function App() {
                         <td>
                           <strong>{prod?.name || row.productId}</strong>
                           <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>{row.brand}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.72rem', color: row.isBulkWeighed ? '#ca8a04' : 'var(--color-text-secondary)' }}>
+                            {row.isBulkWeighed ? 'Granel (Báscula)' : 'Empaque sellado'}
+                          </span>
                         </td>
                         <td className="num-tabular">{row.packageSize} {row.unit}</td>
                         <td className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
