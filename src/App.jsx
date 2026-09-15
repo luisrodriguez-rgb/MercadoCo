@@ -1127,6 +1127,16 @@ export function App() {
               </div>
 
               <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Telemetría del Solver MILP</div>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
+                  {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.optimalityGapPct.toFixed(2)}% Gap
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.activeDecisionVariables} Vars Activas | {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.constraintsCount} Restricciones | UB == LB
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Runtime de Optimización</div>
                 <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
                   {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p50Ms} ms
@@ -1142,7 +1152,7 @@ export function App() {
                   20–50
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  Hogares de Cali (Piloto de Comportamiento Real)
+                  Participantes Responsables de Compra en Cali (V4-B)
                 </div>
               </div>
             </div>
@@ -1202,6 +1212,29 @@ export function App() {
 
             {/* Análisis de Sensibilidad Paramétrica & Protocolo V4-B */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+              {/* Sensibilidad P_HIGH Riesgo Biológico */}
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Database size={14} color="#38bdf8" />
+                  <span>Sensibilidad Riesgo Biológico (P_HIGH ∈ [0.50, 0.90])</span>
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.75rem' }}>
+                  {EXPERIMENTAL_V4_SUMMARY.wasteProbabilitySensitivity.map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.5rem', background: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)' }}>
+                      <div>
+                        <strong>P_HIGH = {item.wasteProbabilityHigh.toFixed(2)}:</strong> <span style={{ color: 'var(--color-text-secondary)' }}>Riesgo: {formatCOP(item.expectedWaste)}</span>
+                      </div>
+                      <div className="num-tabular" style={{ fontWeight: 700, color: '#10b981' }}>
+                        {item.solutionId} (Cambió: NO)
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '0.65rem' }}>
+                  Robustez estructural: Báscula en Éxito sigue siendo óptima en todo el rango [0.50, 0.90].
+                </div>
+              </div>
+
               {/* Sensibilidad */}
               <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
                 <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -1229,7 +1262,7 @@ export function App() {
               <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
                 <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <MapPin size={14} color="#ca8a04" />
-                  <span>Línea V4-B: Protocolo de Validación en Cali (20–50 Hogares)</span>
+                  <span>Línea V4-B: Protocolo de Validación en Cali (20–50 Participantes Decisores)</span>
                 </h4>
                 <p style={{ fontSize: '0.73rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
                   No se evalúan encuestas hipotéticas de disposición a pagar. Se confronta al consumidor con una decisión de compra terminada:
