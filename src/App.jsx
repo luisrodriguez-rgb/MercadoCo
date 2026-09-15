@@ -3,7 +3,7 @@ import { MealPlanService } from './application/MealPlanService.js';
 import { BasketOptimizer } from './application/BasketOptimizer.js';
 import { PRICES_CALI } from './data/prices_cali.js';
 import { ESSENTIAL_PRODUCTS } from './data/products.js';
-import { STORES, CONFIDENCE_LEVELS, CITIES, PANTRY_STAPLE_IDS } from './domain/types.js';
+import { STORES, CONFIDENCE_LEVELS, CITIES, PANTRY_STAPLE_IDS, TRANSPORT_MODES } from './domain/types.js';
 import { LogoD1, LogoAra, LogoExito, FlagColombia } from './ui/StoreLogos.jsx';
 import { 
   SlidersHorizontal, 
@@ -27,7 +27,13 @@ import {
   Moon,
   MapPin,
   CheckCircle,
-  Scale
+  Scale,
+  Car,
+  Footprints,
+  Bus,
+  Bike,
+  HelpCircle,
+  ShieldAlert
 } from 'lucide-react';
 
 export function App() {
@@ -50,8 +56,9 @@ export function App() {
   const [budgetCOP, setBudgetCOP] = useState(220000);
   const [preference, setPreference] = useState('BALANCEADO');
   const [selectedZoneId, setSelectedZoneId] = useState('CALI_GRANADA_VERSALLES');
+  const [selectedTransportModeId, setSelectedTransportModeId] = useState('WALKING');
   const [pantryStockIds, setPantryStockIds] = useState(['prod_sal_refinada', 'prod_aceite_vegetal']);
-  const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'basket' | 'pantry' | 'prices'
+  const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'basket' | 'explainability' | 'pantry' | 'prices'
   const [selectedBasketMode, setSelectedBasketMode] = useState('MULTI'); // 'MULTI' | 'D1' | 'ARA' | 'EXITO'
   const [checkedItems, setCheckedItems] = useState({});
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
@@ -69,15 +76,16 @@ export function App() {
     return MealPlanService.generateWeeklyPlan({ peopleCount, budgetCOP, preference });
   }, [peopleCount, budgetCOP, preference]);
 
-  // 2. Invocación de Solver de Canasta Acoplado
+  // 2. Invocación de Solver de Canasta V2 Acoplado
   const optimization = useMemo(() => {
     return BasketOptimizer.optimize({
       consolidatedIngredients: weeklyPlan.ingredients,
       budgetCOP,
       pantryStockIds,
-      zoneId: selectedZoneId
+      zoneId: selectedZoneId,
+      transportModeId: selectedTransportModeId
     });
-  }, [weeklyPlan, budgetCOP, pantryStockIds, selectedZoneId]);
+  }, [weeklyPlan, budgetCOP, pantryStockIds, selectedZoneId, selectedTransportModeId]);
 
   // Formato monetario estricto en pesos colombianos
   const formatCOP = (val) => {
@@ -131,9 +139,17 @@ export function App() {
     ? optimization.multiStore.totalCost 
     : (optimization.monoStores[selectedBasketMode]?.totalCost || 0);
 
-  const activeTrappedCash = selectedBasketMode === 'MULTI'
-    ? optimization.multiStore.totalTrappedCash
-    : (optimization.monoStores[selectedBasketMode]?.totalTrappedCash || 0);
+  const activeFutureInventory = selectedBasketMode === 'MULTI'
+    ? optimization.multiStore.totalFutureInventory
+    : (optimization.monoStores[selectedBasketMode]?.totalFutureInventory || 0);
+
+  const activeWasteRisk = selectedBasketMode === 'MULTI'
+    ? optimization.multiStore.totalWasteRisk
+    : (optimization.monoStores[selectedBasketMode]?.totalWasteRisk || 0);
+
+  const activeConfidence = selectedBasketMode === 'MULTI'
+    ? optimization.multiStore.averageConfidence
+    : (optimization.monoStores[selectedBasketMode]?.averageConfidence || 0);
 
   const isWithinBudget = activeCost <= budgetCOP;
 
@@ -153,12 +169,12 @@ export function App() {
 
   // Copiar lista de compras para exportación a mensajería
   const copyShoppingList = () => {
-    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas | Zona: ${optimization.currentZone.name})\nPresupuesto: ${formatCOP(budgetCOP)} | Desembolso: ${formatCOP(activeCost)}\n\n`;
+    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas | Zona: ${optimization.currentZone.name})\nPresupuesto: ${formatCOP(budgetCOP)} | Desembolso en caja: ${formatCOP(activeCost)}\n\n`;
     Object.entries(groupedBasketByStore).forEach(([storeId, items]) => {
       const storeName = STORES[storeId]?.name || storeId;
       text += `[${storeName.toUpperCase()}]\n`;
       items.forEach(item => {
-        const packaging = item.isBulkWeighed ? `(Báscula exacta ${item.totalRequired}${item.unit})` : `(${item.packageUnits} paq x ${item.packageSize}${item.unit})`;
+        const packaging = item.packagingType === 'EXACT_WEIGHT' ? `(Báscula exacta ${item.totalRequired}${item.unit})` : `(${item.packageUnits} paq x ${item.packageSize}${item.unit})`;
         text += `- ${item.productName} [${item.brand}] ${packaging}: ${formatCOP(item.totalCost)}\n`;
       });
       text += '\n';
@@ -170,6 +186,7 @@ export function App() {
   };
 
   const caliZones = CITIES.CALI.zones;
+  const transportModesList = Object.values(TRANSPORT_MODES);
   const pantryStapleProducts = ESSENTIAL_PRODUCTS.filter(p => PANTRY_STAPLE_IDS.includes(p.id));
 
   return (
@@ -185,7 +202,7 @@ export function App() {
               <h1>
                 <span>Mercado Colombia</span>
               </h1>
-              <div className="brand-tagline">Sistema de Optimización Presupuestal y Planificación de Menú</div>
+              <div className="brand-tagline">Sistema de Optimización Presupuestal y Planificación de Menú (V2)</div>
             </div>
           </div>
 
@@ -255,12 +272,43 @@ export function App() {
               >
                 {caliZones.map(zone => (
                   <option key={zone.id} value={zone.id}>
-                    {zone.name} (Fricción logística: {formatCOP(zone.frictionCOP)})
+                    {zone.name} ({zone.baseDistanceKm} km radio)
                   </option>
                 ))}
               </select>
               <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: '0.2rem' }}>
                 {optimization.currentZone.notes}
+              </div>
+            </div>
+
+            {/* Selector de Medio de Transporte para Cálculo Paramétrico de Fricción */}
+            <div className="form-field-group">
+              <div className="field-label-row">
+                <span>Modo de Desplazamiento (Fricción F)</span>
+                <span className="field-val-display num-tabular" style={{ fontSize: '0.78rem', color: 'var(--highlight-text)' }}>
+                  F = {formatCOP(optimization.multiStore.frictionPenaltyCOP)}
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem' }}>
+                {transportModesList.map(mode => (
+                  <button
+                    key={mode.id}
+                    onClick={() => setSelectedTransportModeId(mode.id)}
+                    style={{
+                      padding: '0.4rem 0.5rem',
+                      borderRadius: 'var(--radius-xs)',
+                      border: '1px solid',
+                      borderColor: selectedTransportModeId === mode.id ? 'var(--color-brand-emerald)' : 'var(--color-border-subtle)',
+                      background: selectedTransportModeId === mode.id ? 'var(--color-brand-emerald-dim)' : 'var(--color-bg-elevated)',
+                      color: selectedTransportModeId === mode.id ? 'var(--highlight-text)' : 'var(--color-text-secondary)',
+                      fontSize: '0.72rem',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {mode.name}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -317,9 +365,9 @@ export function App() {
             {/* Despensa Preexistente (Insumos que ya tengo en casa) */}
             <div className="form-field-group">
               <div className="field-label-row">
-                <span>Insumos ya disponibles en casa (Despensa)</span>
+                <span>Insumos ya en casa (Despensa preexistente)</span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--highlight-text)', fontWeight: 700 }}>
-                  {pantryStockIds.length} marcados
+                  {pantryStockIds.length} activos
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginTop: '0.2rem' }}>
@@ -412,35 +460,53 @@ export function App() {
                 </h2>
               </div>
 
-              <div className={`badge-verdict ${isWithinBudget ? 'in-budget' : 'deficit'}`}>
-                {isWithinBudget ? <ShieldCheck size={16} /> : <AlertCircle size={16} />}
-                <span className="num-tabular">
-                  {isWithinBudget 
-                    ? `Margen libre en caja: ${formatCOP(budgetCOP - activeCost)}` 
-                    : 'Ajuste requerido'}
-                </span>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {/* Badge de Confianza de Precios */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
+                  <ShieldCheck size={14} color="#10b981" />
+                  <span>Confianza del Catálogo: <strong className="num-tabular" style={{ color: 'var(--highlight-text)' }}>{(activeConfidence * 100).toFixed(1)}%</strong></span>
+                </div>
+
+                <div className={`badge-verdict ${isWithinBudget ? 'in-budget' : 'deficit'}`}>
+                  {isWithinBudget ? <Check size={14} /> : <AlertCircle size={14} />}
+                  <span className="num-tabular">
+                    {isWithinBudget 
+                      ? `Caja libre: ${formatCOP(budgetCOP - activeCost)}` 
+                      : 'Ajuste requerido'}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Desglose Analítico de Desembolso vs. Liquidez Atrapada */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
+            {/* Desglose Analítico Riguroso: Desembolso vs Consumo vs Inventario Útil vs Desperdicio */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Desembolso Total en Caja</div>
-                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Desembolso Total en Caja</div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
                   {formatCOP(activeCost)}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Salida bruta de bolsillo</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Consumo Efectivo de la Semana</div>
-                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
-                  {formatCOP(activeCost - activeTrappedCash)}
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Consumo Efectivo Semanal</div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
+                  {formatCOP(activeCost - (activeFutureInventory + activeWasteRisk))}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>14 servicios ingeridos</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Capital Atrapado en Empaques</div>
-                <div style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#d97706' }} className="num-tabular">
-                  {formatCOP(activeTrappedCash)}
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Inventario Útil Futuro</div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#38bdf8' }} className="num-tabular">
+                  {formatCOP(activeFutureInventory)}
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Arroz, aceite, legumbres</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Riesgo de Desperdicio</div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: activeWasteRisk > 0 ? '#ef4444' : 'var(--color-text-secondary)' }} className="num-tabular">
+                  {formatCOP(activeWasteRisk)}
+                </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Perecederos sobrantes</div>
               </div>
             </div>
 
@@ -513,11 +579,11 @@ export function App() {
               </div>
             </div>
 
-            {/* Análisis de Fricción de Desplazamiento */}
+            {/* Análisis de Fricción Paramétrica */}
             <div className="friction-analysis-bar">
               <Info size={16} color="var(--color-text-secondary)" />
               <span>
-                <strong>Fricción Urbana en {optimization.currentZone.name}:</strong> Penalización calculada en <strong>{formatCOP(optimization.currentZone.frictionCOP)}</strong>. Ahorro bruto de comprar en D1 + Ara: <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>. Veredicto: {optimization.multiStore.isWorthIt ? 'Se justifica ampliamente visitar ambas tiendas.' : 'Recomendado compra monotienda por cercanía.'}
+                <strong>Fricción Paramétrica ({optimization.transportMode.name}):</strong> Costo imputado de <strong>{formatCOP(optimization.multiStore.frictionPenaltyCOP)}</strong> (transporte + valor tiempo en {optimization.currentZone.name}). Ahorro bruto multitienda: <strong>{formatCOP(optimization.multiStore.grossSavings)}</strong>. Veredicto: {optimization.multiStore.isWorthIt ? 'El beneficio en caja supera con creces el costo de desplazamiento.' : 'Se aconseja monotienda para evitar fricción innecesaria.'}
               </span>
             </div>
           </section>
@@ -531,7 +597,7 @@ export function App() {
             onClick={() => setActiveTab('menu')}
           >
             <CalendarDays size={16} />
-            <span>1. Planificación Semanal (Lunes a Domingo)</span>
+            <span>1. Planificación Semanal (14 Servicios)</span>
           </button>
 
           <button 
@@ -544,12 +610,21 @@ export function App() {
           </button>
 
           <button 
+            id="tab-explainability"
+            className={`tab-trigger ${activeTab === 'explainability' ? 'active' : ''}`}
+            onClick={() => setActiveTab('explainability')}
+          >
+            <HelpCircle size={16} />
+            <span>3. Explicabilidad ("¿Por qué estas tiendas?")</span>
+          </button>
+
+          <button 
             id="tab-pantry"
             className={`tab-trigger ${activeTab === 'pantry' ? 'active' : ''}`}
             onClick={() => setActiveTab('pantry')}
           >
             <PackageSearch size={16} />
-            <span>3. Auditoría de Despensa Residual</span>
+            <span>4. Auditoría de Despensa e Inventario</span>
           </button>
 
           <button 
@@ -558,7 +633,7 @@ export function App() {
             onClick={() => setActiveTab('prices')}
           >
             <Database size={16} />
-            <span>4. Registro de Precios Normalizados (Cali)</span>
+            <span>5. Registro de Precios Normalizados (Cali)</span>
           </button>
         </nav>
 
@@ -699,13 +774,13 @@ export function App() {
                             <div className="sku-detail-cell">
                               <span className="sku-title">{item.productName}</span>
                               <span className="sku-subtext">
-                                Marca: <strong>{item.brand}</strong> • {item.isBulkWeighed ? 'Formato: Granel en báscula' : `Presentación fija: ${item.packageSize}${item.unit}`}
+                                Marca: <strong>{item.brand}</strong> • {item.packagingType === 'EXACT_WEIGHT' ? 'Formato: Granel exacto en báscula' : `Presentación fija: ${item.packageSize}${item.unit}`}
                               </span>
                             </div>
                           </div>
 
                           <div className="procurement-right">
-                            {item.isBulkWeighed ? (
+                            {item.packagingType === 'EXACT_WEIGHT' ? (
                               <div className="package-counter-badge num-tabular" style={{ background: 'rgba(202, 138, 4, 0.15)', color: '#ca8a04' }}>
                                 <Scale size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
                                 {item.totalRequired} {item.unit} exactos
@@ -733,45 +808,89 @@ export function App() {
           </div>
         )}
 
-        {/* PESTAÑA 3: AUDITORIA DE DESPENSA RESIDUAL */}
+        {/* PESTAÑA 3: MOTOR DE EXPLICABILIDAD ("¿Por qué estas tiendas?") */}
+        {activeTab === 'explainability' && (
+          <div className="surface-panel">
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <HelpCircle size={18} color="var(--color-brand-emerald)" />
+                <span>Racionalidad de la Asignación Multitienda</span>
+              </h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                El optimizador no compara precios en abstracto. Explica transparentemente qué ventaja financiera u operativa motivó la asignación de cada SKU frente a la tienda alternativa más cercana:
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '0.85rem' }}>
+              {optimization.multiStore.explanations.map((exp, idx) => (
+                <div key={idx} style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{exp.productName}</span>
+                    <span style={{ fontSize: '0.72rem', background: 'var(--color-brand-emerald-dim)', color: 'var(--highlight-text)', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
+                      {exp.assignedStore}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                    {exp.reason}
+                  </div>
+                  {exp.savingsVsRunnerUp > 0 && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--highlight-text)', fontWeight: 600, marginTop: '0.15rem' }}>
+                      Ahorro marginal: {formatCOP(exp.savingsVsRunnerUp)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA 4: AUDITORIA DE DESPENSA RESIDUAL */}
         {activeTab === 'pantry' && (
           <div className="surface-panel">
             <div style={{ marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <PackageSearch size={18} color="#d97706" />
-                <span>Auditoría de Despensa Residual y Liquidez Retenida</span>
+                <span>Auditoría de Despensa Residual y Clasificación de Inventario</span>
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                Como en D1 y Ara los alimentos se adquieren en formatos sellados cerrados (1.000g, 900ml, 30 huevos), el sobrante representa capital temporalmente retenido. Si el usuario cuenta con liquidez justa, estos insumos deben rotarse intensivamente:
+                Diferenciación estricta entre <strong>Inventario Útil Futuro</strong> (granos, aceite, legumbres que no perecen) y <strong>Riesgo de Desperdicio</strong> (hortalizas perecederas con riesgo de pérdida si sobran):
               </p>
             </div>
 
             <div className="residual-grid">
               {activeBasketItems
                 .filter(item => item.pantrySurplus > 0)
-                .map(item => (
-                  <div key={item.productId} className="residual-tile">
-                    <span className="residual-title">{item.productName}</span>
-                    <span className="residual-formula">
-                      Requerimiento semanal: {item.totalRequired} {item.unit} | Empaque adquirido: {item.totalPurchasedAmount} {item.unit}
-                    </span>
-                    <span className="residual-stock num-tabular">
-                      + {item.pantrySurplus.toFixed(1)} {item.unit} sobrantes ({formatCOP(item.trappedCash)} retenidos)
-                    </span>
-                  </div>
-                ))}
+                .map(item => {
+                  const isWasteRisk = item.expectedWasteRisk > 0;
+                  return (
+                    <div key={item.productId} className="residual-tile" style={{ borderLeft: `3px solid ${isWasteRisk ? '#ef4444' : '#38bdf8'}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="residual-title">{item.productName}</span>
+                        <span style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: isWasteRisk ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)', color: isWasteRisk ? '#ef4444' : '#38bdf8', fontWeight: 700 }}>
+                          {isWasteRisk ? 'Riesgo Desperdicio' : 'Inventario Útil'}
+                        </span>
+                      </div>
+                      <span className="residual-formula">
+                        Demanda semanal: {item.totalRequired} {item.unit} | Empaque: {item.totalPurchasedAmount} {item.unit}
+                      </span>
+                      <span className="residual-stock num-tabular" style={{ color: isWasteRisk ? '#ef4444' : '#38bdf8' }}>
+                        + {item.pantrySurplus.toFixed(1)} {item.unit} sobrantes ({formatCOP(item.surplusValue)})
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}
 
-        {/* PESTAÑA 4: REGISTRO DE PRECIOS NORMALIZADOS */}
+        {/* PESTAÑA 5: REGISTRO DE PRECIOS NORMALIZADOS */}
         {activeTab === 'prices' && (
           <div className="surface-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Registro de Precios y Normalización de Catálogo</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un) y modalidad de báscula.
+                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un), tipo de empaque y confidence score.
                 </p>
               </div>
 
@@ -797,7 +916,7 @@ export function App() {
                     <th>Formato Empaque</th>
                     <th>Precio Nominal COP</th>
                     <th>Valor Normalizado</th>
-                    <th>Confianza / Vigencia</th>
+                    <th>Auditoría / Confianza</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -819,8 +938,8 @@ export function App() {
                           <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>{row.brand}</div>
                         </td>
                         <td>
-                          <span style={{ fontSize: '0.72rem', color: row.isBulkWeighed ? '#ca8a04' : 'var(--color-text-secondary)' }}>
-                            {row.isBulkWeighed ? 'Granel (Báscula)' : 'Empaque sellado'}
+                          <span style={{ fontSize: '0.72rem', color: row.packagingType === 'EXACT_WEIGHT' ? '#ca8a04' : 'var(--color-text-secondary)' }}>
+                            {row.packagingType === 'EXACT_WEIGHT' ? 'Granel (Báscula exacta)' : 'Empaque sellado discreto'}
                           </span>
                         </td>
                         <td className="num-tabular">{row.packageSize} {row.unit}</td>
@@ -831,9 +950,14 @@ export function App() {
                           ${row.pricePerUnit.toFixed(2)} COP/{row.unit}
                         </td>
                         <td>
-                          <span className={CONFIDENCE_LEVELS[row.confidence]?.badgeClass || 'badge-recent'}>
-                            {CONFIDENCE_LEVELS[row.confidence]?.label || 'Verificado'}
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span className={CONFIDENCE_LEVELS[row.confidence]?.badgeClass || 'badge-recent'}>
+                              {CONFIDENCE_LEVELS[row.confidence]?.label || 'Verificado'}
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>
+                              Score: {(row.confidenceScore * 100).toFixed(0)}%
+                            </span>
+                          </div>
                         </td>
                       </tr>
                     );
