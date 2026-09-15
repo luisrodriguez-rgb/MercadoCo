@@ -1,143 +1,160 @@
 # Protocolo de Validación Humana y Comportamiento de Compra (Cali) — V4-B
 
 > **Línea Paralela V4-B:** "¿La gente realmente cambiaría su comportamiento semanal por esta solución?"  
-> **Ámbito Geográfico:** Santiago de Cali, Colombia.  
-> **Muestra Objetivo:** 20 a 50 hogares (individuos y parejas de 1 a 2 comensales con presupuesto semanal asignado).
+> **Ámbito Geográfico:** Santiago de Cali, Valle del Cauca, Colombia.  
+> **Unidad Observacional:** **20 a 50 participantes responsables directos de la compra del hogar** (personas que planifican, seleccionan, pagan o cocinan el mercado semanal).
 
 ---
 
-## 1. Justificación Metodológica: Comportamiento Real vs. Intención Hipotética
+## 1. Justificación Metodológica: Comportamiento Observado vs. Intención Declarada
 
-La investigación de mercado evidencia que preguntar directamente *"¿Pagarías $9.900 COP al mes por una app?"* produce sesgos severos de complacencia que no predicen la conversión.
+Preguntar en abstracto *"¿Pagarías por una app que compare supermercados?"* genera un sesgo severo de deseabilidad social que no predice la adopción.
 
-En la **Línea V4-B**, la validación se estructura a partir de:
-1. **Auditoría retrospectiva del comportamiento real:** Cómo mercó el usuario la semana pasada.
-2. **Confrontación empírica con una salida de decisión terminada:** Mostrar una orden de compra concreta y observar la reacción operativa.
-3. **Identificación de fricciones de adopción:** Qué objeción impediría ejecutar el plan (distancia entre tiendas, marcas propias de hard discount, recetas desconocidas).
-
----
-
-## 2. Hipótesis Central de Mercado
-
-$$\boxed{\text{Presupuesto Semanal} \longrightarrow \text{Plan de Comidas (14 Raciones)} \longrightarrow \text{Canasta Multitienda Óptima}}$$
-
-> **La promesa no es "comparar precios de productos aislados"** (problema ya abordado por Beeep, Price It y MercApp).  
-> **La promesa es resolver la decisión completa de abastecimiento:** convertir un presupuesto fijo en qué cocinar, qué comprar y dónde comprarlo minimizando el desembolso en caja.
+En la **Línea V4-B**, la validación se estructura bajo un protocolo cuasi-experimental estricto:
+1. **Separación temporal de mediciones:**
+   - **Antes de mostrar la solución:** Registrar la **Preferencia Declarada** ($Preference_{\text{declared}}$) sobre las propuestas de valor (Ahorro vs. Conveniencia vs. Cero Desperdicio).
+   - **Después de mostrar la solución concreta:** Registrar la **Aceptación Observada** ($Acceptance_{\text{observed}}$) y la decisión de compra real frente a la lista y ruta detalladas.
+2. **Medición del Desplazamiento Conductual ($BehavioralShift$):**
+   $$BehavioralShift = Acceptance_{\text{observed}} - Preference_{\text{declared}}$$
+3. **Auditoría retrospectiva del hábito real:** Cómo mercó el participante la semana anterior (presupuesto mental vs. tirilla de caja).
+4. **Calibración empírica de la fricción:** Medir la tolerancia monetaria a realizar una segunda parada comercial.
 
 ---
 
-## 3. Protocolo de Entrevista Cualitativa (Guion Estructurado)
+## 2. Caracterización del Participante
 
-### Bloque 1: Diagnóstico de Hábitos Actuales
-1. *"Descríbeme paso a paso cómo hiciste tu último mercado semanal."*
-   - ¿Qué día fuiste? ¿Fuiste solo o acompañado?
-   - ¿A qué supermercados fuiste (D1, Ara, Éxito, galería/plaza, tienda de barrio)?
-2. *"¿Llevabas una lista previa o decidiste en el pasillo?"*
+Cada entrevista registra obligatoriamente:
+* **`participantRole`**: Rol decisorio en el hogar (Decisor único / Comprador ejecutor / Cocinero / Financiador).
+* **`householdSize`**: Número de personas que consumen los alimentos comprados.
+* **`weeklyBudget`**: Presupuesto semanal asignado o estimado ($ COP).
+* **`mainStores`**: Supermercados o canales habituales (D1, Ara, Éxito, La 14/Comfandi, Galerías Alameda/Santa Elena, Tienda de barrio).
+* **`shoppingFrequency`**: Frecuencia de abastecimiento (Semanal, Quincenal, Diario por puchos).
+
+---
+
+## 3. Protocolo de Entrevista Cualitativa (Guion en 4 Bloques)
+
+### Bloque 1: Diagnóstico Retrospectivo de Hábitos
+1. *"Descríbeme paso a paso cómo hiciste tu última compra de mercado semanal."*
+   - ¿Qué día fuiste? ¿A cuántas tiendas fuiste? ¿En qué medio de transporte te movilizaste?
+2. *"¿Llevabas una lista escrita, una idea mental o decidiste recorriendo las góndolas?"*
 3. *"¿Tenías un presupuesto límite en mente antes de salir de casa?"*
-   - ¿Cuánto presupuestaste y cuánto terminó marcando la tirilla de caja?
-4. *"¿Qué fue lo más frustrante, desgastante o difícil de todo el proceso?"*
-   - (Explorar: no saber qué cocinar, sentir que la plata no alcanzó, tiempo invertido, comida que se dañó en la nevera).
+   - ¿Cuánto pensabas gastar y cuánto terminó sumando la cuenta final?
+4. *"¿Qué fue lo más desgastante o frustrante de todo el proceso?"*
+   - (Explorar: indecisión sobre qué cocinar, comida dañada en el cajón de la nevera, dinero que no alcanzó).
 
 ---
 
-### Bloque 2: Confrontación con la Decisión de Compra Real
+### Bloque 2: Medición de Preferencia Declarada (Antes de ver la solución)
+5. *"Si tuvieras una herramienta que te ayude con el mercado semanal, ¿cuál de estas tres cosas sería la más valiosa para ti?"*
+   - **Opción A (Ahorro Puro):** *"Pagar lo mínimo posible combinando las tiendas de mi barrio."*
+   - **Opción B (Conveniencia y Carga Mental):** *"No tener que pensar qué cocinar cada día y recibir la lista lista."*
+   - **Opción C (Optimización y Cero Desperdicio):** *"Comprar las cantidades exactas para que no se me pudra nada en la nevera."*
+   *(Registrar respuesta como $Preference_{\text{declared}}$)*.
 
-El entrevistador no explica el algoritmo ni menciona "inteligencia artificial". Muestra en pantalla o en tarjeta impresa la siguiente ficha de decisión adaptada al presupuesto del entrevistado:
+---
+
+### Bloque 3: Confrontación con la Decisión de Compra Concreta
+El entrevistador no explica algoritmos, grafos ni formulaciones matemáticas. Presenta la ficha de decisión terminada adaptada al presupuesto del participante (ejemplo para 2 personas, $180.000 COP, Cali):
 
 ```text
 ======================================================================
-MERCADO COLOMBIA — TU PLAN SEMANAL (CALI)
-Presupuesto asignado: $200.000 COP | 2 personas | 7 días (14 servicios)
+MERCADO COLOMBIA — TU PLAN SEMANAL AUDITADO (CALI)
+Presupuesto: $180.000 COP | 2 comensales | 7 días (14 comidas completas)
 ======================================================================
 
-MENÚ SUGERIDO:
-• Almuerzos: Pollo sudado, lentejas con arroz y huevo, pasta bolognesa, etc.
-• Cenas: Omelette con hogao, atún con ensalada fresca, sándwich campesino.
+MENÚ SEMANAL PLANIFICADO (14 SERVICIOS):
+• Almuerzos: Pechuga a la plancha con arroz y ensalada fresca,
+             Lentejas caseras con huevo frito y plátano,
+             Carne molida sudada con papa y hogao, etc.
+• Cenas:     Omelette de queso con arepa, sándwich de atún,
+             Crema de verduras con huevo cocido.
 
-TU RUTA DE COMPRAS ÓPTIMA:
+RUTA DE COMPRA SUGERIDA (2 PUNTOS DE VENTA):
 ──────────────────────────────────────────────────────────────────────
-TIENDA 1: TIENDAS ARA (Barrio Granada) — 6 Productos
+PARADA 1: TIENDAS ARA (Abarrotes y Proteínas Selladas) — 6 Productos
 • Arroz blanco 1 kg ($3.890)
 • Huevos rojos AA x 30 ($15.900)
 • Lentejas 500g ($3.450)
 • Atún lomitos x 2 latas ($10.980)
-• Tomate chonto 1 kg ($4.200)
-• Aceite vegetal 900 ml ($8.500)
-Subtotal Ara: $46.920 COP
-──────────────────────────────────────────────────────────────────────
-TIENDA 2: TIENDAS D1 (Barrio Granada) — 7 Productos
-• Pechuga de pollo congelada 1 kg ($14.990)
-• Carne molida especial 500g ($9.990)
-• Leche entera 1L x 3 ($11.700)
-• Cebolla cabezona 1 kg ($3.200)
-• Plátano maduro x 3 ($3.600)
+• Leche entera x 3 bolsas ($11.700)
 • Sal refinada 1 kg ($1.850)
-• Café molido 250g ($5.990)
-Subtotal D1: $51.320 COP
+Subtotal Ara: $47.770 COP
 ──────────────────────────────────────────────────────────────────────
-BALANCE FINANCIERO:
-• Desembolso Total en Caja: $98.240 COP
-• Costo Estimado de Desplazamiento (Fricción): $1.200 COP
-• Ahorro Neto vs. Comprar todo en una sola tienda: $16.480 COP
-• Dinero que te queda libre en el bolsillo: $100.560 COP
-• Riesgo de desperdicio de perecederos: $0 COP
+PARADA 2: GRUPO ÉXITO (Báscula Exacta en Hortalizas) — 5 Productos
+• Pechuga de pollo granel 800g ($12.400)
+• Carne molida res 500g ($9.990)
+• Tomate chonto en báscula 650g ($2.730 - evita bolsa sellada de 1 kg)
+• Cebolla cabezona en báscula 500g ($1.600)
+• Plátano maduro 3 unidades ($3.600)
+Subtotal Éxito: $30.320 COP
+──────────────────────────────────────────────────────────────────────
+BALANCE FINANCIERO Y CONTROL DE DESPERDICIO:
+• Desembolso Total en Caja: $78.090 COP
+• Desplazamiento adicional entre tiendas (Fricción): $1.531 COP (4 cuadras)
+• Dinero que te queda libre en el bolsillo: $100.379 COP
+• Ahorro neto real vs. comprar todo en una sola tienda: $16.480 COP
+• Excedente con riesgo de descomposición en nevera: $0 COP
 ======================================================================
 ```
 
----
+6. *"Mirando esta lista y esta asignación exacta: ¿Harías esta compra tal cual está planteada para tu semana?"*
+   - [ ] SÍ (Acepta)
+   - [ ] CON MODIFICACIONES (Indicar cuáles)
+   - [ ] NO (Rechaza — Explicar por qué)
+   *(Registrar como $Acceptance_{\text{observed}}$)*.
 
-### Bloque 3: Preguntas de Comportamiento Crítico
-
-5. *"Mirando esta lista y esta distribución de tiendas: ¿Harías esta compra tal cual está planificada?"*
-   - Si la respuesta es **SÍ**: *"¿Qué es lo que más te convence de hacerlo así?"*
-   - Si la respuesta es **NO** o **DUDOSO**: *"¿Qué tendría que cambiar exactamente para que sí la hicieras?"*
-6. *"Si tuvieras que caminar 4 cuadras adicionales entre el Ara y el D1 para ahorrarte esos $16.480 COP netos, ¿lo harías o preferirías pagar más en una sola tienda?"*
-   - (Determina la elasticidad de la fricción logística $F$ frente al ahorro marginal).
-7. *"¿Te genera desconfianza alguna de las marcas propias mostradas (ej. marcas de D1 o Ara) frente a marcas tradicionales de Éxito?"*
-
----
-
-## 4. Testeo de Mensajes de Valor (Variantes A / B / C)
-
-A cada segmento de la muestra se le presenta una de tres propuestas de valor para medir resonancia emocional e interés de uso:
-
-| Variante | Mensaje Central | Hipótesis a Probar |
-| :--- | :--- | :--- |
-| **Variante A (Ahorro Puro)** | *"Te conseguimos el mercado semanal más barato combinando los supermercados de tu barrio."* | El dolor principal es el dinero que falta a fin de mes. |
-| **Variante B (Conveniencia y Carga Mental)** | *"Dinos cuánto tienes y te decimos exactamente qué comprar y qué cocinar para toda la semana."* | El dolor principal es la fatiga de decisión diaria ("¿qué hago de comer?"). |
-| **Variante C (Optimización Presupuestal)** | *"Convierte tu presupuesto fijo en 14 comidas completas sin desperdiciar comida ni pagar de más."* | El valor reside en el control financiero integral del hogar. |
+7. **Contraste de Percepción:**
+   *"Ahora que ves la solución en concreto frente a ti: ¿Qué es lo que realmente más te llama la atención o te parece más útil?"*
+   *(Permite comprobar si quien declaró "Ahorro" termina cautivado por "no tener que pensar qué cocinar" o la "báscula exacta")*.
 
 ---
 
-## 5. Criterios de Evaluación y Toma de Decisiones
-
-El éxito del piloto V4-B se evalúa según el cumplimiento de tres umbrales de decisión:
-
-```text
-                                RESULTADOS DEL PILOTO V4-B
-                                             │
-                       ┌─────────────────────┴─────────────────────┐
-                       ↓                                           ↓
-       [ Adopción > 60% e Interés Alto ]          [ Fricción Alta / Rechazo a 2 Tiendas ]
-                       │                                           │
-                       ↓                                           ↓
-               AVANZAR A FASE V5                           AJUSTE ESTRATÉGICO
-         • Automatización de scrapers/APIs           • Modalidad "Monotienda Inteligente"
-         • Modelo Freemium:                          • Priorizar conveniencia sobre ahorro
-           - Free: Menú + Lista                      • Integración con domicilios directos
-           - Premium: Optimización multitienda
-```
+### Bloque 4: Medición de la Tolerancia a la Segunda Parada ($\text{FrictionTolerance}$)
+8. *"Supón que tu compra principal la haces en Ara. Para hacer una segunda parada en otra tienda cercana a 4 cuadras, ¿cuánto ahorro neto mínimo necesitarías ver en tu bolsillo para que valga la pena el desvío?"*
+   - [ ] **$2.000 COP** (Muy sensible al ahorro; alta disposición a caminar).
+   - [ ] **$5.000 COP** (Sensibilidad moderada).
+   - [ ] **$10.000 COP** (Umbral estándar de conveniencia).
+   - [ ] **$15.000 COP o más** (Alta aversión a la fricción logística).
+   - [ ] **Nunca haría una segunda parada** (Inflexibilidad absoluta; demanda 100% monotienda).
 
 ---
 
-## 6. Ficha de Registro de la Entrevista
+## 4. Métricas Clave de Evaluación de V4-B
 
-- **ID Entrevistado:**
-- **Barrio / Zona de Cali:**
-- **Número de Personas en el Hogar:**
-- **Presupuesto Semanal Declarado ($ COP):**
-- **Tiendas Frecuentadas:**
-- **Respuesta a la Decisión Propuesta (Acepta / Modifica / Rechaza):**
-- **Principal Barrera Percibida:**
-- **Variante de Mensaje con Mayor Resonancia (A / B / C):**
-- **Comentarios Cualitativos:**
+### A. Tasa de Aceptación Observada ($AcceptanceRate$)
+$$\text{AcceptanceRate} = \frac{\text{Participantes que dicen SÍ a la compra concreta}}{\text{Total Participantes Entrevistados}} \times 100$$
+
+### B. Curva de Tolerancia a la Fricción
+Porcentaje de participantes que aceptan la segunda tienda por escalón de ahorro:
+* $\%_{\ge \$2.000}$
+* $\%_{\ge \$5.000}$
+* $\%_{\ge \$10.000}$
+* $\%_{\text{Solo Monotienda}}$
+
+### C. Marco de Integración para el Paso a V5
+Se preservan como **dos dimensiones complementarias e independientes**:
+1. **Rendimiento Algorítmico (V4-A):** $+13.4\%$ de mejora promedio frente a la heurística humana.
+2. **Aceptación Conductual (V4-B):** $X\%$ de adopción observada en compradores reales.
+
+Y se calcula como indicador sintético complementario del proyecto:
+$$\boxed{\text{MarketReadinessIndex} = \text{AlgorithmicGain (+13.4%)} \times \text{AcceptanceRate (X%)}}$$
+
+---
+
+## 5. Ficha de Registro de la Entrevista
+
+| Campo | Registro |
+| :--- | :--- |
+| **ID Participante** | `P-01` a `P-50` |
+| **Barrio / Clúster de Cali** | Granada, San Fernando, Versalles, Tequendama, Salomia |
+| **Rol Decisorio (`participantRole`)** | Decisor / Comprador / Financiador / Cocinero |
+| **Tamaño del Hogar (`householdSize`)** | 1, 2, 3, 4, 5+ |
+| **Presupuesto Semanal Real** | $ COP |
+| **Tiendas Habituales (`mainStores`)** | D1, Ara, Éxito, Olímpica, Galerías |
+| **Preferencia Declarada ($Preference_{\text{declared}}$)** | A (Ahorro) / B (Conveniencia) / C (Cero Desperdicio) |
+| **Aceptación Observada ($Acceptance_{\text{observed}}$)** | SÍ / MODIFICA / NO |
+| **Tolerancia a 2da Parada** | $2k / $5k / $10k / $15k+ / NUNCA |
+| **Interés Real tras ver la solución** | Ahorro / Carga mental del menú / Gramaje exacto |
+| **Barrera Principal Identificada** | Fricción física / Desconfianza marcas propias / Complejidad recetas |
+| **Observaciones Cualitativas** | Citas textuales del participante |
