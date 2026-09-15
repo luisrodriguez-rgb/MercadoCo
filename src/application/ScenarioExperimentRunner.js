@@ -176,6 +176,12 @@ export class ScenarioExperimentRunner {
     const medianImprovement = Number((sortedImprovements[Math.floor(sortedImprovements.length / 2)]).toFixed(1));
     const minImprovement = Number(Math.min(...improvements).toFixed(1));
     const maxImprovement = Number(Math.max(...improvements).toFixed(1));
+    const rangeImprovement = Number((maxImprovement - minImprovement).toFixed(1));
+
+    // Variabilidad estadística de la mejora (Desviación estándar y Coeficiente de Variación)
+    const variance = improvements.reduce((acc, val) => acc + Math.pow(val - meanImprovement, 2), 0) / improvements.length;
+    const stdDevImprovement = Number(Math.sqrt(variance).toFixed(2));
+    const cvImprovementPct = Number(((stdDevImprovement / meanImprovement) * 100).toFixed(2));
 
     const totalDominanceVsHumanCount = scenarios.filter(s => s.paretoAnalysis.isDominant).length;
     const dominancePct = Number(((totalDominanceVsHumanCount / scenarios.length) * 100).toFixed(1));
@@ -191,10 +197,10 @@ export class ScenarioExperimentRunner {
       { lambdaWaste: 0.2, solutionStability: 'Estable', storePair: 'Ara + Éxito', avgCostCOP: 163715, notes: 'Tolera mayor excedente perecedero' },
       { lambdaWaste: 0.5, solutionStability: 'Estable', storePair: 'Ara + Éxito', avgCostCOP: 163715, notes: 'Balance óptimo estándar' },
       { lambdaWaste: 0.9, solutionStability: 'Óptima (Base)', storePair: 'Ara + Éxito', avgCostCOP: 163715, notes: 'Penalización biológica rigurosa de referencia' },
-      { lambdaWaste: 1.2, solutionStability: 'Estable', storePair: 'Ara + Éxito', avgCostCOP: 163715, notes: 'Aversión extrema a excedentes perecederos' }
+      { lambdaWaste: 1.2, solutionStability: 'Estable', storePair: 'Ara + Éxito', avgCostCOP: 163715, notes: 'Aversión severa a excedentes perecederos' }
     ];
 
-    // Sensibilidad Empírica de WasteProbability_HIGH en P_HIGH in [0.50, 0.60, 0.70, 0.80, 0.90]
+    // Sensibilidad Local de WasteProbability_HIGH en P_HIGH in [0.50, 0.60, 0.70, 0.80, 0.90]
     // Ejecutada dinámicamente sobre el menú de referencia E1 (2 PAX, $150k, Granada, Balanceado)
     const refPlan = MealPlanService.generateWeeklyPlan({ peopleCount: 2, budgetCOP: 150000, preference: 'BALANCEADO' });
     const baselineHigh = 0.70;
@@ -221,6 +227,7 @@ export class ScenarioExperimentRunner {
 
       const currentSolutionId = sweepOpt.multiStore.items.map(i => `${i.productId}:${i.storeId}:${i.packageUnits}`).sort().join('|');
       const solutionChanged = currentSolutionId !== baselineSolutionId;
+      const distInfo = sweepOpt.solverTelemetry.stabilityAndDistance;
 
       return {
         wasteProbabilityHigh: pHigh,
@@ -232,9 +239,14 @@ export class ScenarioExperimentRunner {
         futureInventory: sweepOpt.multiStore.totalFutureInventory,
         proteinAdequacy: 100.0,
         solutionChanged,
+        incumbentScore: distInfo.incumbentScore,
+        runnerUpSubset: distInfo.runnerUpSubset,
+        runnerUpScore: distInfo.runnerUpScore,
+        deltaSecondBest: distInfo.deltaSecondBest,
+        deltaSecondBestPct: distInfo.deltaSecondBestPct,
         notes: solutionChanged 
-          ? 'Quiebre de solución: el incremento de riesgo forzó reasignación de punto de venta.' 
-          : 'Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima.'
+          ? 'Quiebre de solución: reasignación de tienda.' 
+          : `Estable en el escenario probado y rango evaluado (\u0394_2nd = ${distInfo.deltaSecondBest}, +${distInfo.deltaSecondBestPct}% sobre ${distInfo.runnerUpSubset})`
       };
     });
 
@@ -242,15 +254,19 @@ export class ScenarioExperimentRunner {
     const representativeTelemetry = scenarios[0].solverTelemetry;
 
     return {
-      totalScenarios: scenarios.length,
+      totalScenarios: scenarios.length, // 12
       totalRuns: scenarios.length * 5, // 60 ejecuciones
+      directSolutionComparisons: scenarios.length * 2, // 24 pares directos MILP vs RH-1 (120 soluciones totales evaluadas)
       allComparisonsSymmetric: scenarios.every(s => s.comparisonStatus === 'VALID_SYMMETRIC'),
       scenarios,
       summary: {
         meanImprovementPct: meanImprovement,
+        stdDevImprovementPct: stdDevImprovement,
+        cvImprovementPct,
         medianImprovementPct: medianImprovement,
         minImprovementPct: minImprovement,
         maxImprovementPct: maxImprovement,
+        rangePct: rangeImprovement,
         dominancePct,
         paretoDominantCount: totalDominanceVsHumanCount,
         runtime: {
@@ -259,23 +275,10 @@ export class ScenarioExperimentRunner {
           maxMs: maxRuntime
         }
       },
-      solverTelemetry: {
-        solverType: representativeTelemetry.solverType,
-        candidateVariables: representativeTelemetry.candidateVariables,
-        activeDecisionVariables: representativeTelemetry.activeDecisionVariables,
-        integerVariables: representativeTelemetry.integerVariables,
-        continuousVariables: representativeTelemetry.continuousVariables,
-        binaryVariables: representativeTelemetry.binaryVariables,
-        constraintsCount: representativeTelemetry.constraintsCount,
-        lpLowerBound: representativeTelemetry.lpLowerBound,
-        bestBound: representativeTelemetry.bestBound,
-        relaxationGapPct: representativeTelemetry.relaxationGapPct,
-        optimalityGapPct: representativeTelemetry.optimalityGapPct,
-        isGlobalOptimum: representativeTelemetry.isGlobalOptimum,
-        numericalTolerance: representativeTelemetry.numericalTolerance
-      },
+      solverTelemetry: representativeTelemetry,
       sensitivityAnalysis: {
         lambdaSensitivity: lambdaSensitivityResults,
+        localWasteProbabilitySensitivityE1: wasteProbabilitySensitivity,
         wasteProbabilitySensitivity
       }
     };
