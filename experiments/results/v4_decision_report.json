@@ -1,15 +1,16 @@
 {
   "metadata": {
     "reportTitle": "Mercado Colombia — V4 Decision Report",
-    "date": "2026-09-15T05:17:41.340Z",
+    "date": "2026-09-15T05:26:56.354Z",
     "city": "Cali, Colombia",
     "benchmarkTarget": "Exact Separable MILP vs. Reasonable Human Heuristic (RH-1)",
-    "version": "4.0.0-AUDITED"
+    "version": "4.0.1-AUDITED"
   },
   "experimentDesign": {
     "scenariosCount": 12,
     "strategiesPerScenario": 5,
     "totalExecutions": 60,
+    "directSolutionComparisons": 120,
     "dimensions": {
       "budgetsCOP": [
         150000,
@@ -22,24 +23,46 @@
       ],
       "nutritionalProfiles": [
         "Balanceado",
-        "Alta Proteína"
+        "Alta Proteina"
       ]
     }
   },
   "solverTelemetry": {
     "solverType": "Exact Separable MILP Enumerator / Branch & Bound",
-    "candidateVariables": 99,
-    "activeDecisionVariables": 93,
-    "integerVariables": 60,
-    "continuousVariables": 30,
-    "binaryVariables": 3,
-    "constraintsCount": 34,
-    "lpLowerBound": 0.6714,
-    "bestBound": 1.1669,
-    "relaxationGapPct": 42.46,
-    "optimalityGapPct": 0,
-    "isGlobalOptimum": true,
-    "numericalTolerance": 0.00001
+    "variables": {
+      "candidateVariables": 99,
+      "modelVariables": 93,
+      "modelIntegerVariables": 60,
+      "modelContinuousVariables": 30,
+      "modelBinaryVariables": 3,
+      "selectedNonZeroVariables": 32
+    },
+    "constraints": {
+      "coverageActive": 30,
+      "pantryDeducted": 2,
+      "coverageCatalogTotal": 33,
+      "budget": 1,
+      "storeActivation": 3,
+      "activeInstanceTotal": 34,
+      "canonicalCatalogTotal": 37
+    },
+    "boundsAndGaps": {
+      "incumbentUb": 1.1669,
+      "initialLpRelaxationLb": 0.6714,
+      "initialLpIntegralityGapPct": 42.46,
+      "finalBbLowerBound": 1.1669,
+      "finalOptimalityGapPct": 0,
+      "globalOptimumProof": "Final B&B lower bound == incumbent objective within tolerance 1e-5",
+      "isGlobalOptimum": true
+    },
+    "stabilityAndDistance": {
+      "incumbentScore": 1.1669,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.2328,
+      "deltaSecondBest": 0.0659,
+      "deltaSecondBestPct": 5.65
+    },
+    "runtimeMs": 0.46
   },
   "scenarioResults": [
     {
@@ -48,7 +71,7 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 15.53,
+      "runtimeMs": 16.75,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.8,
       "netSavingsVsBestMonoCOP": 24910,
@@ -57,6 +80,8 @@
       "humanCostCOP": 189881,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0659,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -65,7 +90,7 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.93,
+      "runtimeMs": 1.23,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.3,
       "netSavingsVsBestMonoCOP": 23513,
@@ -74,6 +99,8 @@
       "humanCostCOP": 186791,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0643,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -82,7 +109,7 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.38,
+      "runtimeMs": 0.76,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.6,
       "netSavingsVsBestMonoCOP": 23972,
@@ -91,6 +118,8 @@
       "humanCostCOP": 192069,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0659,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -99,7 +128,7 @@
       "budgetCOP": 150000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.34,
+      "runtimeMs": 0.39,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.1,
       "netSavingsVsBestMonoCOP": 22575,
@@ -108,6 +137,8 @@
       "humanCostCOP": 188979,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0643,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -116,7 +147,7 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.23,
+      "runtimeMs": 0.56,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.8,
       "netSavingsVsBestMonoCOP": 24910,
@@ -125,6 +156,8 @@
       "humanCostCOP": 189881,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0449,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -133,7 +166,7 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.22,
+      "runtimeMs": 0.36,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.3,
       "netSavingsVsBestMonoCOP": 23513,
@@ -142,6 +175,8 @@
       "humanCostCOP": 186791,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0438,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -150,7 +185,7 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.22,
+      "runtimeMs": 0.46,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.6,
       "netSavingsVsBestMonoCOP": 23972,
@@ -159,6 +194,8 @@
       "humanCostCOP": 192069,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0449,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -167,7 +204,7 @@
       "budgetCOP": 220000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.2,
+      "runtimeMs": 0.51,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.1,
       "netSavingsVsBestMonoCOP": 22575,
@@ -176,6 +213,8 @@
       "humanCostCOP": 188979,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0438,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -184,7 +223,7 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.2,
+      "runtimeMs": 0.36,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.8,
       "netSavingsVsBestMonoCOP": 24910,
@@ -193,6 +232,8 @@
       "humanCostCOP": 189881,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0353,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -201,7 +242,7 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_GRANADA_VERSALLES",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.24,
+      "runtimeMs": 0.39,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.3,
       "netSavingsVsBestMonoCOP": 23513,
@@ -210,6 +251,8 @@
       "humanCostCOP": 186791,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0344,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -218,7 +261,7 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "BALANCEADO",
-      "runtimeMs": 0.36,
+      "runtimeMs": 0.37,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.6,
       "netSavingsVsBestMonoCOP": 23972,
@@ -227,6 +270,8 @@
       "humanCostCOP": 192069,
       "milpWasteRiskCOP": 7995,
       "humanWasteRiskCOP": 21894,
+      "deltaSecondBest": 0.0352,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     },
     {
@@ -235,7 +280,7 @@
       "budgetCOP": 280000,
       "zoneId": "CALI_SAN_FERNANDO",
       "preference": "ALTA_PROTEINA",
-      "runtimeMs": 0.18,
+      "runtimeMs": 0.43,
       "comparisonStatus": "VALID_SYMMETRIC",
       "improvementVsHumanPct": 13.1,
       "netSavingsVsBestMonoCOP": 22575,
@@ -244,15 +289,20 @@
       "humanCostCOP": 188979,
       "milpWasteRiskCOP": 6673,
       "humanWasteRiskCOP": 20015,
+      "deltaSecondBest": 0.0344,
+      "runnerUpSubset": "D1+EXITO",
       "paretoDominant": true
     }
   ],
   "aggregateResults": {
     "meanImprovementPct": 13.4,
+    "stdDevImprovementPct": 0.27,
+    "cvImprovementPct": 2.01,
     "medianImprovementPct": 13.6,
     "minImprovementPct": 13.1,
     "maxImprovementPct": 13.8,
-    "rangePct": 0.7
+    "rangePct": 0.7,
+    "variabilityDiagnosis": "Baja dispersión (CV = 2.01%). El piso estructural de ahorro es constante por la ventaja combinatoria de báscula en hortalizas y precios en abarrotes."
   },
   "paretoAnalysis": {
     "dominantScenariosCount": 12,
@@ -287,10 +337,10 @@
       "solutionStability": "Estable",
       "storePair": "Ara + Éxito",
       "avgCostCOP": 163715,
-      "notes": "Aversión extrema a excedentes perecederos"
+      "notes": "Aversión severa a excedentes perecederos"
     }
   ],
-  "wasteProbabilitySensitivity": [
+  "localWasteProbabilitySensitivityE1": [
     {
       "wasteProbabilityHigh": 0.5,
       "solutionId": "ARA+EXITO",
@@ -301,7 +351,12 @@
       "futureInventory": 42422,
       "proteinAdequacy": 100,
       "solutionChanged": false,
-      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      "incumbentScore": 1.1609,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.2266,
+      "deltaSecondBest": 0.0657,
+      "deltaSecondBestPct": 5.66,
+      "notes": "Estable en el escenario probado y rango evaluado (Δ_2nd = 0.0657, +5.66% sobre D1+EXITO)"
     },
     {
       "wasteProbabilityHigh": 0.6,
@@ -313,7 +368,12 @@
       "futureInventory": 41860,
       "proteinAdequacy": 100,
       "solutionChanged": false,
-      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      "incumbentScore": 1.1639,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.2297,
+      "deltaSecondBest": 0.0658,
+      "deltaSecondBestPct": 5.65,
+      "notes": "Estable en el escenario probado y rango evaluado (Δ_2nd = 0.0658, +5.65% sobre D1+EXITO)"
     },
     {
       "wasteProbabilityHigh": 0.7,
@@ -325,7 +385,12 @@
       "futureInventory": 41298,
       "proteinAdequacy": 100,
       "solutionChanged": false,
-      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      "incumbentScore": 1.1669,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.2328,
+      "deltaSecondBest": 0.0659,
+      "deltaSecondBestPct": 5.65,
+      "notes": "Estable en el escenario probado y rango evaluado (Δ_2nd = 0.0659, +5.65% sobre D1+EXITO)"
     },
     {
       "wasteProbabilityHigh": 0.8,
@@ -337,7 +402,12 @@
       "futureInventory": 40736,
       "proteinAdequacy": 100,
       "solutionChanged": false,
-      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      "incumbentScore": 1.1699,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.2359,
+      "deltaSecondBest": 0.066,
+      "deltaSecondBestPct": 5.64,
+      "notes": "Estable en el escenario probado y rango evaluado (Δ_2nd = 0.066, +5.64% sobre D1+EXITO)"
     },
     {
       "wasteProbabilityHigh": 0.9,
@@ -349,12 +419,20 @@
       "futureInventory": 40173,
       "proteinAdequacy": 100,
       "solutionChanged": false,
-      "notes": "Solución ultraestable: báscula continua en Éxito sigue siendo estrictamente óptima."
+      "incumbentScore": 1.1729,
+      "runnerUpSubset": "D1+EXITO",
+      "runnerUpScore": 1.239,
+      "deltaSecondBest": 0.0661,
+      "deltaSecondBestPct": 5.64,
+      "notes": "Estable en el escenario probado y rango evaluado (Δ_2nd = 0.0661, +5.64% sobre D1+EXITO)"
     }
   ],
   "symmetryAudit": {
+    "scenariosAudited": 12,
+    "validExecutions": 60,
+    "directPairSolutions": 24,
     "allScenariosSymmetric": true,
-    "auditVerification": "MILP fingerprint === RH-1 fingerprint en el 100% de las 60 corridas.",
+    "auditVerification": "MILP fingerprint === RH-1 fingerprint en el 100% de las ejecuciones evaluadas.",
     "fingerprintSchema": [
       "catalogVersion",
       "priceVersion",
@@ -368,16 +446,17 @@
     ]
   },
   "runtimeBenchmark": {
-    "p50Ms": 0.24,
-    "p95Ms": 15.53,
-    "maxMs": 15.53,
+    "p50Ms": 0.46,
+    "p95Ms": 16.75,
+    "maxMs": 16.75,
     "environment": "Local V8 / Node.js runtime"
   },
   "limitations": [
-    "Catálogo acotado a 33 SKUs esenciales de canasta básica de Cali.",
-    "Precios correspondientes al entorno empírico experimental de Cali (Q1 2026).",
-    "Probabilidades de desperdicio tratadas como parámetros experimentales de riesgo biológico calibrados, no frecuencias observadas.",
-    "RH-1 representa una aproximación modelada del comprador informado, no un panel de compradores humanos en vivo."
+    "Catálogo experimental acotado a 33 SKUs esenciales de canasta básica de Cali.",
+    "Precios correspondientes a recolección empírica controlada en Cali (Q1 2026).",
+    "Probabilidades de desperdicio tratadas como parámetros experimentales de riesgo biológico calibrados por categoría, no frecuencias observadas.",
+    "RH-1 representa una aproximación algorítmica del comprador informado, no un panel de compradores humanos en vivo.",
+    "Sensibilidad de P_HIGH reportada localmente sobre el escenario de referencia E1."
   ],
   "conclusion": {
     "algorithmicStatus": "VALIDATED_STRICT_DOMINANCE",

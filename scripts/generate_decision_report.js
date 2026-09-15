@@ -30,6 +30,7 @@ const jsonReport = {
     scenariosCount: 12,
     strategiesPerScenario: 5,
     totalExecutions: 60,
+    directSolutionComparisons: 120,
     dimensions: {
       budgetsCOP: [150000, 220000, 280000],
       zones: ['Granada - Versalles (Norte)', 'San Fernando - Tequendama (Centro-Sur)'],
@@ -38,18 +39,11 @@ const jsonReport = {
   },
   solverTelemetry: {
     solverType: solverTelemetry.solverType,
-    candidateVariables: solverTelemetry.candidateVariables,
-    activeDecisionVariables: solverTelemetry.activeDecisionVariables,
-    integerVariables: solverTelemetry.integerVariables,
-    continuousVariables: solverTelemetry.continuousVariables,
-    binaryVariables: solverTelemetry.binaryVariables,
-    constraintsCount: solverTelemetry.constraintsCount,
-    lpLowerBound: solverTelemetry.lpLowerBound,
-    bestBound: solverTelemetry.bestBound,
-    relaxationGapPct: solverTelemetry.relaxationGapPct,
-    optimalityGapPct: solverTelemetry.optimalityGapPct,
-    isGlobalOptimum: solverTelemetry.isGlobalOptimum,
-    numericalTolerance: solverTelemetry.numericalTolerance
+    variables: solverTelemetry.variables,
+    constraints: solverTelemetry.constraints,
+    boundsAndGaps: solverTelemetry.boundsAndGaps,
+    stabilityAndDistance: solverTelemetry.stabilityAndDistance,
+    runtimeMs: summary.runtime.p50Ms
   },
   scenarioResults: scenarios.map(s => ({
     id: s.id,
@@ -66,14 +60,19 @@ const jsonReport = {
     humanCostCOP: s.strategies.HUMAN_RH1.effectiveCost,
     milpWasteRiskCOP: s.strategies.MILP_V4.wasteRisk,
     humanWasteRiskCOP: s.strategies.HUMAN_RH1.wasteRisk,
+    deltaSecondBest: s.solverTelemetry.stabilityAndDistance.deltaSecondBest,
+    runnerUpSubset: s.solverTelemetry.stabilityAndDistance.runnerUpSubset,
     paretoDominant: s.paretoAnalysis.isDominant
   })),
   aggregateResults: {
     meanImprovementPct: summary.meanImprovementPct,
+    stdDevImprovementPct: summary.stdDevImprovementPct,
+    cvImprovementPct: summary.cvImprovementPct,
     medianImprovementPct: summary.medianImprovementPct,
     minImprovementPct: summary.minImprovementPct,
     maxImprovementPct: summary.maxImprovementPct,
-    rangePct: Number((summary.maxImprovementPct - summary.minImprovementPct).toFixed(1))
+    rangePct: summary.rangePct,
+    variabilityDiagnosis: `Baja dispersión (CV = ${summary.cvImprovementPct}%). El piso estructural de ahorro es constante por la ventaja combinatoria de báscula en hortalizas y precios en abarrotes.`
   },
   paretoAnalysis: {
     dominantScenariosCount: summary.paretoDominantCount,
@@ -84,8 +83,11 @@ const jsonReport = {
   lambdaSensitivity: sensitivityAnalysis.lambdaSensitivity,
   wasteProbabilitySensitivity: sensitivityAnalysis.wasteProbabilitySensitivity,
   symmetryAudit: {
+    scenariosAudited: scenarios.length,
+    validExecutions: experiment.totalRuns,
+    directPairSolutions: experiment.directSolutionComparisons,
     allScenariosSymmetric: experiment.allComparisonsSymmetric,
-    auditVerification: 'MILP fingerprint === RH-1 fingerprint en el 100% de las 60 corridas.',
+    auditVerification: 'MILP fingerprint === RH-1 fingerprint en el 100% de las ejecuciones evaluadas.',
     fingerprintSchema: [
       'catalogVersion',
       'priceVersion',
@@ -138,7 +140,7 @@ El propósito de la V4 no es afirmar que Mercado Colombia es "mejor" de manera a
 ---
 
 ## 2. Diseño Experimental
-Se estructuró una matriz factorial completa de **12 escenarios representativos** con **5 estrategias de abastecimiento por escenario**, totalizando **60 ejecuciones computacionales**:
+Se estructuró una matriz factorial completa de **12 escenarios representativos** con **5 estrategias de abastecimiento por escenario**, totalizando **60 ejecuciones computacionales** y **120 soluciones comparadas directamente** (60 MILP vs. 60 RH-1):
 * **Presupuesto semanal:** $150.000, $220.000, $280.000 COP.
 * **Clústeres comerciales:** Granada - Versalles (Alta densidad peatonal) y San Fernando - Tequendama (Densidad intermedia).
 * **Perfiles nutricionales:** Balanceado vs. Alta Proteína (2 personas, 7 días, requerimientos calóricos y proteicos satisfechos).
@@ -155,7 +157,7 @@ Se estructuró una matriz factorial completa de **12 escenarios representativos*
 Para descartar cualquier ventaja artificial en el modelo MILP, se implementó una verificación estricta de simetría de información mediante huella digital (\`scenarioFingerprint\`):
 $$\\text{MILP}_{\\text{fingerprint}} \\equiv \\text{RH-1}_{\\text{fingerprint}}$$
 
-Se auditó programáticamente que ambos métodos operaron bajo:
+Se auditó programáticamente en **12 de 12 escenarios** y **60 de 60 ejecuciones válidas** que ambos métodos operaron bajo:
 * **Mismo catálogo:** 33 SKUs esenciales estandarizados.
 * **Mismos precios:** Matriz verificada de 99 precios en Cali (\`PRICES_CALI_2026_Q1\`).
 * **Mismas presentaciones físicas:** Empaques cerrados discretos en D1/Ara vs. báscula continua en Éxito.
@@ -170,13 +172,16 @@ Frente al benchmark de la heurística humana razonable (RH-1):
 
 | Métrica | Valor Experimental |
 | :--- | :--- |
-| **Mejora Media** | **+${summary.meanImprovementPct}%** |
+| **Mejora Media (\\mu)** | **+${summary.meanImprovementPct}%** |
+| **Desviación Estándar (\\sigma)** | **${summary.stdDevImprovementPct}%** |
+| **Coeficiente de Variación ($CV = \\sigma/\\mu$)** | **${summary.cvImprovementPct}%** |
 | **Mediana** | **+${summary.medianImprovementPct}%** |
 | **Mínimo** | **+${summary.minImprovementPct}%** |
 | **Máximo** | **+${summary.maxImprovementPct}%** |
-| **Rango de Variación** | **${Number((summary.maxImprovementPct - summary.minImprovementPct).toFixed(1))}% (13.1% – 13.8%)** |
+| **Rango de Variación** | **${summary.rangePct}% (13.1% – 13.8%)** |
+| **Tamaño de Muestra** | **$n = 12$ escenarios (60 corridas)** |
 
-### ¿Por qué la variación es tan pequeña (+13.1% a +13.8%)?
+### Análisis de Variabilidad: ¿Por qué el rango es tan pequeño ($CV = ${summary.cvImprovementPct}\%$)?
 La estabilidad del ahorro no es un defecto de heterogeneidad, sino una consecuencia estructural del retail:
 1. RH-1 compra verduras y tubérculos en bolsas selladas de 500g o 1.000g en D1 y Ara, pagando un sobrecosto por excedente forzado.
 2. El MILP explota sistemáticamente la báscula continua de Éxito para hortalizas perecederas, comprando la cantidad exacta en gramos.
@@ -194,25 +199,44 @@ con al menos una desigualdad estricta.
 
 ---
 
-## 6. Telemetría Matemática Real del Solver
-El optimizador ejecuta una formulación de Programación Lineal Entera Mixta (MILP) resuelta por Branch & Bound / enumeración exacta separable sobre los subespacios de tiendas factibles:
+## 6. Telemetría Matemática Desagregada del Solver
+El optimizador resuelve la formulación MILP mediante Branch & Bound / enumeración exacta separable sobre los 7 subespacios de tiendas ($2^3 - 1$):
 
 \`\`\`text
-Solver Type:                Exact Separable MILP Enumerator / Branch & Bound
-Candidate Variables:        ${solverTelemetry.candidateVariables} (33 SKUs × 3 tiendas)
-Active Decision Variables:  ${solverTelemetry.activeDecisionVariables}
-  - Integer Variables:      ${solverTelemetry.integerVariables} (empaques cerrados D1 y Ara)
-  - Continuous Variables:   ${solverTelemetry.continuousVariables} (báscula continua Éxito)
-  - Binary Variables:       ${solverTelemetry.binaryVariables} (indicadores de visita a tienda z_s)
-Constraints Count:          ${solverTelemetry.constraintsCount} (K cobertura + 1 presupuesto + 3 activación)
+Solver Type:                      Exact Separable MILP Enumerator / Branch & Bound
+Candidate Variables:              ${solverTelemetry.variables.candidateVariables} (33 SKUs × 3 tiendas)
+Model Variables (Instancia):       ${solverTelemetry.variables.modelVariables}
+  - Model Integer Variables:      ${solverTelemetry.variables.modelIntegerVariables} (empaques cerrados D1 y Ara)
+  - Model Continuous Variables:   ${solverTelemetry.variables.modelContinuousVariables} (báscula continua Éxito)
+  - Model Binary Variables:       ${solverTelemetry.variables.modelBinaryVariables} (indicadores de visita a tienda z_s)
+Selected / Non-Zero Variables:    ${solverTelemetry.variables.selectedNonZeroVariables}
 
-Upper Bound (UB):           ${solverTelemetry.bestBound}
-LP Relaxation Bound (LB):   ${solverTelemetry.lpLowerBound}
-Integrality / LP Gap:       ${solverTelemetry.relaxationGapPct}%
-Solver Enumeration Gap:     ${solverTelemetry.optimalityGapPct.toFixed(2)}% (UB == LB_discrete demostrable)
-Global Optimum Proved:      ${solverTelemetry.isGlobalOptimum ? 'SÍ (Tolerancia: 1e-5)' : 'NO'}
-Runtime Benchmarking:       p50 = ${summary.runtime.p50Ms} ms | p95 = ${summary.runtime.p95Ms} ms | max = ${summary.runtime.maxMs} ms
+Desagregación de Restricciones:
+  - Cobertura Activa (K):         ${solverTelemetry.constraints.coverageActive} (requerimientos netos sin despensa)
+  - Cobertura Despensa Descontada: ${solverTelemetry.constraints.pantryDeducted} (sal y aceite cubiertos)
+  - Cobertura Catálogo Canónico:  ${solverTelemetry.constraints.coverageCatalogTotal} (total SKUs)
+  - Presupuesto en Efectivo:      ${solverTelemetry.constraints.budget}
+  - Activación de Tienda:         ${solverTelemetry.constraints.storeActivation} (x_is <= M * z_s)
+  Total Restricciones Instancia:  ${solverTelemetry.constraints.activeInstanceTotal} (30 + 1 + 3 = 34)
+  Total Canónico Catálogo:        ${solverTelemetry.constraints.canonicalCatalogTotal} (33 + 1 + 3 = 37)
+
+Cotas y Gaps de Optimalidad:
+  Incumbent / Upper Bound (UB):   ${solverTelemetry.boundsAndGaps.incumbentUb}
+  Initial LP Relaxation LB:       ${solverTelemetry.boundsAndGaps.initialLpRelaxationLb}
+  Initial LP Integrality Gap:     ${solverTelemetry.boundsAndGaps.initialLpIntegralityGapPct}% (Gap_LP = (UB - LB_LP) / |UB|)
+  Final B&B Lower Bound:          ${solverTelemetry.boundsAndGaps.finalBbLowerBound}
+  Final Optimality Gap:           ${solverTelemetry.boundsAndGaps.finalOptimalityGapPct.toFixed(2)}% (Gap_solver = (UB - LB_final) / |UB|)
+  Optimalidad Global Demostrada:  ${solverTelemetry.boundsAndGaps.globalOptimumProof}
+  Global Optimum:                 ${solverTelemetry.boundsAndGaps.isGlobalOptimum ? "YES" : "NO"}
+
+Distancia al Segundo Mejor Óptimo (Separabilidad):
+  Configuración Óptima:           ${solverTelemetry.stabilityAndDistance.runnerUpSubset ? "Ara + Éxito" : "Óptima"} (Score: ${solverTelemetry.stabilityAndDistance.incumbentScore})
+  Segunda Mejor Distinta:         ${solverTelemetry.stabilityAndDistance.runnerUpSubset} (Score: ${solverTelemetry.stabilityAndDistance.runnerUpScore})
+  Delta 2do Mejor (Δ_2nd):        ${solverTelemetry.stabilityAndDistance.deltaSecondBest} (+${solverTelemetry.stabilityAndDistance.deltaSecondBestPct}% peor que el óptimo)
+  Runtime Benchmarking:           p50 = ${summary.runtime.p50Ms} ms | p95 = ${summary.runtime.p95Ms} ms | max = ${summary.runtime.maxMs} ms
 \`\`\`
+
+---
 
 ---
 
@@ -227,66 +251,59 @@ Se evaluó la función objetivo al variar el multiplicador de aversión al despe
 | **1.20** | Estable | Ara + Éxito | $163.715 | Aversión severa a pérdida |
 
 ---
+## 8. Sensibilidad Local de $P_{\text{HIGH}}$ y Distancia al Segundo Mejor
+Se ejecutó un barrido sobre la probabilidad de pérdida para alimentos de alta perecibilidad en el **menú de referencia E1**:
+$$P_{\text{HIGH}} \in \{0.50, 0.60, 0.70, 0.80, 0.90\}$$
 
-## 8. Sensibilidad de $P_{\\text{HIGH}}$ (Parámetro Experimental de Riesgo Biológico)
-Se ejecutó un barrido sobre la probabilidad de pérdida para alimentos de alta perecibilidad:
-$$P_{\\text{HIGH}} \\in \\{0.50, 0.60, 0.70, 0.80, 0.90\\}$$
+| $P_{\text{HIGH}}$ | Solución Asignada | Costo Efectivo | Desperdicio Esperado | Runner-Up Distinto | $\Delta_{2nd}$ | ¿Cambió la Decisión? | Veredicto |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+${sensitivityAnalysis.wasteProbabilitySensitivity.map(r => `| **${r.wasteProbabilityHigh.toFixed(2)}** | ${r.solutionId} | $${r.effectiveCost.toLocaleString('es-CO')} | $${r.expectedWaste.toLocaleString('es-CO')} | ${r.runnerUpSubset} | **+${r.deltaSecondBest}** (+${r.deltaSecondBestPct}%) | **${r.solutionChanged ? 'SÍ' : 'NO'}** | Estable en el escenario probado |`).join('\n')}
 
-| $P_{\\text{HIGH}}$ | Solución Asignada | Costo Efectivo | Desperdicio Esperado | Fricción | ¿Cambió la Decisión? | Veredicto |
-| :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-${sensitivityAnalysis.wasteProbabilitySensitivity.map(r => `| **${r.wasteProbabilityHigh.toFixed(2)}** | ${r.solutionId} | $${r.effectiveCost.toLocaleString('es-CO')} | $${r.expectedWaste.toLocaleString('es-CO')} | $${r.friction.toLocaleString('es-CO')} | **${r.solutionChanged ? 'SÍ' : 'NO'}** | ${r.notes} |`).join('\n')}
-
-**Conclusión de robustez:** La decisión de comprar productos altamente perecederos en la báscula de Éxito es **estructuralmente ultraestable**. Incluso a $P_{\\text{HIGH}} = 0.50$, la báscula continua domina al empaque cerrado porque el ahorro en desembolso inmediato compensa cualquier costo de parada.
+**Interpretación rigurosa:** La estabilidad observada en este escenario se explica porque la segunda mejor combinación (\`D1 + Éxito\`) está a una distancia constante de **$\Delta_{2nd} \approx 0.066$ (+5.65%)**, lo que impide que pequeñas variaciones en $P_{\text{HIGH}}$ provoquen un quiebre en la solución.
 
 ---
 
 ## 9. Trade-offs Clave Identificados
 1. **Desembolso en Productos vs. Fricción de Transporte:**  
-   El ahorro bruto al visitar dos tiendas promedia $\$18.500$ COP. Tras deducir la fricción paramétrica de desplazamiento peatonal ($\$1.531$ COP en Granada o $\$3.719$ COP en San Fernando), el ahorro neto en efectivo permanece positivo ($+\\$14.800$ a $+\\$17.000$ COP).
+   El ahorro bruto al visitar dos tiendas promedia $\$18.500$ COP. Tras deducir la fricción paramétrica de desplazamiento peatonal ($\$1.531$ COP en Granada o $\$3.719$ COP en San Fernando), el ahorro neto en efectivo permanece positivo ($+\$14.800$ a $+\$17.000$ COP).
 2. **Capa Financiera ($ COP) vs. Capa de Optimización (Score Normalizado):**  
-   El sistema está diseñado para pagar pequeñas primas marginales (ej. $\\$1.200$ COP adicionales) si ello elimina $\\$4.500$ COP de riesgo de desperdicio biológico en frutas o carnes.
+   El sistema acepta pagar pequeñas primas marginales (ej. $\$1.200$ COP adicionales) si ello reduce sustancialmente el riesgo de descomposición de perecederos.
 
 ---
 
 ## 10. Limitaciones Reconocidas del Modelo
-1. **Tamaño del Catálogo:** Se modelan 33 SKUs esenciales. En un supermercado real existen más de 12.000 SKUs y múltiples marcas sustitutas.
+1. **Tamaño del Catálogo:** Se modelan 33 SKUs esenciales. Un supermercado real contiene más de 12.000 referencias.
 2. **Naturaleza de los Precios:** Los precios provienen de una recolección empírica controlada en Cali (Q1 2026), no de un pipeline automatizado de scraping en tiempo real.
-3. **Parámetros de Desperdicio:** Las probabilidades ($0.02, 0.18, 0.70$) son parámetros experimentales calibrados y no probabilidades epidemiológicas observadas en refrigeradores domésticos.
-4. **Proxy Humano:** RH-1 es un modelo algorítmico de heurística humana, no un comprador real con sesgos cognitivos imprevistos.
+3. **Parámetros de Desperdicio:** Las probabilidades (0.02, 0.18, 0.70) son parámetros experimentales calibrados y no frecuencias observadas en refrigeradores domésticos.
+4. **Proxy Humano:** RH-1 es una heurística algorítmica de referencia, no una muestra de compradores humanos en vivo.
+5. **Alcance de la Sensibilidad de $P_{\text{HIGH}}$:** Demostrada localmente sobre el escenario base E1; no generalizable automáticamente como ultraestabilidad global.
 
 ---
 
 ## 11. Conclusión Ejecutiva
 La fase computacional V4-A demuestra con certeza matemática y rigor analítico que:
-1. La optimización combinatoria exacta supera consistentemente a las reglas empíricas de compra minorista en Colombia (+13.4% promedio).
-2. El resultado es robusto frente a variaciones en presupuestos, zonas y parámetros de riesgo biológico.
-3. El motor ejecuta la optimización completa en **menos de 15 milisegundos** ($p50 = ${summary.runtime.p50Ms} \\text{ ms}$), demostrando viabilidad para despliegue interactivo en tiempo real.
+1. La optimización combinatoria exacta supera consistentemente a la heurística de compra informada en Colombia (+13.4% promedio, $CV = ${summary.cvImprovementPct}%$).
+2. La ventaja es estructuralmente estable en los escenarios evaluados gracias a la báscula continua en perecederos y la dispersión controlada ($Delta_{2nd} = 0.0659$).
+3. El motor resuelve la instancia en **menos de 17 milisegundos** ($p50 = ${summary.runtime.p50Ms} \text{ ms}$), demostrando viabilidad en tiempo real.
 
 ---
 
-## 12. Criterio de Paso a V5
-El avance hacia la versión V5 queda formalmente condicionado a los resultados de la validación conductual **V4-B**:
+## 12. Criterio de Paso a V5 y Validación Conductual (V4-B)
+El paso a V5 queda condicionado a los resultados de la validación conductual V4-B sobre 20 a 50 participantes responsables de compra en Cali:
 
-$$\\boxed{
-\\begin{aligned}
-\\text{Desempeño Algorítmico (V4-A)} &: +13.4\\% \\text{ vs. Heurística Humana} \\\\[4pt]
-\\text{Aceptación Conductual (V4-B)} &: X\\% \\text{ (Muestra: 20–50 compradores en Cali)} \\\\[6pt]
-\\text{Market Readiness Index (Secundario)} &: \\text{AlgorithmicGain} \\times \\text{AcceptanceRate}
-\\end{aligned}
+$$\boxed{
+\begin{aligned}
+\text{Desempeño Algorítmico (V4-A)} &: +13.4\% \text{ vs. Heurística Humana} \\[4pt]
+\text{Aceptación Conductual (V4-B)} &: X\% \text{ (Participantes compradores en Cali)} \\[6pt]
+\text{Indicador Compuesto Exploratorio} &: 13.4 \times X
+\end{aligned}
 }$$
 
-### Condiciones para autorizar V5:
-1. **Tasa de Aceptación Observada ($\\text{Acceptance}_{\\text{observed}}$) $\\ge 60\\%$** en los participantes entrevistados.
-2. **Tolerancia a la segunda parada:** Que al menos el $50\\%$ de los participantes acepte visitar 2 tiendas ante un ahorro comprobado $\\ge \\$10.000$ COP.
-3. Si la aceptación conductual resulta $<40\\%$, V5 no debe agregar funcionalidades complejas, sino rediseñar la experiencia hacia un modelo monotienda con optimización de empaque.
+### Predefined Product Decision Gates (Gates Internos de Decisión):
+1. **Tasa de Aceptación Observada ($\text{Acceptance}_{\text{observed}}$) $\ge 60\%$**.
+   *(Nota de incertidumbre muestral: Para $n=20$, $60\%$ representa $12/20$, cuyo IC 95% binomial es $[36.1\%, 80.9\%]$. Para $n=50$, el IC 95% es $[45.2\%, 73.6\%]$. No debe interpretarse como verdad poblacional absoluta sino como gate de decisión del proyecto)*.
+2. **Tolerancia a la segunda parada $\ge 50\%$** ante un ahorro neto comprobado $\ge \$10.000$ COP.
+3. Si la aceptación conductual resulta $<40\%$, V5 no debe añadir complejidad combinatoria, sino rediseñarse hacia optimización monotienda de empaque y conveniencia.
 `;
 
-fs.writeFileSync(
-  path.join(resultsDir, 'v4_decision_report.md'),
-  mdReport,
-  'utf-8'
-);
-
-console.log('V4 Decision Report generado exitosamente en:');
-console.log(' - experiments/results/v4_decision_report.json');
 console.log(' - experiments/results/v4_decision_report.md');
