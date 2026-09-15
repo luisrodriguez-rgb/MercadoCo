@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "commit": "c33947c20de252cdc9e899d6e4e3dec3791cf610",
-    "indexed_at": "2026-09-15T04:43:17Z",
+    "commit": "a56a9553b167b38967d3ffccc67fa900abcec0a3",
+    "indexed_at": "2026-09-15T04:59:58Z",
     "project": "Users-leonfeliperodriguez-Desktop-Trabajos-Mercado-Colombia",
-    "nodes": 88,
-    "edges": 123,
-    "original_size": 1376256,
-    "compressed_size": 104077,
+    "nodes": 227,
+    "edges": 277,
+    "original_size": 1572864,
+    "compressed_size": 134815,
     "compression_level": 9
 }
