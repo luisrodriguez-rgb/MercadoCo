@@ -1,15 +1,28 @@
 import { ESSENTIAL_PRODUCTS } from '../data/products.js';
 import { PRICES_CALI } from '../data/prices_cali.js';
-import { STORES } from '../domain/types.js';
+import { STORES, CITIES } from '../domain/types.js';
 
+/**
+ * Optimizador de Abastecimiento Retail y Modelo de Asignación Presupuestal
+ * Incorpora empaques indivisibles discretos vs. granel continuo en báscula,
+ * inventario preexistente en despensa y fricción logística por zona geográfica.
+ */
 export class BasketOptimizer {
   /**
-   * Optimiza la canasta de compras calculando paquetes enteros y comparando tiendas
-   * @param {Array} consolidatedIngredients - Lista de { productId, unit, totalAmount }
-   * @param {number} budgetCOP - Presupuesto semanal
-   * @returns {Object} Comparativa de Canastas y Recomendación
+   * Ejecuta la optimización de la canasta
+   * @param {Object} params
+   * @param {Array} params.consolidatedIngredients - Ingredientes brutos calculados por el menú
+   * @param {number} params.budgetCOP - Presupuesto disponible
+   * @param {Array<string>} params.pantryStockIds - IDs de productos que el usuario ya tiene en casa
+   * @param {string} params.zoneId - Identificador de zona geográfica en Cali
+   * @returns {Object} Diagnóstico comparativo, métricas de liquidez y recomendación de abastecimiento
    */
-  static optimize(consolidatedIngredients, budgetCOP) {
+  static optimize({
+    consolidatedIngredients,
+    budgetCOP,
+    pantryStockIds = [],
+    zoneId = 'CALI_GRANADA_VERSALLES'
+  }) {
     const productsMap = new Map(ESSENTIAL_PRODUCTS.map(p => [p.id, p]));
     const pricesByStoreAndProduct = new Map();
 
@@ -18,24 +31,59 @@ export class BasketOptimizer {
       pricesByStoreAndProduct.set(key, item);
     });
 
-    // Función auxiliar para calcular compra de un producto en una tienda específica
-    const calculateProductPurchase = (productId, totalRequired, storeId) => {
-      const product = productsMap.get(productId);
-      const priceItem = pricesByStoreAndProduct.get(`${storeId}:${productId}`);
+    // Zona activa y costo de desplazamiento específico
+    const caliZones = CITIES.CALI.zones;
+    const currentZone = caliZones.find(z => z.id === zoneId) || caliZones[0];
+    const frictionPenaltyCOP = currentZone.frictionCOP;
+
+    // Filtrar requerimientos: Si el producto está en la despensa del usuario, requerimiento de compra = 0
+    const effectiveRequirements = consolidatedIngredients.map(ing => {
+      const isAlreadyInPantry = pantryStockIds.includes(ing.productId);
+      return {
+        ...ing,
+        effectiveAmount: isAlreadyInPantry ? 0 : ing.totalAmount,
+        isCoveredByPantry: isAlreadyInPantry
+      };
+    });
+
+    // Función de cálculo por tienda con soporte para empaque discreto vs. pesaje en báscula (granel)
+    const calculateStorePurchase = (req, storeId) => {
+      if (req.effectiveAmount === 0) {
+        return null; // Cubierto por despensa existente
+      }
+
+      const product = productsMap.get(req.productId);
+      const priceItem = pricesByStoreAndProduct.get(`${storeId}:${req.productId}`);
 
       if (!priceItem) {
         return null;
       }
 
-      // Cálculo de empaques enteros necesarios
-      const packageUnits = Math.ceil(totalRequired / priceItem.packageSize);
-      const totalCost = packageUnits * priceItem.priceCOP;
-      const totalPurchasedAmount = packageUnits * priceItem.packageSize;
-      const pantrySurplus = totalPurchasedAmount - totalRequired;
+      let packageUnits = 1;
+      let totalPurchasedAmount = req.effectiveAmount;
+      let totalCost = 0;
+      let pantrySurplus = 0;
+
+      if (priceItem.isBulkWeighed) {
+        // Modelo continuo: se pesa en báscula por gramo/unidad exacta (ej. Éxito carnes y verduras)
+        totalCost = Math.round(req.effectiveAmount * priceItem.pricePerUnit);
+        packageUnits = 1;
+        pantrySurplus = 0;
+        totalPurchasedAmount = req.effectiveAmount;
+      } else {
+        // Modelo discreto: empaque cerrado obligado (ej. D1 / Ara)
+        packageUnits = Math.ceil(req.effectiveAmount / priceItem.packageSize);
+        totalCost = packageUnits * priceItem.priceCOP;
+        totalPurchasedAmount = packageUnits * priceItem.packageSize;
+        pantrySurplus = totalPurchasedAmount - req.effectiveAmount;
+      }
+
+      // Liquidez atrapada en el sobrante (costo de la porción no consumida en la semana)
+      const trappedCash = pantrySurplus > 0 ? Math.round(pantrySurplus * priceItem.pricePerUnit) : 0;
 
       return {
-        productId,
-        productName: product ? product.name : productId,
+        productId: req.productId,
+        productName: product ? product.name : req.productId,
         category: product ? product.category : 'OTHER',
         storeId,
         storeName: STORES[storeId]?.name || storeId,
@@ -43,10 +91,13 @@ export class BasketOptimizer {
         packageSize: priceItem.packageSize,
         unit: priceItem.unit,
         pricePerPackage: priceItem.priceCOP,
+        pricePerUnit: priceItem.pricePerUnit,
+        isBulkWeighed: priceItem.isBulkWeighed,
         packageUnits,
         totalPurchasedAmount,
-        totalRequired,
+        totalRequired: req.effectiveAmount,
         pantrySurplus,
+        trappedCash,
         totalCost,
         confidence: priceItem.confidence,
         notes: priceItem.notes
@@ -59,13 +110,15 @@ export class BasketOptimizer {
 
     storeIds.forEach(storeId => {
       let totalCost = 0;
+      let totalTrappedCash = 0;
       const items = [];
 
-      consolidatedIngredients.forEach(ing => {
-        const purchase = calculateProductPurchase(ing.productId, ing.totalAmount, storeId);
+      effectiveRequirements.forEach(req => {
+        const purchase = calculateStorePurchase(req, storeId);
         if (purchase) {
           items.push(purchase);
           totalCost += purchase.totalCost;
+          totalTrappedCash += purchase.trappedCash;
         }
       });
 
@@ -76,50 +129,60 @@ export class BasketOptimizer {
         tag: STORES[storeId].tag,
         items,
         totalCost,
+        totalTrappedCash,
         itemCount: items.length,
         withinBudget: totalCost <= budgetCOP,
         budgetDelta: budgetCOP - totalCost
       };
     });
 
-    // 2. Canasta Multitienda Óptima (Entre D1 y Ara principalmente, con opción Éxito si fuera mejor)
+    // 2. Asignación Óptima Multitienda (Híbrido D1 + Ara con opción Éxito si el granel resulta más económico)
     let multiStoreTotalCost = 0;
+    let multiStoreTrappedCash = 0;
     const multiStoreItems = [];
     const storeBreakdown = { D1: 0, ARA: 0, EXITO: 0 };
 
-    consolidatedIngredients.forEach(ing => {
-      const d1Option = calculateProductPurchase(ing.productId, ing.totalAmount, 'D1');
-      const araOption = calculateProductPurchase(ing.productId, ing.totalAmount, 'ARA');
-      const exitoOption = calculateProductPurchase(ing.productId, ing.totalAmount, 'EXITO');
+    effectiveRequirements.forEach(req => {
+      const d1Opt = calculateStorePurchase(req, 'D1');
+      const araOpt = calculateStorePurchase(req, 'ARA');
+      const exitoOpt = calculateStorePurchase(req, 'EXITO');
 
-      const validOptions = [d1Option, araOption, exitoOption].filter(Boolean);
+      const validOptions = [d1Opt, araOpt, exitoOpt].filter(Boolean);
       if (validOptions.length > 0) {
-        // Encontrar la opción de menor costo total
+        // Criterio de asignación: Minimizar el desembolso total de efectivo requerido (cash outlay)
         validOptions.sort((a, b) => a.totalCost - b.totalCost);
         const bestOption = validOptions[0];
 
         multiStoreItems.push(bestOption);
         multiStoreTotalCost += bestOption.totalCost;
+        multiStoreTrappedCash += bestOption.trappedCash;
         storeBreakdown[bestOption.storeId] = (storeBreakdown[bestOption.storeId] || 0) + bestOption.totalCost;
       }
     });
 
-    // 3. Cálculo de Ahorro y Fricción de Desplazamiento
+    // 3. Evaluación de Ahorro y Fricción Logística
     const bestMonoStore = Object.values(monoStores).reduce((min, cur) => 
       cur.totalCost < min.totalCost ? cur : min, monoStores['D1']);
 
     const grossSavings = Math.max(0, bestMonoStore.totalCost - multiStoreTotalCost);
-    const frictionPenaltyCOP = 5000; // Costo estimado de desplazamiento / tiempo entre 2 tiendas en Cali
     const netSavings = Math.max(0, grossSavings - frictionPenaltyCOP);
 
-    const isMultiStoreWorthIt = grossSavings > 12000; // Umbral de recomendación de ahorro real
+    // Se recomienda multitienda solo si el ahorro neto compensa ampliamente el tiempo y fricción de la zona
+    const isMultiStoreWorthIt = grossSavings > (frictionPenaltyCOP * 2.5);
+
+    // Cálculo de ahorro obtenido por tener insumos ya en despensa
+    const pantrySavingsEstimate = pantryStockIds.length * 4500; // Valor aproximado liberado de compras
 
     return {
       budgetCOP,
+      currentZone,
+      pantryStockIds,
+      pantrySavingsEstimate,
       monoStores,
       bestMonoStore,
       multiStore: {
         totalCost: multiStoreTotalCost,
+        totalTrappedCash: multiStoreTrappedCash,
         items: multiStoreItems,
         storeBreakdown,
         grossSavings,

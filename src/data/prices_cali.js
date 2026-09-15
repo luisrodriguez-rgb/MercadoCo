@@ -3,7 +3,7 @@ import { CONFIDENCE_LEVELS } from '../domain/types.js';
 /**
  * Matriz de Precios Reales y Referenciados en Cali (Valle del Cauca)
  * Tiendas: D1, Tiendas Ara, Grupo Éxito
- * Precios expresados en Pesos Colombianos (COP).
+ * Incluye modelado de empaque discreto (malla/bolsa sellada) vs. granel continuo (báscula Éxito).
  */
 export const PRICES_CALI = [
   // --- PECHUGA DE POLLO ---
@@ -14,9 +14,10 @@ export const PRICES_CALI = [
     packageSize: 1000,
     unit: 'g',
     priceCOP: 13900,
-    pricePerUnit: 13.90, // COP/g
+    pricePerUnit: 13.90,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Pechuga sin piel ni hueso bandeja'
+    isBulkWeighed: false,
+    notes: 'Bandeja sellada de peso fijo'
   },
   {
     productId: 'prod_pechuga_pollo',
@@ -27,7 +28,8 @@ export const PRICES_CALI = [
     priceCOP: 14200,
     pricePerUnit: 14.20,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Pechuga entera de pollo congelada'
+    isBulkWeighed: false,
+    notes: 'Bolsa congelada de peso fijo'
   },
   {
     productId: 'prod_pechuga_pollo',
@@ -38,7 +40,8 @@ export const PRICES_CALI = [
     priceCOP: 16900,
     pricePerUnit: 16.90,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Pechuga refrigerada de marca nacional'
+    isBulkWeighed: true, // Se puede pedir por peso exacto en carnicería
+    notes: 'Carnicería Éxito pesada a solicitud'
   },
 
   // --- CARNE MOLIDA ---
@@ -49,9 +52,10 @@ export const PRICES_CALI = [
     packageSize: 500,
     unit: 'g',
     priceCOP: 10900,
-    pricePerUnit: 21.80, // COP/g
+    pricePerUnit: 21.80,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Carne de res molida 500g'
+    isBulkWeighed: false,
+    notes: 'Bandeja atmósfera modificada 500g'
   },
   {
     productId: 'prod_carne_molida',
@@ -62,7 +66,8 @@ export const PRICES_CALI = [
     priceCOP: 10500,
     pricePerUnit: 21.00,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Carne res molida magra'
+    isBulkWeighed: false,
+    notes: 'Bandeja sellada 500g'
   },
   {
     productId: 'prod_carne_molida',
@@ -73,7 +78,8 @@ export const PRICES_CALI = [
     priceCOP: 13500,
     pricePerUnit: 27.00,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Molida especial de res bandejita'
+    isBulkWeighed: true,
+    notes: 'Molida en punto por gramo requerido'
   },
 
   // --- PERNIL / MUSLOS DE POLLO ---
@@ -86,7 +92,8 @@ export const PRICES_CALI = [
     priceCOP: 8900,
     pricePerUnit: 8.90,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Pernil con rabadilla'
+    isBulkWeighed: false,
+    notes: 'Pernil con rabadilla bolsa'
   },
   {
     productId: 'prod_muslos_pollo',
@@ -97,7 +104,8 @@ export const PRICES_CALI = [
     priceCOP: 8700,
     pricePerUnit: 8.70,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Pernil mixto'
+    isBulkWeighed: false,
+    notes: 'Pernil congelado 1kg'
   },
   {
     productId: 'prod_muslos_pollo',
@@ -108,7 +116,8 @@ export const PRICES_CALI = [
     priceCOP: 11200,
     pricePerUnit: 11.20,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Bandeja muslos frescos'
+    isBulkWeighed: true,
+    notes: 'Mostrador de carnes a granel'
   },
 
   // --- ATUN EN LATA ---
@@ -121,7 +130,8 @@ export const PRICES_CALI = [
     priceCOP: 4890,
     pricePerUnit: 34.92,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Lomitos de atún en aceite 140g'
+    isBulkWeighed: false,
+    notes: 'Lata estándar 140g'
   },
   {
     productId: 'prod_atun_lata',
@@ -132,7 +142,8 @@ export const PRICES_CALI = [
     priceCOP: 4790,
     pricePerUnit: 34.21,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Lomos de atún en agua/aceite'
+    isBulkWeighed: false,
+    notes: 'Lata 140g aceite'
   },
   {
     productId: 'prod_atun_lata',
@@ -143,7 +154,8 @@ export const PRICES_CALI = [
     priceCOP: 7900,
     pricePerUnit: 49.37,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Marca líder en agua'
+    isBulkWeighed: false,
+    notes: 'Lata 160g marca líder'
   },
 
   // --- LOMO DE CERDO ---
@@ -156,7 +168,8 @@ export const PRICES_CALI = [
     priceCOP: 9900,
     pricePerUnit: 19.80,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Filete lomo cerdo 500g'
+    isBulkWeighed: false,
+    notes: 'Bandeja 500g'
   },
   {
     productId: 'prod_cerdo_lomo',
@@ -167,7 +180,8 @@ export const PRICES_CALI = [
     priceCOP: 9600,
     pricePerUnit: 19.20,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Chuleta/lomo cerdo bandeja'
+    isBulkWeighed: false,
+    notes: 'Bandeja 500g filetes'
   },
   {
     productId: 'prod_cerdo_lomo',
@@ -178,7 +192,8 @@ export const PRICES_CALI = [
     priceCOP: 12400,
     pricePerUnit: 24.80,
     confidence: CONFIDENCE_LEVELS.ESTIMATED.level,
-    notes: 'Lomo de cerdo en corte fino'
+    isBulkWeighed: true,
+    notes: 'Lomo porción cortada en báscula'
   },
 
   // --- SALCHICHA ---
@@ -191,7 +206,8 @@ export const PRICES_CALI = [
     priceCOP: 5490,
     pricePerUnit: 12.20,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Paquete de salchichas manguera'
+    isBulkWeighed: false,
+    notes: 'Paquete manguera sellado'
   },
   {
     productId: 'prod_salchicha_manguera',
@@ -202,7 +218,8 @@ export const PRICES_CALI = [
     priceCOP: 5600,
     pricePerUnit: 11.20,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Salchicha tradicional económica'
+    isBulkWeighed: false,
+    notes: 'Paquete sellado 500g'
   },
   {
     productId: 'prod_salchicha_manguera',
@@ -213,7 +230,8 @@ export const PRICES_CALI = [
     priceCOP: 8900,
     pricePerUnit: 19.77,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Salchicha manguera Zenú'
+    isBulkWeighed: false,
+    notes: 'Paquete Zenú'
   },
 
   // --- HUEVOS AA (30 UNIDADES) ---
@@ -224,9 +242,10 @@ export const PRICES_CALI = [
     packageSize: 30,
     unit: 'un',
     priceCOP: 15900,
-    pricePerUnit: 530.0, // COP por huevo
+    pricePerUnit: 530.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Cubeta x30 tipo AA'
+    isBulkWeighed: false,
+    notes: 'Panal cubeta x30'
   },
   {
     productId: 'prod_huevos_aa',
@@ -237,7 +256,8 @@ export const PRICES_CALI = [
     priceCOP: 15400,
     pricePerUnit: 513.33,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Panal x30 huevos rojos AA'
+    isBulkWeighed: false,
+    notes: 'Cubeta x30 huevos AA'
   },
   {
     productId: 'prod_huevos_aa',
@@ -248,7 +268,8 @@ export const PRICES_CALI = [
     priceCOP: 18900,
     pricePerUnit: 630.0,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Cubeta x30 selección especial'
+    isBulkWeighed: false,
+    notes: 'Cubeta x30'
   },
 
   // --- LECHE ENTERA UHT (1000ml) ---
@@ -261,7 +282,8 @@ export const PRICES_CALI = [
     priceCOP: 3690,
     pricePerUnit: 3.69,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa 1 Litro UHT'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1L UHT'
   },
   {
     productId: 'prod_leche_entera',
@@ -272,6 +294,7 @@ export const PRICES_CALI = [
     priceCOP: 3490,
     pricePerUnit: 3.87,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
+    isBulkWeighed: false,
     notes: 'Bolsa 900ml'
   },
   {
@@ -283,7 +306,8 @@ export const PRICES_CALI = [
     priceCOP: 4400,
     pricePerUnit: 4.40,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Bolsa 1000ml tradicional'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1000ml'
   },
 
   // --- QUESO CUAJADA / CAMPESINO ---
@@ -296,7 +320,8 @@ export const PRICES_CALI = [
     priceCOP: 6890,
     pricePerUnit: 17.22,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bloque 400g semiduro'
+    isBulkWeighed: false,
+    notes: 'Bloque sellado 400g'
   },
   {
     productId: 'prod_queso_cuajada',
@@ -307,7 +332,8 @@ export const PRICES_CALI = [
     priceCOP: 6700,
     pricePerUnit: 16.75,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Queso campesino fresco'
+    isBulkWeighed: false,
+    notes: 'Bloque sellado 400g'
   },
   {
     productId: 'prod_queso_cuajada',
@@ -318,7 +344,8 @@ export const PRICES_CALI = [
     priceCOP: 9900,
     pricePerUnit: 22.00,
     confidence: CONFIDENCE_LEVELS.ESTIMATED.level,
-    notes: 'Bloque marca líder'
+    isBulkWeighed: true,
+    notes: 'Corte en balanza lácteos'
   },
 
   // --- QUESO DOBLE CREMA TAJADO ---
@@ -331,7 +358,8 @@ export const PRICES_CALI = [
     priceCOP: 7490,
     pricePerUnit: 24.96,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Tajado x12 tajadas'
+    isBulkWeighed: false,
+    notes: 'Paquete tajado 300g'
   },
   {
     productId: 'prod_queso_doble_crema',
@@ -342,7 +370,8 @@ export const PRICES_CALI = [
     priceCOP: 7290,
     pricePerUnit: 24.30,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Tajado para sándwich'
+    isBulkWeighed: false,
+    notes: 'Paquete tajado 300g'
   },
   {
     productId: 'prod_queso_doble_crema',
@@ -353,7 +382,8 @@ export const PRICES_CALI = [
     priceCOP: 11900,
     pricePerUnit: 37.18,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Queso alpina doble crema'
+    isBulkWeighed: false,
+    notes: 'Empaque Alpina 320g'
   },
 
   // --- MARGARINA / MANTEQUILLA ---
@@ -366,6 +396,7 @@ export const PRICES_CALI = [
     priceCOP: 3390,
     pricePerUnit: 13.56,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
+    isBulkWeighed: false,
     notes: 'Pote 250g con sal'
   },
   {
@@ -377,6 +408,7 @@ export const PRICES_CALI = [
     priceCOP: 3290,
     pricePerUnit: 13.16,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
+    isBulkWeighed: false,
     notes: 'Pote 250g suave'
   },
   {
@@ -388,7 +420,8 @@ export const PRICES_CALI = [
     priceCOP: 5600,
     pricePerUnit: 22.40,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Margarina premium Rama'
+    isBulkWeighed: false,
+    notes: 'Pote Rama 250g'
   },
 
   // --- ARROZ BLANCO (1000g) ---
@@ -401,7 +434,8 @@ export const PRICES_CALI = [
     priceCOP: 3990,
     pricePerUnit: 3.99,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa 1 kg grano seleccionado'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg sellada'
   },
   {
     productId: 'prod_arroz_blanco',
@@ -412,7 +446,8 @@ export const PRICES_CALI = [
     priceCOP: 3950,
     pricePerUnit: 3.95,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa 1 kg de primera'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg sellada'
   },
   {
     productId: 'prod_arroz_blanco',
@@ -423,7 +458,8 @@ export const PRICES_CALI = [
     priceCOP: 4900,
     pricePerUnit: 4.90,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Marca tradicional'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg marca líder'
   },
 
   // --- LENTEJAS (500g) ---
@@ -436,7 +472,8 @@ export const PRICES_CALI = [
     priceCOP: 3290,
     pricePerUnit: 6.58,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Lenteja seleccionada 500g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
   {
     productId: 'prod_lentejas',
@@ -447,7 +484,8 @@ export const PRICES_CALI = [
     priceCOP: 3190,
     pricePerUnit: 6.38,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Lenteja tierna 500g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
   {
     productId: 'prod_lentejas',
@@ -458,7 +496,8 @@ export const PRICES_CALI = [
     priceCOP: 4200,
     pricePerUnit: 8.40,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Paquete 500g grano fino'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
 
   // --- FRIJOL CARGAMANTO (500g) ---
@@ -471,7 +510,8 @@ export const PRICES_CALI = [
     priceCOP: 5490,
     pricePerUnit: 10.98,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Fríjol bola o cargamanto'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
   {
     productId: 'prod_frijol_cargamanto',
@@ -482,7 +522,8 @@ export const PRICES_CALI = [
     priceCOP: 5390,
     pricePerUnit: 10.78,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Fríjol rojo 500g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
   {
     productId: 'prod_frijol_cargamanto',
@@ -493,7 +534,8 @@ export const PRICES_CALI = [
     priceCOP: 7100,
     pricePerUnit: 14.20,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Fríjol cargamanto selecto'
+    isBulkWeighed: false,
+    notes: 'Bolsa 500g'
   },
 
   // --- PASTA ESPAGUETI (500g) ---
@@ -506,7 +548,8 @@ export const PRICES_CALI = [
     priceCOP: 2690,
     pricePerUnit: 5.38,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Espagueti tradicional 500g'
+    isBulkWeighed: false,
+    notes: 'Paquete 500g'
   },
   {
     productId: 'prod_pasta_espagueti',
@@ -517,7 +560,8 @@ export const PRICES_CALI = [
     priceCOP: 2590,
     pricePerUnit: 5.18,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Espagueti sémola 500g'
+    isBulkWeighed: false,
+    notes: 'Paquete 500g'
   },
   {
     productId: 'prod_pasta_espagueti',
@@ -528,10 +572,11 @@ export const PRICES_CALI = [
     priceCOP: 4100,
     pricePerUnit: 8.20,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Pasta Doria clásica'
+    isBulkWeighed: false,
+    notes: 'Paquete Doria 500g'
   },
 
-  // --- AVENA EN HOJUELAS (500g) ---
+  // --- AVENA EN HOJUELAS (400g) ---
   {
     productId: 'prod_avena_hojuelas',
     storeId: 'D1',
@@ -541,7 +586,8 @@ export const PRICES_CALI = [
     priceCOP: 2990,
     pricePerUnit: 7.47,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Avena hojuelas bolsa 400g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 400g'
   },
   {
     productId: 'prod_avena_hojuelas',
@@ -552,7 +598,8 @@ export const PRICES_CALI = [
     priceCOP: 2890,
     pricePerUnit: 7.22,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Avena hojuelas 400g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 400g'
   },
   {
     productId: 'prod_avena_hojuelas',
@@ -563,7 +610,8 @@ export const PRICES_CALI = [
     priceCOP: 5200,
     pricePerUnit: 13.00,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Avena Quaker bolsa'
+    isBulkWeighed: false,
+    notes: 'Bolsa Quaker'
   },
 
   // --- PAN TAJADO ---
@@ -576,7 +624,8 @@ export const PRICES_CALI = [
     priceCOP: 4190,
     pricePerUnit: 9.31,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Pan blanco tajado mediano'
+    isBulkWeighed: false,
+    notes: 'Bolsa 450g'
   },
   {
     productId: 'prod_pan_tajado',
@@ -587,7 +636,8 @@ export const PRICES_CALI = [
     priceCOP: 3990,
     pricePerUnit: 8.87,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Pan blanco de molde'
+    isBulkWeighed: false,
+    notes: 'Bolsa 450g'
   },
   {
     productId: 'prod_pan_tajado',
@@ -598,7 +648,8 @@ export const PRICES_CALI = [
     priceCOP: 7900,
     pricePerUnit: 14.36,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Pan de molde Bimbo'
+    isBulkWeighed: false,
+    notes: 'Bolsa Bimbo 550g'
   },
 
   // --- AREPAS DE MAIZ (10 UNIDADES) ---
@@ -609,9 +660,10 @@ export const PRICES_CALI = [
     packageSize: 10,
     unit: 'un',
     priceCOP: 3190,
-    pricePerUnit: 319.0, // por arepa
+    pricePerUnit: 319.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Arepa blanca delgada x10'
+    isBulkWeighed: false,
+    notes: 'Paquete x10 unidades'
   },
   {
     productId: 'prod_arepas_maiz',
@@ -622,7 +674,8 @@ export const PRICES_CALI = [
     priceCOP: 2990,
     pricePerUnit: 299.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Arepa maíz blanco x10'
+    isBulkWeighed: false,
+    notes: 'Paquete x10 unidades'
   },
   {
     productId: 'prod_arepas_maiz',
@@ -633,7 +686,8 @@ export const PRICES_CALI = [
     priceCOP: 4500,
     pricePerUnit: 450.0,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Arepas de maíz paquete'
+    isBulkWeighed: false,
+    notes: 'Paquete x10'
   },
 
   // --- TOMATE CHONTO (1000g) ---
@@ -646,7 +700,8 @@ export const PRICES_CALI = [
     priceCOP: 4990,
     pricePerUnit: 4.99,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Tomate Chonto 1kg'
+    isBulkWeighed: false, // D1 vende malla sellada cerrada
+    notes: 'Malla fija de 1kg sellada'
   },
   {
     productId: 'prod_tomate_chonto',
@@ -657,7 +712,8 @@ export const PRICES_CALI = [
     priceCOP: 4790,
     pricePerUnit: 4.79,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Tomate Chonto kilo'
+    isBulkWeighed: false,
+    notes: 'Malla fija de 1kg'
   },
   {
     productId: 'prod_tomate_chonto',
@@ -668,7 +724,8 @@ export const PRICES_CALI = [
     priceCOP: 5600,
     pricePerUnit: 5.60,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Tomate Chonto seleccionado'
+    isBulkWeighed: true, // Éxito pesa gramos exactos en báscula
+    notes: 'Pesado continuo a granel en báscula'
   },
 
   // --- CEBOLLA CABEZONA (1000g) ---
@@ -681,7 +738,8 @@ export const PRICES_CALI = [
     priceCOP: 3490,
     pricePerUnit: 3.49,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Cebolla roja/blanca 1kg'
+    isBulkWeighed: false,
+    notes: 'Malla sellada de 1kg'
   },
   {
     productId: 'prod_cebolla_cabezona',
@@ -692,7 +750,8 @@ export const PRICES_CALI = [
     priceCOP: 3390,
     pricePerUnit: 3.39,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Cebolla cabezona kilo'
+    isBulkWeighed: false,
+    notes: 'Malla 1kg fija'
   },
   {
     productId: 'prod_cebolla_cabezona',
@@ -703,7 +762,8 @@ export const PRICES_CALI = [
     priceCOP: 4300,
     pricePerUnit: 4.30,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Cebolla cabezona malla'
+    isBulkWeighed: true,
+    notes: 'A granel continuo por gramo'
   },
 
   // --- CEBOLLA LARGA (JUNCA) (500g) ---
@@ -716,7 +776,8 @@ export const PRICES_CALI = [
     priceCOP: 2290,
     pricePerUnit: 4.58,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Atado cebolla junca'
+    isBulkWeighed: false,
+    notes: 'Atado fijo 500g'
   },
   {
     productId: 'prod_cebolla_larga',
@@ -727,7 +788,8 @@ export const PRICES_CALI = [
     priceCOP: 2190,
     pricePerUnit: 4.38,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Manojo cebolla larga'
+    isBulkWeighed: false,
+    notes: 'Atado fijo 500g'
   },
   {
     productId: 'prod_cebolla_larga',
@@ -738,7 +800,8 @@ export const PRICES_CALI = [
     priceCOP: 2800,
     pricePerUnit: 5.60,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Cebolla junca limpia'
+    isBulkWeighed: true,
+    notes: 'A granel en báscula'
   },
 
   // --- PAPA PASTUSA (2000g / 2kg) ---
@@ -751,7 +814,8 @@ export const PRICES_CALI = [
     priceCOP: 5990,
     pricePerUnit: 2.995,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa papa pastusa 2kg'
+    isBulkWeighed: false,
+    notes: 'Bolsa fija de 2kg'
   },
   {
     productId: 'prod_papa_pastusa',
@@ -762,18 +826,20 @@ export const PRICES_CALI = [
     priceCOP: 5890,
     pricePerUnit: 2.945,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa papa 2kg limpia'
+    isBulkWeighed: false,
+    notes: 'Bolsa fija de 2kg'
   },
   {
     productId: 'prod_papa_pastusa',
     storeId: 'EXITO',
     brand: 'Éxito Huerta',
-    packageSize: 2000,
+    packageSize: 1000,
     unit: 'g',
-    priceCOP: 7200,
+    priceCOP: 3600,
     pricePerUnit: 3.60,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Papa parda lavada bolsa'
+    isBulkWeighed: true, // En Éxito se pesa por kilo o fracción exacta
+    notes: 'A granel continuo en báscula'
   },
 
   // --- PLATANO MADURO (x3 unidades) ---
@@ -786,7 +852,8 @@ export const PRICES_CALI = [
     priceCOP: 4290,
     pricePerUnit: 1430.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bandeja x3 plátanos maduros'
+    isBulkWeighed: false,
+    notes: 'Bandeja fija x3'
   },
   {
     productId: 'prod_platano_maduro',
@@ -797,18 +864,20 @@ export const PRICES_CALI = [
     priceCOP: 3990,
     pricePerUnit: 1330.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Plátano maduro x3'
+    isBulkWeighed: false,
+    notes: 'Bandeja fija x3'
   },
   {
     productId: 'prod_platano_maduro',
     storeId: 'EXITO',
     brand: 'Éxito Huerta',
-    packageSize: 3,
+    packageSize: 1,
     unit: 'un',
-    priceCOP: 5100,
+    priceCOP: 1700,
     pricePerUnit: 1700.0,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Plátano hartón x3'
+    isBulkWeighed: true,
+    notes: 'Unidades individuales en báscula'
   },
 
   // --- ZANAHORIA (1000g) ---
@@ -821,7 +890,8 @@ export const PRICES_CALI = [
     priceCOP: 3100,
     pricePerUnit: 3.10,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa 1kg zanahoria lavada'
+    isBulkWeighed: false,
+    notes: 'Bolsa fija 1kg'
   },
   {
     productId: 'prod_zanahoria',
@@ -832,7 +902,8 @@ export const PRICES_CALI = [
     priceCOP: 2990,
     pricePerUnit: 2.99,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Zanahoria fresca 1kg'
+    isBulkWeighed: false,
+    notes: 'Bolsa fija 1kg'
   },
   {
     productId: 'prod_zanahoria',
@@ -843,7 +914,8 @@ export const PRICES_CALI = [
     priceCOP: 3800,
     pricePerUnit: 3.80,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Zanahoria seleccionada'
+    isBulkWeighed: true,
+    notes: 'A granel continuo en báscula'
   },
 
   // --- AGUACATE (x2 unidades) ---
@@ -856,7 +928,8 @@ export const PRICES_CALI = [
     priceCOP: 5490,
     pricePerUnit: 2745.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Malla x2 aguacates maduros'
+    isBulkWeighed: false,
+    notes: 'Malla fija x2'
   },
   {
     productId: 'prod_aguacate',
@@ -867,18 +940,20 @@ export const PRICES_CALI = [
     priceCOP: 5290,
     pricePerUnit: 2645.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Aguacate papelillo x2'
+    isBulkWeighed: false,
+    notes: 'Malla fija x2'
   },
   {
     productId: 'prod_aguacate',
     storeId: 'EXITO',
     brand: 'Éxito Huerta',
-    packageSize: 2,
+    packageSize: 1,
     unit: 'un',
-    priceCOP: 6800,
+    priceCOP: 3400,
     pricePerUnit: 3400.0,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Aguacate hass/papelillo'
+    isBulkWeighed: true,
+    notes: 'Unidad individual por gramaje'
   },
 
   // --- LIMON TAHITI (x6 unidades) ---
@@ -891,7 +966,8 @@ export const PRICES_CALI = [
     priceCOP: 3500,
     pricePerUnit: 583.33,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Malla x6 limones jugosos'
+    isBulkWeighed: false,
+    notes: 'Malla fija x6'
   },
   {
     productId: 'prod_limon_tahiti',
@@ -902,7 +978,8 @@ export const PRICES_CALI = [
     priceCOP: 3390,
     pricePerUnit: 565.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Limón común x6'
+    isBulkWeighed: false,
+    notes: 'Malla fija x6'
   },
   {
     productId: 'prod_limon_tahiti',
@@ -913,7 +990,8 @@ export const PRICES_CALI = [
     priceCOP: 4400,
     pricePerUnit: 733.33,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Limón Tahití verde'
+    isBulkWeighed: true,
+    notes: 'A granel por kilo en báscula'
   },
 
   // --- AJO (x3 cabezas) ---
@@ -926,7 +1004,8 @@ export const PRICES_CALI = [
     priceCOP: 2190,
     pricePerUnit: 730.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Malla x3 cabezas de ajo'
+    isBulkWeighed: false,
+    notes: 'Malla fija x3'
   },
   {
     productId: 'prod_ajo_cabeza',
@@ -937,7 +1016,8 @@ export const PRICES_CALI = [
     priceCOP: 2090,
     pricePerUnit: 696.67,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Ajo malla 3 unidades'
+    isBulkWeighed: false,
+    notes: 'Malla fija x3'
   },
   {
     productId: 'prod_ajo_cabeza',
@@ -948,7 +1028,8 @@ export const PRICES_CALI = [
     priceCOP: 2900,
     pricePerUnit: 966.67,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Ajo importado blanco'
+    isBulkWeighed: false,
+    notes: 'Malla x3'
   },
 
   // --- CILANTRO (1 atado) ---
@@ -961,7 +1042,8 @@ export const PRICES_CALI = [
     priceCOP: 1290,
     pricePerUnit: 1290.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Atado fresco de cilantro'
+    isBulkWeighed: false,
+    notes: 'Atado sellado'
   },
   {
     productId: 'prod_cilantro',
@@ -972,7 +1054,8 @@ export const PRICES_CALI = [
     priceCOP: 1190,
     pricePerUnit: 1190.0,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Manojo de cilantro'
+    isBulkWeighed: false,
+    notes: 'Atado sellado'
   },
   {
     productId: 'prod_cilantro',
@@ -983,7 +1066,8 @@ export const PRICES_CALI = [
     priceCOP: 1800,
     pricePerUnit: 1800.0,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Cilantro fresco atado'
+    isBulkWeighed: false,
+    notes: 'Atado fresco'
   },
 
   // --- ACEITE VEGETAL (900ml) ---
@@ -996,7 +1080,8 @@ export const PRICES_CALI = [
     priceCOP: 6890,
     pricePerUnit: 7.65,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Botella 900ml de soya/palma'
+    isBulkWeighed: false,
+    notes: 'Botella 900ml'
   },
   {
     productId: 'prod_aceite_vegetal',
@@ -1007,7 +1092,8 @@ export const PRICES_CALI = [
     priceCOP: 6790,
     pricePerUnit: 7.54,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Aceite vegetal 900ml'
+    isBulkWeighed: false,
+    notes: 'Botella 900ml'
   },
   {
     productId: 'prod_aceite_vegetal',
@@ -1018,7 +1104,8 @@ export const PRICES_CALI = [
     priceCOP: 9800,
     pricePerUnit: 10.88,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Aceite vegetal marca premium'
+    isBulkWeighed: false,
+    notes: 'Botella 900ml'
   },
 
   // --- PANELA (1000g) ---
@@ -1031,7 +1118,8 @@ export const PRICES_CALI = [
     priceCOP: 4690,
     pricePerUnit: 4.69,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Panela pastilla x4 / 1kg'
+    isBulkWeighed: false,
+    notes: 'Pastilla 1kg'
   },
   {
     productId: 'prod_panela_bloque',
@@ -1042,7 +1130,8 @@ export const PRICES_CALI = [
     priceCOP: 4590,
     pricePerUnit: 4.59,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Panela redonda o cuadrada 1kg'
+    isBulkWeighed: false,
+    notes: 'Pastilla 1kg'
   },
   {
     productId: 'prod_panela_bloque',
@@ -1053,7 +1142,8 @@ export const PRICES_CALI = [
     priceCOP: 5900,
     pricePerUnit: 5.90,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Panela pulverizada o pastilla'
+    isBulkWeighed: false,
+    notes: 'Paquete 1kg'
   },
 
   // --- SAL (1000g) ---
@@ -1066,7 +1156,8 @@ export const PRICES_CALI = [
     priceCOP: 1490,
     pricePerUnit: 1.49,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Sal yodada 1000g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg'
   },
   {
     productId: 'prod_sal_refinada',
@@ -1077,7 +1168,8 @@ export const PRICES_CALI = [
     priceCOP: 1390,
     pricePerUnit: 1.39,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Bolsa 1kg sal de mesa'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg'
   },
   {
     productId: 'prod_sal_refinada',
@@ -1088,7 +1180,8 @@ export const PRICES_CALI = [
     priceCOP: 2200,
     pricePerUnit: 2.20,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Sal Refisal bolsa'
+    isBulkWeighed: false,
+    notes: 'Bolsa 1kg'
   },
 
   // --- CAFE MOLIDO (250g) ---
@@ -1101,7 +1194,8 @@ export const PRICES_CALI = [
     priceCOP: 6890,
     pricePerUnit: 27.56,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Café tostado y molido 250g'
+    isBulkWeighed: false,
+    notes: 'Bolsa 250g'
   },
   {
     productId: 'prod_cafe_molido',
@@ -1112,7 +1206,8 @@ export const PRICES_CALI = [
     priceCOP: 6790,
     pricePerUnit: 27.16,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Café colombiano molido'
+    isBulkWeighed: false,
+    notes: 'Bolsa 250g'
   },
   {
     productId: 'prod_cafe_molido',
@@ -1123,7 +1218,8 @@ export const PRICES_CALI = [
     priceCOP: 8900,
     pricePerUnit: 35.60,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Café tradicional marca líder'
+    isBulkWeighed: false,
+    notes: 'Bolsa 250g'
   },
 
   // --- PASTA DE TOMATE (200g) ---
@@ -1136,7 +1232,8 @@ export const PRICES_CALI = [
     priceCOP: 1990,
     pricePerUnit: 9.95,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Doypack 200g salsa de tomate'
+    isBulkWeighed: false,
+    notes: 'Doypack 200g'
   },
   {
     productId: 'prod_pasta_tomate',
@@ -1147,7 +1244,8 @@ export const PRICES_CALI = [
     priceCOP: 1890,
     pricePerUnit: 9.45,
     confidence: CONFIDENCE_LEVELS.VERIFIED_TODAY.level,
-    notes: 'Pasta de tomate 200g'
+    isBulkWeighed: false,
+    notes: 'Doypack 200g'
   },
   {
     productId: 'prod_pasta_tomate',
@@ -1158,6 +1256,7 @@ export const PRICES_CALI = [
     priceCOP: 3200,
     pricePerUnit: 16.00,
     confidence: CONFIDENCE_LEVELS.RECENT_WEEK.level,
-    notes: 'Salsa de tomate Fruco'
+    isBulkWeighed: false,
+    notes: 'Doypack Fruco'
   }
 ];
