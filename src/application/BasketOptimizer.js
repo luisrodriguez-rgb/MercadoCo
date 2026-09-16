@@ -20,18 +20,20 @@ export class BasketOptimizer {
    * @param {string} params.transportModeId - Modo de transporte (WALKING | TRANSIT_MIO | VEHICLE | DELIVERY)
    * @returns {Object} Diagnóstico financiero completo y canasta explicada
    */
-  static optimize({
-    consolidatedIngredients,
-    budgetCOP,
-    pantryStockIds = [],
-    zoneId = 'CALI_GRANADA_VERSALLES',
-    transportModeId = 'WALKING',
-    wasteRiskParams = {
+  static optimize(rawParams = {}) {
+    const params = rawParams || {};
+    const consolidatedIngredients = params.consolidatedIngredients || 
+      (params.weeklyPlan && (params.weeklyPlan.ingredients || params.weeklyPlan.consolidatedIngredients)) || 
+      [];
+    const budgetCOP = params.budgetCOP !== undefined ? params.budgetCOP : 220000;
+    const pantryStockIds = params.pantryStockIds || (params.userPreferences && params.userPreferences.existingPantryStockIds) || [];
+    const zoneId = params.zoneId || (params.userPreferences && params.userPreferences.zoneId) || 'CALI_GRANADA_VERSALLES';
+    const transportModeId = params.transportModeId || (params.userPreferences && params.userPreferences.transportModeId) || 'WALKING';
+    const wasteRiskParams = params.wasteRiskParams || {
       HIGH: PERISHABILITY.HIGH.wasteProbability,
       MEDIUM: PERISHABILITY.MEDIUM.wasteProbability,
       STABLE: PERISHABILITY.STABLE.wasteProbability
-    }
-  }) {
+    };
     const productsMap = new Map(ESSENTIAL_PRODUCTS.map(p => [p.id, p]));
     const pricesByStoreAndProduct = new Map();
 

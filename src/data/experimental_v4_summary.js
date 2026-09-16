@@ -79,3 +79,24 @@ export const EXPERIMENTAL_V4_SUMMARY = {
     frictionToleranceScale: ["$2.000 COP", "$5.000 COP", "$10.000 COP", "$15.000+ COP", "Nunca (Monotienda estricta)"]
   }
 };
+
+// Compatibilidad y alias unificados
+EXPERIMENTAL_V4_SUMMARY.summary = {
+  ...EXPERIMENTAL_V4_SUMMARY.metrics,
+  dominancePct: EXPERIMENTAL_V4_SUMMARY.metrics?.dominanceRatePct || 100.0,
+  runtime: EXPERIMENTAL_V4_SUMMARY.metrics?.runtime || { p50Ms: 0.24, p95Ms: 15.72, maxMs: 15.72 }
+};
+
+EXPERIMENTAL_V4_SUMMARY.scenarios = EXPERIMENTAL_V4_SUMMARY.scenarios.map(s => ({
+  ...s,
+  scenarioId: s.id,
+  budgetCOP: s.budget,
+  heuristicImprovementPct: s.improvementPct,
+  milp: {
+    effectiveCostCOP: s.milpCost,
+    netSavingsVsBestMonoCOP: s.savingsVsBestMono
+  },
+  humanHeuristic: {
+    effectiveCostCOP: s.humanCost
+  }
+}));
