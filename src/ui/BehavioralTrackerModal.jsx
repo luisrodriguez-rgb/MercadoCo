@@ -38,7 +38,7 @@ export function BehavioralTrackerModal({
         <div className="modal-body">
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-bg-base)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)', marginBottom: '1rem', fontSize: '0.74rem', color: 'var(--color-text-secondary)' }}>
             <Lock size={14} color="#10b981" />
-            <span><strong>Protocolo de Investigación Ética:</strong> Datos anonimizados exclusivamente para la evaluación de hipótesis conductuales de tolerancia y adopción en Cali.</span>
+            <span><strong>Protocolo de Registro:</strong> Datos experimentales pseudonimizados y protocolo de registro definido para evaluación conductual de campo en Cali.</span>
           </div>
 
           <div className="participant-input-row">
