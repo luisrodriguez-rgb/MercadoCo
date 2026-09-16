@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, ShieldCheck, Activity, User, Database } from 'lucide-react';
+import { X, Copy, Check, ShieldCheck, Activity, User, Database, Lock } from 'lucide-react';
 
 export function BehavioralTrackerModal({ 
   isOpen, 
@@ -27,7 +27,7 @@ export function BehavioralTrackerModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Activity size={18} color="var(--color-brand-emerald)" />
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
-              Telemetría Conductual V4-B (Validación de Campo)
+              Registro Metodológico V4-B (Datos Pseudonimizados)
             </h3>
           </div>
           <button className="modal-close-btn" onClick={onClose}>
@@ -36,23 +36,25 @@ export function BehavioralTrackerModal({
         </div>
 
         <div className="modal-body">
-          <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0' }}>
-            Instrumentación automática de la sesión para el registro de hipótesis de adopción, tolerancia a segunda parada y ejecución de compra en Santiago de Cali.
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-bg-base)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)', marginBottom: '1rem', fontSize: '0.74rem', color: 'var(--color-text-secondary)' }}>
+            <Lock size={14} color="#10b981" />
+            <span><strong>Protocolo de Investigación Ética:</strong> Datos anonimizados exclusivamente para la evaluación de hipótesis conductuales de tolerancia y adopción en Cali.</span>
+          </div>
 
           <div className="participant-input-row">
-            <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>ID del Participante:</label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Código de Participante (Pseudónimo):</label>
             <input 
               type="text"
               value={sessionData.participantId}
               onChange={e => onUpdateParticipantId(e.target.value)}
+              placeholder="CALI-SUB-01"
               style={{
                 background: 'var(--color-bg-elevated)',
                 border: '1px solid var(--color-border-subtle)',
                 borderRadius: 'var(--radius-xs)',
                 color: 'var(--color-text-primary)',
-                padding: '0.3rem 0.6rem',
-                fontSize: '0.8rem',
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.82rem',
                 fontFamily: 'monospace'
               }}
             />
@@ -62,22 +64,22 @@ export function BehavioralTrackerModal({
             <div className="metric-pill">
               <span>2da Tienda Aceptada:</span>
               <strong style={{ color: sessionData.secondStoreAccepted ? '#10b981' : '#f87171' }}>
-                {sessionData.secondStoreAccepted ? 'SÍ (Híbrido)' : 'NO (Monotienda)'}
+                {sessionData.secondStoreAccepted ? 'SÍ (Híbrido)' : 'NO (1 Tienda)'}
               </strong>
             </div>
             <div className="metric-pill">
-              <span>Checklist Abierto:</span>
-              <strong>{sessionData.checklistOpened ? 'SÍ' : 'NO'}</strong>
+              <span>Checklist Completado:</span>
+              <strong>{sessionData.checklistCompleted ? 'SÍ (100%)' : (sessionData.checklistItemsChecked + '/' + sessionData.totalLinesInBasket)}</strong>
             </div>
             <div className="metric-pill">
-              <span>Ítems Marcados:</span>
-              <strong>{sessionData.checklistItemsChecked} / {sessionData.totalItemsInBasket}</strong>
-            </div>
-            <div className="metric-pill">
-              <span>Compra Confirmada:</span>
-              <strong style={{ color: sessionData.purchaseCompleted ? '#10b981' : 'var(--color-text-tertiary)' }}>
-                {sessionData.purchaseCompleted ? 'SÍ' : 'NO'}
+              <span>Compra Reportada:</span>
+              <strong style={{ color: sessionData.purchaseReported ? '#10b981' : 'var(--color-text-tertiary)' }}>
+                {sessionData.purchaseReported ? 'SÍ' : 'NO'}
               </strong>
+            </div>
+            <div className="metric-pill">
+              <span>Ahorro Estimado:</span>
+              <strong style={{ color: '#10b981' }}>+${Math.round(sessionData.netSavingsEstimated || 0).toLocaleString('es-CO')} COP</strong>
             </div>
           </div>
 
