@@ -91,6 +91,8 @@ export default function App() {
     checklistItemsChecked: 0,
     checklistCompleted: false,
     purchaseReported: false,
+    purchaseReportMethod: null,
+    purchaseReportedAt: null,
     totalLinesInBasket: 30,
     ingredientsRequiredCount: 14,
     netSavingsEstimated: 24910
@@ -224,7 +226,12 @@ export default function App() {
 
   const handleReportPurchase = () => {
     setPurchaseReported(true);
-    setBehavioralSession(s => ({ ...s, purchaseReported: true }));
+    setBehavioralSession(s => ({ 
+      ...s, 
+      purchaseReported: true,
+      purchaseReportMethod: "participant_confirmation",
+      purchaseReportedAt: new Date().toISOString()
+    }));
   };
 
   // Trade-off simétrico de 2da parada (V4-B Sin Sesgo Visual)
