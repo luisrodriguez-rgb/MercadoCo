@@ -28,13 +28,14 @@ export function ShoppingChecklist({
   onCopyList,
   copiedNotification,
   formatCOP,
-  onCompletePurchase,
-  purchaseCompleted
+  onReportPurchase,
+  purchaseReported
 }) {
   const activeStores = Object.keys(groupedBasketByStore);
-  const totalItemsCount = Object.values(groupedBasketByStore).reduce((acc, list) => acc + list.length, 0);
+  const totalLinesCount = Object.values(groupedBasketByStore).reduce((acc, list) => acc + list.length, 0);
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
-  const progressPct = totalItemsCount > 0 ? Math.round((checkedCount / totalItemsCount) * 100) : 0;
+  const progressPct = totalLinesCount > 0 ? Math.round((checkedCount / totalLinesCount) * 100) : 0;
+  const checklistCompleted = totalLinesCount > 0 && checkedCount === totalLinesCount;
 
   const renderStoreLogo = (storeId, width = 36, height = 22) => {
     switch (storeId) {
@@ -54,16 +55,16 @@ export function ShoppingChecklist({
             <ShoppingBag size={14} />
             <span>Lista de Compra Operativa por Parada</span>
           </div>
-          <h2>Tu compra en el supermercado</h2>
+          <h2>Tu lista en el supermercado</h2>
           <p>
-            {totalItemsCount} productos distribuidos en {activeStores.length} {activeStores.length === 1 ? 'tienda' : 'tiendas'} para maximizar tu ahorro en {optimization.currentZone.name}.
+            {totalLinesCount} líneas de compra organizadas en {activeStores.length} {activeStores.length === 1 ? 'tienda' : 'tiendas'} para cubrir los requerimientos del menú semanal en {optimization.currentZone.name}.
           </p>
         </div>
 
         <div className="checklist-progress-box">
           <div className="progress-labels">
-            <span>Progreso de compra</span>
-            <strong className="num-tabular">{checkedCount} / {totalItemsCount} productos ({progressPct}%)</strong>
+            <span>Progreso de verificación</span>
+            <strong className="num-tabular">{checkedCount} / {totalLinesCount} líneas ({progressPct}%)</strong>
           </div>
           <div className="progress-bar-track">
             <div 
@@ -80,7 +81,7 @@ export function ShoppingChecklist({
               {copiedNotification ? <Check size={14} color="#10b981" /> : <Share2 size={14} />}
               <span>{copiedNotification ? '¡Lista copiada!' : 'Copiar para WhatsApp'}</span>
             </button>
-            {checkedCount < totalItemsCount ? (
+            {checkedCount < totalLinesCount ? (
               <button className="btn-secondary-action" onClick={onSelectAll}>
                 <CheckCircle2 size={14} />
                 <span>Marcar todos</span>
@@ -95,20 +96,20 @@ export function ShoppingChecklist({
         </div>
       </div>
 
-      {/* Resumen de ahorro de la ruta */}
+      {/* Resumen de costos de la ruta */}
       <div className="checklist-summary-strip">
         <div className="summary-stat">
           <span className="stat-lbl">Desembolso estimado en cajas</span>
           <span className="stat-val num-tabular">{formatCOP(optimization.multiStore.itemsCost)}</span>
         </div>
         <div className="summary-stat">
-          <span className="stat-lbl">Fricción estimada (recorrido)</span>
+          <span className="stat-lbl">Fricción logística estimada</span>
           <span className="stat-val num-tabular" style={{ color: 'var(--color-text-secondary)' }}>
             {formatCOP(optimization.multiStore.frictionPenaltyCOP)}
           </span>
         </div>
         <div className="summary-stat highlight">
-          <span className="stat-lbl">Ahorro neto comprobado</span>
+          <span className="stat-lbl">Ahorro neto estimado</span>
           <span className="stat-val num-tabular">+{formatCOP(optimization.multiStore.netSavings)}</span>
         </div>
         <div className="summary-stat">
@@ -141,7 +142,7 @@ export function ShoppingChecklist({
                     <div>
                       <h3 className="stop-store-title">{storeName}</h3>
                       <div className="stop-store-sub">
-                        {items.length} productos · {storeCheckedCount}/{items.length} listos
+                        {items.length} líneas de compra · {storeCheckedCount}/{items.length} verificadas
                       </div>
                     </div>
                   </div>
@@ -171,7 +172,7 @@ export function ShoppingChecklist({
                       <button 
                         type="button"
                         className="item-checkbox-btn"
-                        aria-label={isChecked ? 'Desmarcar producto' : 'Marcar producto'}
+                        aria-label={isChecked ? 'Desmarcar ítem' : 'Marcar ítem'}
                       >
                         {isChecked ? (
                           <CheckSquare size={18} color="var(--color-brand-emerald)" />
@@ -208,34 +209,34 @@ export function ShoppingChecklist({
         })}
       </div>
 
-      {/* Tarjeta de finalización y comparación */}
+      {/* Tarjeta de finalización y reporte de compra */}
       <div className="checklist-footer-card">
         <div className="footer-info">
           <Sparkles size={18} color="var(--color-brand-emerald)" />
           <div>
-            <strong>¿Terminaste tu compra en el supermercado?</strong>
+            <strong>Estado de ejecución de compra</strong>
             <p>
-              {progressPct === 100 
-                ? ('¡Excelente! Todos los productos están marcados. Has ahorrado ' + formatCOP(optimization.multiStore.netSavings) + ' frente a la mejor monotienda.')
-                : 'Marca cada producto en el pasillo para llevar control de tu lista y evitar compras por impulso.'}
+              {checklistCompleted 
+                ? ('Checklist completado (' + totalLinesCount + '/' + totalLinesCount + '). Ahorro neto estimado: ' + formatCOP(optimization.multiStore.netSavings) + ' frente a comprar todo en una sola tienda.')
+                : 'Marca cada línea en el pasillo del supermercado para auditar la compra y verificar la disponibilidad real.'}
             </p>
           </div>
         </div>
 
         <div>
-          {progressPct === 100 && !purchaseCompleted && (
+          {checklistCompleted && !purchaseReported && (
             <button 
               className="btn-complete-purchase"
-              onClick={onCompletePurchase}
+              onClick={onReportPurchase}
             >
               <Check size={16} />
-              <span>Confirmar compra realizada</span>
+              <span>Informar compra efectuada</span>
             </button>
           )}
-          {purchaseCompleted && (
+          {purchaseReported && (
             <div className="purchase-completed-badge">
               <CheckCircle2 size={16} color="#10b981" />
-              <span>Compra registrada en tu historial</span>
+              <span>Compra informada por el participante</span>
             </div>
           )}
         </div>
