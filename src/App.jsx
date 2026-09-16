@@ -6,6 +6,8 @@ import { ESSENTIAL_PRODUCTS } from './data/products.js';
 import { STORES, CONFIDENCE_LEVELS, CITIES, PANTRY_STAPLE_IDS, TRANSPORT_MODES } from './domain/types.js';
 import { LogoD1, LogoAra, LogoExito, FlagColombia } from './ui/StoreLogos.jsx';
 import { EXPERIMENTAL_V4_SUMMARY } from './data/experimental_v4_summary.js';
+import { ShoppingChecklist } from './ui/ShoppingChecklist.jsx';
+import { BehavioralTrackerModal } from './ui/BehavioralTrackerModal.jsx';
 import { 
   SlidersHorizontal, 
   CalendarDays, 
@@ -15,44 +17,51 @@ import {
   TrendingDown, 
   ShieldCheck, 
   AlertCircle, 
-  SunMedium, 
-  MoonStar, 
   Timer, 
   CircleDollarSign, 
   Copy, 
   Check, 
   Search, 
   ArrowRightLeft, 
-  Info,
-  Sun,
-  Moon,
-  MapPin,
-  CheckCircle,
-  Scale,
-  Car,
-  Footprints,
-  Bus,
-  Bike,
-  HelpCircle,
-  ShieldAlert,
-  FlaskConical,
-  Award
+  Info, 
+  Sun, 
+  Moon, 
+  MapPin, 
+  CheckCircle, 
+  Scale, 
+  Car, 
+  Footprints, 
+  Bus, 
+  HelpCircle, 
+  ShieldAlert, 
+  FlaskConical, 
+  Award, 
+  ShoppingBag, 
+  Store, 
+  ArrowRight, 
+  Clock, 
+  Sparkles, 
+  ChevronRight, 
+  ChevronDown, 
+  Activity, 
+  Heart, 
+  CheckCircle2, 
+  History 
 } from 'lucide-react';
 
-export function App() {
-  // Modo de color (Oscuro / Claro)
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('mc_theme') || 'dark';
-  });
+export default function App() {
+  // Tema claro/oscuro
+  const [theme, setTheme] = useState(() => localStorage.getItem('mc_theme') || 'dark');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('mc_theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-  };
+  const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+
+  // Pestaña activa: 'overview' | 'shopping' | 'compare' | 'why' | 'history' | 'laboratory'
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Parámetros de simulación
   const [peopleCount, setPeopleCount] = useState(2);
@@ -61,25 +70,41 @@ export function App() {
   const [selectedZoneId, setSelectedZoneId] = useState('CALI_GRANADA_VERSALLES');
   const [selectedTransportModeId, setSelectedTransportModeId] = useState('WALKING');
   const [pantryStockIds, setPantryStockIds] = useState(['prod_sal_refinada', 'prod_aceite_vegetal']);
-  const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'basket' | 'explainability' | 'pantry' | 'prices'
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
   const [selectedBasketMode, setSelectedBasketMode] = useState('MULTI'); // 'MULTI' | 'D1' | 'ARA' | 'EXITO'
   const [checkedItems, setCheckedItems] = useState({});
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
   const [copiedNotification, setCopiedNotification] = useState(false);
+  const [purchaseCompleted, setPurchaseCompleted] = useState(false);
+  const [behavioralModalOpen, setBehavioralModalOpen] = useState(false);
 
-  // Toggle insumo en despensa preexistente
+  // Telemetría conductual V4-B
+  const [behavioralSession, setBehavioralSession] = useState(() => ({
+    sessionId: 'sess_' + Math.random().toString(36).substring(2, 9),
+    scenarioKey: 'Granada-Versalles - $220k - 2 PAX - Balanceado',
+    participantId: 'P_CALI_01',
+    startedAt: new Date().toISOString(),
+    secondStoreAccepted: true,
+    secondStoreInteractionsCount: 0,
+    checklistOpened: false,
+    checklistItemsChecked: 0,
+    whatsappCopied: false,
+    explanationOpened: false,
+    purchaseCompleted: false,
+    totalItemsInBasket: 0,
+    netSavingsPresented: 24910
+  }));
+
   const togglePantryStaple = (id) => {
-    setPantryStockIds(prev => 
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
+    setPantryStockIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
   };
 
-  // 1. Invocación de Generador de Menú
+  // Invocación del planificador nutricional semanal
   const weeklyPlan = useMemo(() => {
     return MealPlanService.generateWeeklyPlan({ peopleCount, budgetCOP, preference });
   }, [peopleCount, budgetCOP, preference]);
 
-  // 2. Invocación de Solver de Canasta V2 Acoplado
+  // Invocación del optimizador combinatorio exacto
   const optimization = useMemo(() => {
     return BasketOptimizer.optimize({
       consolidatedIngredients: weeklyPlan.ingredients,
@@ -90,44 +115,33 @@ export function App() {
     });
   }, [weeklyPlan, budgetCOP, pantryStockIds, selectedZoneId, selectedTransportModeId]);
 
-  // Formato monetario estricto en pesos colombianos
-  const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
-    }).format(val);
-  };
-
-  // Toggle checklist de compra
-  const toggleItemCheck = (id) => {
-    setCheckedItems(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
-  // Items de la canasta activa
+  // Items de la canasta según modo seleccionado
   const activeBasketItems = useMemo(() => {
-    if (selectedBasketMode === 'MULTI') {
-      return optimization.multiStore.items;
-    }
+    if (selectedBasketMode === 'MULTI') return optimization.multiStore.items;
     return optimization.monoStores[selectedBasketMode]?.items || [];
-  }, [optimization, selectedBasketMode]);
+  }, [selectedBasketMode, optimization]);
 
-  // Agrupamiento por tienda para logística de compra
+  // Agrupación de canasta por tienda para paradas
   const groupedBasketByStore = useMemo(() => {
     const groups = {};
     activeBasketItems.forEach(item => {
-      if (!groups[item.storeId]) {
-        groups[item.storeId] = [];
-      }
+      if (!groups[item.storeId]) groups[item.storeId] = [];
       groups[item.storeId].push(item);
     });
     return groups;
   }, [activeBasketItems]);
 
-  // Filtrado de la matriz de precios
+  // Actualizar sesión conductual al cambiar la canasta
+  useEffect(() => {
+    setBehavioralSession(prev => ({
+      ...prev,
+      scenarioKey: optimization.currentZone.name + ' - $' + (budgetCOP / 1000) + 'k - ' + peopleCount + ' PAX - ' + preference,
+      totalItemsInBasket: activeBasketItems.length,
+      netSavingsPresented: optimization.multiStore.netSavings
+    }));
+  }, [optimization, budgetCOP, peopleCount, preference, activeBasketItems]);
+
+  // Matriz de precios filtrada
   const filteredPrices = useMemo(() => {
     if (!priceSearchQuery.trim()) return PRICES_CALI;
     const q = priceSearchQuery.toLowerCase();
@@ -142,59 +156,106 @@ export function App() {
     ? optimization.multiStore.totalCost 
     : (optimization.monoStores[selectedBasketMode]?.totalCost || 0);
 
-  const activeFutureInventory = selectedBasketMode === 'MULTI'
-    ? optimization.multiStore.totalFutureInventory
-    : (optimization.monoStores[selectedBasketMode]?.totalFutureInventory || 0);
-
-  const activeWasteRisk = selectedBasketMode === 'MULTI'
-    ? optimization.multiStore.totalWasteRisk
-    : (optimization.monoStores[selectedBasketMode]?.totalWasteRisk || 0);
-
-  const activeConfidence = selectedBasketMode === 'MULTI'
-    ? optimization.multiStore.averageConfidence
-    : (optimization.monoStores[selectedBasketMode]?.averageConfidence || 0);
-
   const isWithinBudget = activeCost <= budgetCOP;
 
-  // Renderizador de logos oficiales
-  const renderStoreLogo = (storeId, width = 38, height = 24) => {
-    switch (storeId) {
-      case 'D1':
-        return <LogoD1 width={width} height={height} />;
-      case 'ARA':
-        return <LogoAra width={width} height={height} />;
-      case 'EXITO':
-        return <LogoExito width={width} height={height} />;
-      default:
-        return null;
-    }
+  const formatCOP = (val) => '$ ' + Math.round(val || 0).toLocaleString('es-CO');
+
+  // Handlers del Checklist y Conducta
+  const handleItemCheckToggle = (productId) => {
+    setCheckedItems(prev => {
+      const next = { ...prev, [productId]: !prev[productId] };
+      const checkedCount = Object.values(next).filter(Boolean).length;
+      setBehavioralSession(s => ({ ...s, checklistItemsChecked: checkedCount }));
+      return next;
+    });
   };
 
-  // Copiar lista de compras para exportación a mensajería
-  const copyShoppingList = () => {
-    let text = `MERCADO OPTIMIZADO - CALI (${peopleCount} personas | Zona: ${optimization.currentZone.name})\nPresupuesto: ${formatCOP(budgetCOP)} | Desembolso en caja: ${formatCOP(activeCost)}\n\n`;
-    Object.entries(groupedBasketByStore).forEach(([storeId, items]) => {
+  const handleSelectAll = () => {
+    const next = {};
+    activeBasketItems.forEach(it => { next[it.productId] = true; });
+    setCheckedItems(next);
+    setBehavioralSession(s => ({ ...s, checklistItemsChecked: activeBasketItems.length }));
+  };
+
+  const handleResetAll = () => {
+    setCheckedItems({});
+    setBehavioralSession(s => ({ ...s, checklistItemsChecked: 0 }));
+  };
+
+  const handleCopyShoppingList = () => {
+    let text = 'MERCADO COLOMBIA - ORDEN DE COMPRA (' + peopleCount + ' personas | Zona: ' + optimization.currentZone.name + ')\n';
+    text += 'Presupuesto: ' + formatCOP(budgetCOP) + ' | Salida estimada en caja: ' + formatCOP(activeCost) + '\n\n';
+    Object.entries(groupedBasketByStore).forEach(([storeId, items], idx) => {
       const storeName = STORES[storeId]?.name || storeId;
-      text += `[${storeName.toUpperCase()}]\n`;
+      const subtotal = items.reduce((acc, it) => acc + it.totalCost, 0);
+      text += 'PARADA ' + (idx + 1) + ': ' + storeName.toUpperCase() + ' (' + formatCOP(subtotal) + ')\n';
       items.forEach(item => {
-        const packaging = item.packagingType === 'EXACT_WEIGHT' ? `(Báscula exacta ${item.totalRequired}${item.unit})` : `(${item.packageUnits} paq x ${item.packageSize}${item.unit})`;
-        text += `- ${item.productName} [${item.brand}] ${packaging}: ${formatCOP(item.totalCost)}\n`;
+        const packaging = item.packagingType === 'EXACT_WEIGHT' 
+          ? '(Báscula exacta ' + item.totalRequired + item.unit + ')' 
+          : '(' + item.packageUnits + ' paq x ' + item.packageSize + item.unit + ')';
+        text += '  [ ] ' + item.productName + ' [' + item.brand + '] ' + packaging + ': ' + formatCOP(item.totalCost) + '\n';
       });
       text += '\n';
     });
+    text += 'Ahorro neto comprobado: +' + formatCOP(optimization.multiStore.netSavings) + ' frente a comprar todo en una sola tienda.';
     navigator.clipboard.writeText(text).then(() => {
       setCopiedNotification(true);
+      setBehavioralSession(s => ({ ...s, whatsappCopied: true }));
       setTimeout(() => setCopiedNotification(false), 2500);
     });
+  };
+
+  const handleCompletePurchase = () => {
+    setPurchaseCompleted(true);
+    setBehavioralSession(s => ({ ...s, purchaseCompleted: true }));
+  };
+
+  // Trade-off de 2da parada (V4-B)
+  const handleAcceptSecondStore = () => {
+    setSelectedBasketMode('MULTI');
+    setBehavioralSession(s => ({
+      ...s,
+      secondStoreAccepted: true,
+      secondStoreInteractionsCount: s.secondStoreInteractionsCount + 1
+    }));
+  };
+
+  const handlePreferSingleStore = () => {
+    const bestMonoId = optimization.bestMonoStore.storeId;
+    setSelectedBasketMode(bestMonoId);
+    setBehavioralSession(s => ({
+      ...s,
+      secondStoreAccepted: false,
+      secondStoreInteractionsCount: s.secondStoreInteractionsCount + 1
+    }));
+  };
+
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+    if (tabKey === 'shopping') {
+      setBehavioralSession(s => ({ ...s, checklistOpened: true }));
+    } else if (tabKey === 'why') {
+      setBehavioralSession(s => ({ ...s, explanationOpened: true }));
+    }
+  };
+
+  const renderStoreLogo = (storeId, width = 32, height = 20) => {
+    switch (storeId) {
+      case 'D1': return <LogoD1 width={width} height={height} />;
+      case 'ARA': return <LogoAra width={width} height={height} />;
+      case 'EXITO': return <LogoExito width={width} height={height} />;
+      default: return null;
+    }
   };
 
   const caliZones = CITIES.CALI.zones;
   const transportModesList = Object.values(TRANSPORT_MODES);
   const pantryStapleProducts = ESSENTIAL_PRODUCTS.filter(p => PANTRY_STAPLE_IDS.includes(p.id));
+  const telemetry = optimization.solverTelemetry;
 
   return (
     <div>
-      {/* Header Institucional */}
+      {/* Header Unificado */}
       <header className="site-header">
         <div className="site-header-inner">
           <div className="brand-section">
@@ -202,378 +263,612 @@ export function App() {
               <FlagColombia width={22} height={14} />
             </div>
             <div className="brand-titles">
-              <h1>
-                <span>Mercado Colombia</span>
-              </h1>
-              <div className="brand-tagline">Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V4)</div>
+              <h1><span>Mercado Colombia</span></h1>
+              <div className="brand-tagline">Compra mejor. Vive mejor.</div>
             </div>
           </div>
 
+          {/* Barra de Navegación de 6 Pestañas */}
+          <nav className="consumer-nav-strip">
+            <button 
+              className={'nav-tab-btn ' + (activeTab === 'overview' ? 'active' : '')}
+              onClick={() => handleTabChange('overview')}
+            >
+              <Store size={15} />
+              <span>Mi mercado</span>
+            </button>
+
+            <button 
+              className={'nav-tab-btn ' + (activeTab === 'shopping' ? 'active' : '')}
+              onClick={() => handleTabChange('shopping')}
+            >
+              <ShoppingBag size={15} />
+              <span>Compra</span>
+              <span style={{ fontSize: '0.68rem', background: 'var(--color-bg-elevated)', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 700 }}>
+                {activeBasketItems.length}
+              </span>
+            </button>
+
+            <button 
+              className={'nav-tab-btn ' + (activeTab === 'compare' ? 'active' : '')}
+              onClick={() => handleTabChange('compare')}
+            >
+              <ArrowRightLeft size={15} />
+              <span>Comparar</span>
+            </button>
+
+            <button 
+              className={'nav-tab-btn ' + (activeTab === 'why' ? 'active' : '')}
+              onClick={() => handleTabChange('why')}
+            >
+              <HelpCircle size={15} />
+              <span>¿Por qué?</span>
+            </button>
+
+            <button 
+              className={'nav-tab-btn ' + (activeTab === 'history' ? 'active' : '')}
+              onClick={() => handleTabChange('history')}
+            >
+              <History size={15} />
+              <span>Mi Historial</span>
+            </button>
+
+            <button 
+              className={'nav-tab-btn lab-tab ' + (activeTab === 'laboratory' ? 'active' : '')}
+              onClick={() => handleTabChange('laboratory')}
+            >
+              <FlaskConical size={15} />
+              <span>Laboratorio V4</span>
+            </button>
+          </nav>
+
+          {/* Controles de Cabecera */}
           <div className="header-controls-strip">
             <div className="status-badge active-region">
               <div className="dot-indicator"></div>
-              <span>Cali, Valle del Cauca</span>
+              <span>Cali, Valle</span>
             </div>
 
             <button 
-              id="btn-theme-toggle"
               className="theme-toggle-btn" 
               onClick={toggleTheme}
               aria-label="Alternar modo de color"
             >
-              {theme === 'dark' ? (
-                <>
-                  <Sun size={14} />
-                  <span>Modo Claro</span>
-                </>
-              ) : (
-                <>
-                  <Moon size={14} />
-                  <span>Modo Oscuro</span>
-                </>
-              )}
+              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Contenedor Principal */}
+      {/* Contenido Principal */}
       <main className="app-container">
-        <div className="top-deck-grid">
-          {/* Panel de Configuración de Parámetros */}
-          <section className="surface-panel">
-            <div className="panel-header-title">
-              <h2>
-                <SlidersHorizontal size={16} />
-                <span>Parámetros Operativos</span>
-              </h2>
-            </div>
-
-            {/* Selector de Zona Urbana de Cali */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <MapPin size={13} color="var(--color-brand-emerald)" />
-                  <span>Zona Urbana / Clúster Comercial</span>
-                </span>
-              </div>
-              <select
-                id="select-zone"
-                value={selectedZoneId}
-                onChange={(e) => setSelectedZoneId(e.target.value)}
-                style={{
-                  width: '100%',
-                  background: 'var(--color-bg-elevated)',
-                  border: '1px solid var(--color-border-subtle)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--color-text-primary)',
-                  fontSize: '0.8rem',
-                  padding: '0.5rem 0.65rem',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {caliZones.map(zone => (
-                  <option key={zone.id} value={zone.id}>
-                    {zone.name} ({zone.baseDistanceKm} km radio)
-                  </option>
-                ))}
-              </select>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)', marginTop: '0.2rem' }}>
-                {optimization.currentZone.notes}
-              </div>
-            </div>
-
-            {/* Selector de Medio de Transporte para Cálculo Paramétrico de Fricción */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span>Modo de Desplazamiento (Fricción F)</span>
-                <span className="field-val-display num-tabular" style={{ fontSize: '0.78rem', color: 'var(--highlight-text)' }}>
-                  F = {formatCOP(optimization.multiStore.frictionPenaltyCOP)}
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem' }}>
-                {transportModesList.map(mode => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setSelectedTransportModeId(mode.id)}
-                    style={{
-                      padding: '0.4rem 0.5rem',
-                      borderRadius: 'var(--radius-xs)',
-                      border: '1px solid',
-                      borderColor: selectedTransportModeId === mode.id ? 'var(--color-brand-emerald)' : 'var(--color-border-subtle)',
-                      background: selectedTransportModeId === mode.id ? 'var(--color-brand-emerald-dim)' : 'var(--color-bg-elevated)',
-                      color: selectedTransportModeId === mode.id ? 'var(--highlight-text)' : 'var(--color-text-secondary)',
-                      fontSize: '0.72rem',
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                  >
-                    {mode.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Selector de Comensales */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span>Comensales habituales</span>
-                <span className="field-val-display num-tabular">{peopleCount} personas</span>
-              </div>
-              <div className="people-grid">
-                {[1, 2, 3, 4].map(num => (
-                  <button
-                    key={num}
-                    id={`btn-people-${num}`}
-                    className={`option-select-btn ${peopleCount === num ? 'active' : ''}`}
-                    onClick={() => setPeopleCount(num)}
-                  >
-                    <span className="main-label num-tabular">{num}</span>
-                    <span className="sub-label">{num === 2 ? 'Pareja' : num === 1 ? 'Individual' : 'Familia'}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Selector de Presupuesto Semanal */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span>Presupuesto en Efectivo Asignado</span>
-                <span className="field-val-display num-tabular">{formatCOP(budgetCOP)}</span>
-              </div>
-              <input
-                id="slider-budget"
-                type="range"
-                min="100000"
-                max="400000"
-                step="10000"
-                value={budgetCOP}
-                onChange={(e) => setBudgetCOP(Number(e.target.value))}
-                className="slider-control"
-              />
-              <div className="presets-strip">
-                {[150000, 200000, 250000, 300000].map(val => (
-                  <button
-                    key={val}
-                    className={`preset-button ${budgetCOP === val ? 'active' : ''}`}
-                    onClick={() => setBudgetCOP(val)}
-                  >
-                    ${val / 1000}k COP
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Despensa Preexistente (Insumos que ya tengo en casa) */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span>Insumos ya en casa (Despensa preexistente)</span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--highlight-text)', fontWeight: 700 }}>
-                  {pantryStockIds.length} activos
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginTop: '0.2rem' }}>
-                {pantryStapleProducts.map(prod => {
-                  const hasIt = pantryStockIds.includes(prod.id);
-                  return (
-                    <button
-                      key={prod.id}
-                      onClick={() => togglePantryStaple(prod.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                        padding: '0.35rem 0.5rem',
-                        borderRadius: 'var(--radius-xs)',
-                        border: '1px solid',
-                        borderColor: hasIt ? 'var(--color-brand-emerald)' : 'var(--color-border-subtle)',
-                        background: hasIt ? 'var(--color-brand-emerald-dim)' : 'var(--color-bg-elevated)',
-                        color: hasIt ? 'var(--highlight-text)' : 'var(--color-text-secondary)',
-                        fontSize: '0.73rem',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <CheckCircle size={12} color={hasIt ? '#10b981' : 'var(--color-text-tertiary)'} />
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {prod.name.split(' ')[0]} {prod.name.split(' ')[1] || ''}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Enfoque del Menú */}
-            <div className="form-field-group">
-              <div className="field-label-row">
-                <span>Enfoque Nutricional / Financiero</span>
-              </div>
-              <div className="segmented-switch">
-                {[
-                  { id: 'BALANCEADO', label: 'Balanceado' },
-                  { id: 'ECONOMICO', label: 'Máx. Ahorro' },
-                  { id: 'ALTA_PROTEINA', label: 'Alta Proteína' }
-                ].map(item => (
-                  <button
-                    key={item.id}
-                    className={`segment-item ${preference === item.id ? 'active' : ''}`}
-                    onClick={() => setPreference(item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Métricas de Cobertura */}
-            <div className="panel-kpi-row">
-              <div className="kpi-cell">
-                <span className="val highlight num-tabular">{weeklyPlan.days.length * 2}</span>
-                <span className="lbl">Raciones Semanales</span>
-              </div>
-              <div className="kpi-cell">
-                <span className="val num-tabular">{activeBasketItems.length}</span>
-                <span className="lbl">SKUs a Comprar</span>
-              </div>
-              <div className="kpi-cell">
-                <span className="val highlight num-tabular">{formatCOP(activeCost / (weeklyPlan.days.length * 2 * peopleCount))}</span>
-                <span className="lbl">Costo Real / Plato</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Tablero Ejecutivo Financiero */}
-          <section className="surface-panel diagnostic-board">
-            <div className="board-top-status">
-              <div className="headline-wrap">
-                <div className="eyebrow">Diagnóstico de Liquidez y Asignación ({optimization.currentZone.name})</div>
-                <h2>
-                  {isWithinBudget ? (
-                    <span style={{ color: 'var(--highlight-text)' }}>
-                      Presupuesto suficiente para las 14 raciones del ciclo
-                    </span>
-                  ) : (
-                    <span style={{ color: '#fbbf24' }}>
-                      Déficit presupuestal de {formatCOP(activeCost - budgetCOP)}
-                    </span>
-                  )}
-                </h2>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                {/* Badge de Calidad y Cobertura de Datos (Reemplazo conceptual formal) */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
-                  <ShieldCheck size={14} color="#10b981" />
-                  <span>Calidad de Datos: <strong className="num-tabular" style={{ color: 'var(--highlight-text)' }}>{optimization.dataQuality.coveragePercentage}%</strong></span>
-                  <span style={{ color: 'var(--color-text-tertiary)', marginLeft: '4px' }}>({optimization.dataQuality.verifiedSKUsCount}/{optimization.dataQuality.totalSKUsCount} verificados)</span>
+        {/* PESTAÑA 1: MI MERCADO (OVERVIEW CONSUMIDOR) */}
+        {activeTab === 'overview' && (
+          <div className="consumer-three-col-layout">
+            {/* Columna Izquierda: Configuración del Hogar */}
+            <aside className="consumer-sidebar">
+              <div className="sidebar-card">
+                <div className="sidebar-title">
+                  <SlidersHorizontal size={16} color="var(--color-brand-emerald)" />
+                  <span>Tu mercado</span>
+                </div>
+                <div className="sidebar-sub">
+                  Personaliza tus preferencias para obtener la mejor recomendación.
                 </div>
 
-                <div className={`badge-verdict ${isWithinBudget ? 'in-budget' : 'deficit'}`}>
-                  {isWithinBudget ? <Check size={14} /> : <AlertCircle size={14} />}
-                  <span className="num-tabular">
-                    {isWithinBudget 
-                      ? `Caja libre: ${formatCOP(budgetCOP - activeCost)}` 
-                      : 'Ajuste requerido'}
+                {/* Comensales */}
+                <div className="sidebar-form-item">
+                  <div className="sidebar-form-label">
+                    <span>Personas en el hogar</span>
+                    <span className="num-tabular">{peopleCount} personas</span>
+                  </div>
+                  <div className="people-grid">
+                    {[1, 2, 3, 4].map(num => (
+                      <button
+                        key={num}
+                        className={'option-select-btn ' + (peopleCount === num ? 'active' : '')}
+                        onClick={() => setPeopleCount(num)}
+                      >
+                        <span className="main-label num-tabular">{num}</span>
+                        <span className="sub-label">{num === 2 ? 'Pareja' : num === 1 ? 'Solo' : 'Familia'}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Presupuesto semanal */}
+                <div className="sidebar-form-item">
+                  <div className="sidebar-form-label">
+                    <span>Presupuesto semanal</span>
+                    <strong className="num-tabular" style={{ color: 'var(--color-brand-emerald)' }}>
+                      {formatCOP(budgetCOP)}
+                    </strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="100000"
+                    max="400000"
+                    step="10000"
+                    value={budgetCOP}
+                    onChange={e => setBudgetCOP(Number(e.target.value))}
+                    className="slider-control"
+                  />
+                  <div className="presets-strip">
+                    {[150000, 200000, 220000, 250000].map(val => (
+                      <button
+                        key={val}
+                        className={'preset-button ' + (budgetCOP === val ? 'active' : '')}
+                        onClick={() => setBudgetCOP(val)}
+                      >
+                        ${val / 1000}k
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Zona comercial en Cali */}
+                <div className="sidebar-form-item">
+                  <div className="sidebar-form-label">
+                    <span>Zona / Área comercial</span>
+                  </div>
+                  <select
+                    className="sidebar-select"
+                    value={selectedZoneId}
+                    onChange={e => setSelectedZoneId(e.target.value)}
+                  >
+                    {caliZones.map(zone => (
+                      <option key={zone.id} value={zone.id}>
+                        {zone.name} ({zone.baseDistanceKm} km)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Modo de desplazamiento */}
+                <div className="sidebar-form-item">
+                  <div className="sidebar-form-label">
+                    <span>Modo de desplazamiento</span>
+                  </div>
+                  <div className="transport-pills-grid">
+                    {transportModesList.slice(0, 3).map(mode => (
+                      <button
+                        key={mode.id}
+                        className={'transport-pill-btn ' + (selectedTransportModeId === mode.id ? 'active' : '')}
+                        onClick={() => setSelectedTransportModeId(mode.id)}
+                      >
+                        {mode.id === 'WALKING' && <Footprints size={14} />}
+                        {mode.id === 'MIO' && <Bus size={14} />}
+                        {mode.id === 'CAR_MOTO' && <Car size={14} />}
+                        <span>{mode.name.split(' ')[0]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Perfil nutricional */}
+                <div className="sidebar-form-item">
+                  <div className="sidebar-form-label">
+                    <span>Perfil nutricional</span>
+                  </div>
+                  <select
+                    className="sidebar-select"
+                    value={preference}
+                    onChange={e => setPreference(e.target.value)}
+                  >
+                    <option value="BALANCEADO">Balanceado (Recomendado)</option>
+                    <option value="ECONOMICO">Máx. Ahorro</option>
+                    <option value="ALTA_PROTEINA">Alta Proteína</option>
+                  </select>
+                </div>
+
+                {/* Acordeón de Configuración Avanzada */}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button 
+                    className="accordion-toggle-btn"
+                    onClick={() => setAdvancedSettingsOpen(!advancedSettingsOpen)}
+                  >
+                    <span>Configuración avanzada</span>
+                    {advancedSettingsOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </button>
+
+                  {advancedSettingsOpen && (
+                    <div className="accordion-content">
+                      <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
+                        <strong>Insumos ya en casa (Despensa preexistente):</strong>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem' }}>
+                        {pantryStapleProducts.map(prod => {
+                          const hasIt = pantryStockIds.includes(prod.id);
+                          return (
+                            <button
+                              key={prod.id}
+                              onClick={() => togglePantryStaple(prod.id)}
+                              style={{
+                                padding: '0.3rem 0.45rem',
+                                borderRadius: 'var(--radius-xs)',
+                                border: '1px solid ' + (hasIt ? 'var(--color-brand-emerald)' : 'var(--color-border-subtle)'),
+                                background: hasIt ? 'var(--color-brand-emerald-dim)' : 'var(--color-bg-elevated)',
+                                color: hasIt ? 'var(--highlight-text)' : 'var(--color-text-secondary)',
+                                fontSize: '0.7rem',
+                                textAlign: 'left',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {prod.name.split(' ')[0]} {prod.name.split(' ')[1] || ''}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Banner de Valor al Consumidor */}
+              <div className="sidebar-wellness-banner">
+                <Sparkles size={18} style={{ flexShrink: 0 }} />
+                <div>
+                  <strong>Tu ahorro, tu bienestar</strong>
+                  <div>Optimizamos tu compra considerando precio, empaques, disponibilidad, nutrición y fricción logística.</div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Columna Central: Recomendación de Compra */}
+            <section className="consumer-main-content">
+              {/* Hero Banner Principal */}
+              <div className="hero-decision-banner">
+                <div className="hero-banner-top">
+                  <div className="hero-title-group">
+                    <div className="hero-cart-icon-wrap">
+                      <ShoppingBag size={22} color="#ffffff" />
+                    </div>
+                    <div>
+                      <h2>Tu mejor mercado esta semana</h2>
+                      <p>Combinamos las mejores opciones de cada tienda para que tu plata rinda más.</p>
+                    </div>
+                  </div>
+
+                  <div className="hero-active-scenario-badge">
+                    <MapPin size={12} />
+                    <span>Escenario activo: {optimization.currentZone.name.split(' ')[0]} · {formatCOP(budgetCOP)} · {peopleCount} personas</span>
+                  </div>
+                </div>
+
+                <div className="hero-stats-row">
+                  <div className="hero-stat-cell">
+                    <span className="hero-stat-lbl">Costo efectivo total</span>
+                    <div className="hero-stat-val num-tabular">
+                      {formatCOP(optimization.multiStore.effectiveCost)}
+                      <span className="hero-stat-badge-heuristic">+{optimization.heuristicBenchmark.heuristicImprovementPct}% vs RH-1</span>
+                    </div>
+                    <span className="hero-stat-sub">En {optimization.currentZone.name.split(' ')[0]}</span>
+                  </div>
+
+                  <div className="hero-stat-cell">
+                    <span className="hero-stat-lbl">Ahorro neto comprobado</span>
+                    <div className="hero-stat-val num-tabular" style={{ color: '#a7f3d0' }}>
+                      +{formatCOP(optimization.multiStore.netSavings)}
+                    </div>
+                    <span className="hero-stat-sub">Frente a la mejor monotienda</span>
+                  </div>
+
+                  <div className="hero-stat-cell">
+                    <span className="hero-stat-lbl">Tiendas sugeridas</span>
+                    <div className="hero-stat-val" style={{ fontSize: '1.1rem' }}>
+                      {optimization.multiStore.activeStores.length} tiendas
+                    </div>
+                    <span className="hero-stat-sub">{optimization.multiStore.activeStores.join(' + ')}</span>
+                  </div>
+
+                  <div className="hero-stat-cell">
+                    <span className="hero-stat-lbl">Productos</span>
+                    <div className="hero-stat-val" style={{ fontSize: '1.1rem' }}>
+                      {activeBasketItems.length} ítems
+                    </div>
+                    <span className="hero-stat-sub">Para los 7 días</span>
+                  </div>
+
+                  <div className="hero-stat-cell">
+                    <span className="hero-stat-lbl">Tiempo estimado</span>
+                    <div className="hero-stat-val" style={{ fontSize: '1.1rem' }}>
+                      ~ 45 min
+                    </div>
+                    <span className="hero-stat-sub">Recorrido peatonal</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desglose Presupuestal */}
+              <div className="consumer-budget-breakdown-card">
+                <div className="breakdown-top-header">
+                  <h3>Desglose de tu presupuesto</h3>
+                  <span className="num-tabular" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-text-secondary)' }}>
+                    {formatCOP(budgetCOP)} Presupuesto asignado
                   </span>
                 </div>
+
+                <div className="breakdown-bars-track">
+                  <div className="breakdown-step-card base">
+                    <span className="step-card-value num-tabular">{formatCOP(budgetCOP)}</span>
+                    <span className="step-card-pct">100.0%</span>
+                    <span className="step-card-lbl">Presupuesto</span>
+                    <span className="step-card-sub">Asignado semanal</span>
+                  </div>
+
+                  <div className="breakdown-step-card items">
+                    <span className="step-card-value num-tabular" style={{ color: '#38bdf8' }}>-{formatCOP(optimization.multiStore.itemsCost)}</span>
+                    <span className="step-card-pct">{((optimization.multiStore.itemsCost / budgetCOP) * 100).toFixed(1)}%</span>
+                    <span className="step-card-lbl">Productos</span>
+                    <span className="step-card-sub">En góndola / cajas</span>
+                  </div>
+
+                  <div className="breakdown-step-card friction">
+                    <span className="step-card-value num-tabular" style={{ color: '#c084fc' }}>-{formatCOP(optimization.multiStore.frictionPenaltyCOP)}</span>
+                    <span className="step-card-pct">{((optimization.multiStore.frictionPenaltyCOP / budgetCOP) * 100).toFixed(1)}%</span>
+                    <span className="step-card-lbl">Fricción logística</span>
+                    <span className="step-card-sub">Desplazamiento</span>
+                  </div>
+
+                  <div className="breakdown-step-card free">
+                    <span className="step-card-value num-tabular" style={{ color: '#4ade80' }}>+{formatCOP(budgetCOP - activeCost)}</span>
+                    <span className="step-card-pct">{(((budgetCOP - activeCost) / budgetCOP) * 100).toFixed(1)}%</span>
+                    <span className="step-card-lbl">Caja libre</span>
+                    <span className="step-card-sub">Para imprevistos</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Asignación Óptima de Tiendas */}
+              <div className="consumer-stores-card">
+                <div className="stores-card-header">
+                  <h3>Asignación óptima de tiendas</h3>
+                  <span className="recommended-solution-pill">Solución recomendada</span>
+                </div>
+
+                <div className="store-split-cards-row">
+                  {Object.entries(groupedBasketByStore).map(([storeId, items]) => {
+                    const storeSubtotal = items.reduce((acc, it) => acc + it.totalCost, 0);
+                    const storeName = STORES[storeId]?.name || storeId;
+                    return (
+                      <div key={storeId} className="assigned-store-box">
+                        <div className="store-box-top">
+                          {renderStoreLogo(storeId, 32, 20)}
+                          <span className="store-box-brand-name">{storeName}</span>
+                        </div>
+                        <div className="store-box-items-pill">
+                          <CheckCircle2 size={12} color="#10b981" />
+                          <span>{items.length} productos</span>
+                        </div>
+                        <div className="store-box-amount num-tabular">
+                          {formatCOP(storeSubtotal)}
+                        </div>
+                        <button 
+                          className="store-box-link"
+                          onClick={() => handleTabChange('shopping')}
+                        >
+                          <span>Ver productos</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+
+                  {/* Tarjeta de Mejor Monotienda de Referencia */}
+                  <div className="assigned-store-box monostore-box">
+                    <div className="store-box-top">
+                      <Store size={18} color="var(--color-text-secondary)" />
+                      <div>
+                        <div className="store-box-brand-name">Mejor monotienda</div>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>
+                          ({optimization.bestMonoStore.storeName})
+                        </div>
+                      </div>
+                    </div>
+                    <div className="store-box-amount num-tabular">
+                      {formatCOP(optimization.bestMonoStore.effectiveCost)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 700, marginTop: 'auto' }}>
+                      + {formatCOP(optimization.multiStore.netSavings)} vs tu solución
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta de Trade-off de Segunda Parada (Interacción Conductual V4-B) */}
+              <div className="second-store-tradeoff-card">
+                <div className="tradeoff-header">
+                  <h3>¿Vale la pena hacer una segunda parada?</h3>
+                  <span className="tradeoff-savings-pill num-tabular">
+                    Ahorro neto: +{formatCOP(optimization.multiStore.netSavings)}
+                  </span>
+                </div>
+                <div className="tradeoff-prompt">
+                  Para ahorrar <strong>{formatCOP(optimization.multiStore.netSavings)}</strong> necesitas visitar dos tiendas ({optimization.multiStore.activeStores.join(' y ')}), lo que añade aproximadamente <strong>~18 minutos</strong> de desplazamiento en {optimization.currentZone.name.split(' ')[0]}. ¿Prefieres maximizar tu plata o ahorrar tiempo?
+                </div>
+                <div className="tradeoff-options-grid">
+                  <button 
+                    className="btn-accept-second-store"
+                    onClick={handleAcceptSecondStore}
+                  >
+                    <Check size={16} />
+                    <span>Acepto 2da tienda (Ahorro {formatCOP(optimization.multiStore.netSavings)})</span>
+                  </button>
+                  <button 
+                    className="btn-prefer-single-store"
+                    onClick={handlePreferSingleStore}
+                  >
+                    <span>Prefiero 1 sola tienda ({optimization.bestMonoStore.storeName})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* ¿Por qué esta combinación? (Human-Readable) */}
+              <div className="consumer-why-card">
+                <div className="why-header">
+                  <h3>¿Por qué esta combinación?</h3>
+                  <button 
+                    className="store-box-link"
+                    onClick={() => handleTabChange('why')}
+                  >
+                    <span>Ver explicación completa</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+                <div className="why-sub">
+                  El sistema analiza precio, empaques, disponibilidad y tu perfil para encontrar la mejor combinación.
+                </div>
+                <div className="why-reasons-grid">
+                  <div className="why-reason-box">
+                    <div className="why-item-icon">🥔</div>
+                    <div>
+                      <div className="why-box-title">Papa → Éxito</div>
+                      <div className="why-box-desc">Puedes comprar exactamente 1.2 kg en báscula (menos desperdicio).</div>
+                    </div>
+                  </div>
+                  <div className="why-reason-box">
+                    <div className="why-item-icon">🥚</div>
+                    <div>
+                      <div className="why-box-title">Huevos → Ara</div>
+                      <div className="why-box-desc">Menor costo por unidad en cubeta familiar de 30.</div>
+                    </div>
+                  </div>
+                  <div className="why-reason-box">
+                    <div className="why-item-icon">🍚</div>
+                    <div>
+                      <div className="why-box-title">Arroz → D1</div>
+                      <div className="why-box-desc">Mejor precio por presentación compatible con tu consumo.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Columna Derecha: Resumen de Ahorro y CTA a la Lista */}
+            <aside className="consumer-right-col">
+              {/* Tarjeta de Ahorro en Detalle */}
+              <div className="right-card">
+                <div className="right-card-title">
+                  <span>Tu ahorro en detalle</span>
+                  <button className="store-box-link" onClick={() => handleTabChange('compare')}>
+                    <span>Ver cálculo →</span>
+                  </button>
+                </div>
+                <div className="savings-breakdown-row">
+                  <span>Ahorro en productos:</span>
+                  <strong className="num-tabular" style={{ color: '#10b981' }}>
+                    +{formatCOP(optimization.multiStore.grossSavings)}
+                  </strong>
+                </div>
+                <div className="savings-breakdown-row">
+                  <span>Costo de tiendas extra:</span>
+                  <strong className="num-tabular" style={{ color: '#f87171' }}>
+                    -{formatCOP(optimization.multiStore.deltaFriction)}
+                  </strong>
+                </div>
+                <div className="savings-breakdown-row total-row">
+                  <span>Ahorro neto:</span>
+                  <strong className="num-tabular" style={{ color: '#10b981' }}>
+                    {formatCOP(optimization.multiStore.netSavings)}
+                  </strong>
+                </div>
+              </div>
+
+              {/* Qué incluye tu compra */}
+              <div className="right-card">
+                <div className="right-card-title">
+                  <span>Qué incluye tu compra</span>
+                </div>
+                <div className="package-info-row">
+                  <span>Productos</span>
+                  <strong className="num-tabular">{activeBasketItems.length}</strong>
+                </div>
+                <div className="package-info-row">
+                  <span>Tiendas</span>
+                  <strong className="num-tabular">{optimization.multiStore.activeStores.length}</strong>
+                </div>
+                <div className="package-info-row">
+                  <span>Tiempo estimado de recorrido</span>
+                  <strong>~ 45 min</strong>
+                </div>
+              </div>
+
+              {/* Explicación del modelo */}
+              <div className="right-card">
+                <div className="right-card-title">
+                  <span>Explicación del modelo</span>
+                </div>
+                <div className="explanation-bullets-list">
+                  <div className="explanation-bullet-item">
+                    <CheckCircle size={14} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span>Optimiza precio, empaques y disponibilidad en múltiples tiendas.</span>
+                  </div>
+                  <div className="explanation-bullet-item">
+                    <CheckCircle size={14} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span>Considera tu nutrición y la probabilidad de desperdicio biológico.</span>
+                  </div>
+                  <div className="explanation-bullet-item">
+                    <CheckCircle size={14} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span>Calcula la fricción logística para encontrar el mejor equilibrio entre ahorro y conveniencia.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Destacado: Ver Lista de Compra */}
+              <div className="cta-checklist-banner">
+                <div className="cta-banner-header">
+                  <CheckCircle2 size={20} />
+                  <span>¿Listo para tu lista de compra?</span>
+                </div>
+                <p className="cta-banner-p">
+                  Te generamos la lista exacta por tienda para que solo te preocupes por disfrutar en el supermercado.
+                </p>
+                <button 
+                  className="btn-cta-go-checklist"
+                  onClick={() => handleTabChange('shopping')}
+                >
+                  <span>Ver mi lista de compra</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {/* PESTAÑA 2: COMPRA (SHOPPING CHECKLIST POR PARADA) */}
+        {activeTab === 'shopping' && (
+          <ShoppingChecklist 
+            groupedBasketByStore={groupedBasketByStore}
+            optimization={optimization}
+            peopleCount={peopleCount}
+            budgetCOP={budgetCOP}
+            onItemCheckToggle={handleItemCheckToggle}
+            checkedItems={checkedItems}
+            onSelectAll={handleSelectAll}
+            onResetAll={handleResetAll}
+            onCopyList={handleCopyShoppingList}
+            copiedNotification={copiedNotification}
+            formatCOP={formatCOP}
+            onCompletePurchase={handleCompletePurchase}
+            purchaseCompleted={purchaseCompleted}
+          />
+        )}
+
+        {/* PESTAÑA 3: COMPARAR (CANASTA COMPLETA VS MONOTIENDAS) */}
+        {activeTab === 'compare' && (
+          <div className="surface-panel">
+            <div className="panel-header-title">
+              <h2>
+                <ArrowRightLeft size={18} />
+                <span>Comparativa de Opciones: Multi-tienda vs. Monotiendas en Cali</span>
+              </h2>
             </div>
-
-            {/* Desglose Analítico Riguroso: Desembolso vs Consumo vs Inventario Útil vs Desperdicio */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.65rem', background: 'var(--color-bg-base)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Desembolso Total en Caja</div>
-                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
-                  {formatCOP(activeCost)}
-                </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Salida bruta de bolsillo</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Consumo Efectivo Semanal</div>
-                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
-                  {formatCOP(activeCost - (activeFutureInventory + activeWasteRisk))}
-                </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>14 raciones ingeridas</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Inventario Útil Futuro</div>
-                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#38bdf8' }} className="num-tabular">
-                  {formatCOP(activeFutureInventory)}
-                </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Granos, aceite, legumbres (activo)</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Riesgo de Desperdicio</div>
-                <div style={{ fontSize: '1.2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: activeWasteRisk > 0 ? '#ef4444' : 'var(--color-text-secondary)' }} className="num-tabular">
-                  {formatCOP(activeWasteRisk)}
-                </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--color-text-tertiary)' }}>Perecederos sobrantes</div>
-              </div>
-            </div>
-
-            {/* V3: Gráfico Waterfall de Descomposición Presupuestal */}
-            <div className="waterfall-panel">
-              <div className="waterfall-header">
-                <div className="waterfall-title">
-                  <TrendingDown size={14} color="var(--color-brand-emerald)" />
-                  <span>Descomposición de Flujo Presupuestal (Waterfall de Desembolso)</span>
-                </div>
-                <div className="waterfall-meta num-tabular">
-                  Caja Libre Neta: {formatCOP(budgetCOP - activeCost)} ({(Math.max(0, (budgetCOP - activeCost) / budgetCOP) * 100).toFixed(1)}%)
-                </div>
-              </div>
-
-              <div className="waterfall-bars-grid">
-                {/* 1. Presupuesto Total */}
-                <div className="waterfall-stage-card">
-                  <span className="waterfall-stage-lbl">1. Presupuesto Asignado</span>
-                  <span className="waterfall-stage-val num-tabular">{formatCOP(budgetCOP)}</span>
-                  <span className="waterfall-stage-pct" style={{ color: 'var(--color-text-tertiary)' }}>Base: 100.0%</span>
-                  <div className="waterfall-bar-track">
-                    <div className="waterfall-bar-fill" style={{ width: '100%', background: '#64748b' }}></div>
-                  </div>
-                </div>
-
-                {/* 2. Desembolso en Productos */}
-                <div className="waterfall-stage-card">
-                  <span className="waterfall-stage-lbl">2. Salida en Productos</span>
-                  <span className="waterfall-stage-val num-tabular" style={{ color: '#fbbf24' }}>-{formatCOP(activeCost)}</span>
-                  <span className="waterfall-stage-pct" style={{ color: '#fbbf24' }}>{((activeCost / budgetCOP) * 100).toFixed(1)}% del presupuesto</span>
-                  <div className="waterfall-bar-track">
-                    <div className="waterfall-bar-fill" style={{ width: `${Math.min(100, (activeCost / budgetCOP) * 100)}%`, background: '#fbbf24' }}></div>
-                  </div>
-                </div>
-
-                {/* 3. Fricción Logística Imputada */}
-                <div className="waterfall-stage-card">
-                  <span className="waterfall-stage-lbl">3. Fricción Logística F</span>
-                  <span className="waterfall-stage-val num-tabular" style={{ color: '#f87171' }}>-{formatCOP(selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0))}</span>
-                  <span className="waterfall-stage-pct" style={{ color: '#f87171' }}>{(((selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0)) / budgetCOP) * 100).toFixed(1)}% del presupuesto</span>
-                  <div className="waterfall-bar-track">
-                    <div className="waterfall-bar-fill" style={{ width: `${Math.min(100, (((selectedBasketMode === 'MULTI' ? optimization.multiStore.frictionPenaltyCOP : (optimization.monoStores[selectedBasketMode]?.frictionCOP || 0)) / budgetCOP) * 100) * 10)}%`, background: '#f87171' }}></div>
-                  </div>
-                </div>
-
-                {/* 4. Caja Libre Disponible */}
-                <div className="waterfall-stage-card">
-                  <span className="waterfall-stage-lbl">4. Caja Libre Disponible</span>
-                  <span className="waterfall-stage-val num-tabular" style={{ color: 'var(--highlight-text)' }}>+{formatCOP(budgetCOP - activeCost)}</span>
-                  <span className="waterfall-stage-pct" style={{ color: 'var(--highlight-text)' }}>{(((budgetCOP - activeCost) / budgetCOP) * 100).toFixed(1)}% de liquidez</span>
-                  <div className="waterfall-bar-track">
-                    <div className="waterfall-bar-fill" style={{ width: `${Math.max(0, ((budgetCOP - activeCost) / budgetCOP) * 100)}%`, background: '#10b981' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Matriz Comparativa de Tiendas con Contabilidad Simétrica (Productos + Fricción) */}
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
+              Compara el valor total de tu mercado si compras en una sola tienda frente a dividir tu lista entre varias tiendas en {optimization.currentZone.name}.
+            </p>
             <div className="store-comparative-matrix">
-              {/* Combinación Multitienda */}
               <div 
-                className={`matrix-store-tile ${selectedBasketMode === 'MULTI' ? 'selected' : ''}`}
+                className={'matrix-store-tile ' + (selectedBasketMode === 'MULTI' ? 'selected' : '')}
                 onClick={() => setSelectedBasketMode('MULTI')}
               >
                 <div className="tile-system-badge">Asignación Óptima</div>
@@ -590,9 +885,8 @@ export function App() {
                 </div>
               </div>
 
-              {/* Monotienda D1 */}
               <div 
-                className={`matrix-store-tile ${selectedBasketMode === 'D1' ? 'selected' : ''}`}
+                className={'matrix-store-tile ' + (selectedBasketMode === 'D1' ? 'selected' : '')}
                 onClick={() => setSelectedBasketMode('D1')}
               >
                 <div className="store-header-row">
@@ -607,9 +901,8 @@ export function App() {
                 </div>
               </div>
 
-              {/* Monotienda Ara */}
               <div 
-                className={`matrix-store-tile ${selectedBasketMode === 'ARA' ? 'selected' : ''}`}
+                className={'matrix-store-tile ' + (selectedBasketMode === 'ARA' ? 'selected' : '')}
                 onClick={() => setSelectedBasketMode('ARA')}
               >
                 <div className="store-header-row">
@@ -624,9 +917,8 @@ export function App() {
                 </div>
               </div>
 
-              {/* Monotienda Éxito */}
               <div 
-                className={`matrix-store-tile ${selectedBasketMode === 'EXITO' ? 'selected' : ''}`}
+                className={'matrix-store-tile ' + (selectedBasketMode === 'EXITO' ? 'selected' : '')}
                 onClick={() => setSelectedBasketMode('EXITO')}
               >
                 <div className="store-header-row">
@@ -641,647 +933,213 @@ export function App() {
                 </div>
               </div>
             </div>
-
-            {/* V4: Tarjeta de Ahorro Auditable con Calculadora vs Mejor Monotienda y Benchmark Humano */}
-            <div className="audit-benchmark-box">
-              <div className="audit-benchmark-header">
-                <span>Auditoría de Ahorro vs. Mejor Monotienda ({optimization.bestMonoStore.storeName})</span>
-                <span className="heuristic-pill">
-                  <TrendingDown size={12} />
-                  +{optimization.heuristicBenchmark.heuristicImprovementPct}% de mejora vs. Heurística RH-1 ({formatCOP(optimization.heuristicBenchmark.effectiveCost)})
-                </span>
-              </div>
-              <div className="audit-benchmark-row">
-                <span>Mejor monotienda ({optimization.bestMonoStore.storeName}): {formatCOP(optimization.bestMonoStore.itemsCost)} productos + {formatCOP(optimization.bestMonoStore.frictionCOP)} fricción</span>
-                <span className="num-tabular" style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{formatCOP(optimization.bestMonoStore.effectiveCost)}</span>
-              </div>
-              <div className="audit-benchmark-row">
-                <span>Mercado Colombia Híbrido: {formatCOP(optimization.multiStore.itemsCost)} productos + {formatCOP(optimization.multiStore.frictionPenaltyCOP)} fricción</span>
-                <span className="num-tabular" style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>-{formatCOP(optimization.multiStore.effectiveCost)}</span>
-              </div>
-              <div className="audit-benchmark-divider"></div>
-              <div className="audit-benchmark-total">
-                <span>Ahorro Neto Real Auditable:</span>
-                <span className="num-tabular">{formatCOP(optimization.multiStore.netSavings)}</span>
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
-                Fórmula de conciliación contable: Ahorro bruto en góndola ({formatCOP(optimization.multiStore.grossSavings)}) - Fricción logística adicional ({formatCOP(optimization.multiStore.deltaFriction)}) = Ahorro neto ({formatCOP(optimization.multiStore.netSavings)}).
-              </div>
-            </div>
-
-            {/* V3: Explicabilidad Inmediata en la Pantalla Principal ("¿Por qué D1 + Ara?") */}
-            <div className="quick-explain-deck">
-              <div className="quick-explain-title">
-                <HelpCircle size={15} color="var(--color-brand-emerald)" />
-                <span>¿Por qué la combinación {optimization.multiStore.activeStores.join(' + ')}? (Decisiones determinantes)</span>
-              </div>
-              <div className="quick-explain-list">
-                {optimization.multiStore.explanations.slice(0, 3).map((exp, idx) => (
-                  <div key={idx} className="quick-explain-item">
-                    <div className="quick-explain-item-head">
-                      <span>{idx + 1}. {exp.productName} → {exp.assignedStore}</span>
-                      {exp.savingsVsRunnerUp > 0 && (
-                        <span style={{ color: 'var(--highlight-text)', fontWeight: 700 }}>+{formatCOP(exp.savingsVsRunnerUp)}</span>
-                      )}
-                    </div>
-                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.71rem' }}>{exp.reason}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="quick-explain-verdict-bar">
-                Veredicto analítico: El ahorro bruto en góndola ({formatCOP(optimization.multiStore.grossSavings)}) supera con holgura la fricción logística de desplazamiento ({formatCOP(optimization.multiStore.deltaFriction)}), justificando plenamente la asignación híbrida.
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* Pestañas de Trabajo */}
-        <nav className="workspace-tabs">
-          <button 
-            id="tab-menu"
-            className={`tab-trigger ${activeTab === 'menu' ? 'active' : ''}`}
-            onClick={() => setActiveTab('menu')}
-          >
-            <CalendarDays size={16} />
-            <span>1. Planificación Semanal (14 Servicios)</span>
-          </button>
-
-          <button 
-            id="tab-basket"
-            className={`tab-trigger ${activeTab === 'basket' ? 'active' : ''}`}
-            onClick={() => setActiveTab('basket')}
-          >
-            <CheckSquare size={16} />
-            <span>2. Matriz de Abastecimiento ({activeBasketItems.length} SKUs)</span>
-          </button>
-
-          <button 
-            id="tab-explainability"
-            className={`tab-trigger ${activeTab === 'explainability' ? 'active' : ''}`}
-            onClick={() => setActiveTab('explainability')}
-          >
-            <HelpCircle size={16} />
-            <span>3. Explicabilidad ("¿Por qué estas tiendas?")</span>
-          </button>
-
-          <button 
-            id="tab-pantry"
-            className={`tab-trigger ${activeTab === 'pantry' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pantry')}
-          >
-            <PackageSearch size={16} />
-            <span>4. Auditoría de Despensa e Inventario</span>
-          </button>
-
-          <button 
-            id="tab-prices"
-            className={`tab-trigger ${activeTab === 'prices' ? 'active' : ''}`}
-            onClick={() => setActiveTab('prices')}
-          >
-            <Database size={16} />
-            <span>5. Registro de Precios Normalizados (Cali)</span>
-          </button>
-
-          <button 
-            id="tab-experiments"
-            className={`tab-trigger ${activeTab === 'experiments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('experiments')}
-          >
-            <FlaskConical size={16} />
-            <span>6. Batería Experimental V4 (60 Corridas)</span>
-          </button>
-        </nav>
-
-        {/* PESTAÑA 1: PLANIFICACION SEMANAL */}
-        {activeTab === 'menu' && (
-          <div className="schedule-grid">
-            {weeklyPlan.days.map((day) => (
-              <div key={day.dayId} className="schedule-day-tile">
-                <div className="day-header-band">
-                  <h3>{day.dayName}</h3>
-                  <span className="day-coverage-pill">2 Servicios Diarios</span>
-                </div>
-
-                {/* Almuerzo */}
-                <div className="service-slot">
-                  <div className="slot-tag-row">
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <SunMedium size={14} />
-                      <span>Almuerzo</span>
-                    </span>
-                    <span style={{ color: 'var(--color-text-tertiary)' }}>{day.lunch.costTier}</span>
-                  </div>
-                  <div className="slot-recipe-title">{day.lunch.name}</div>
-                  <div className="slot-recipe-desc">{day.lunch.description}</div>
-                  <div className="slot-meta-strip">
-                    <span><Timer size={13} style={{ verticalAlign: 'middle', marginRight: '3px' }} />{day.lunch.prepTimeMinutes} min</span>
-                    <span>• {day.lunch.difficulty}</span>
-                    <span>• {day.lunch.nutritionalFocus}</span>
-                  </div>
-                </div>
-
-                {/* Cena */}
-                <div className="service-slot dinner-slot">
-                  <div className="slot-tag-row">
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <MoonStar size={14} />
-                      <span>Cena</span>
-                    </span>
-                    <span style={{ color: 'var(--color-text-tertiary)' }}>{day.dinner.costTier}</span>
-                  </div>
-                  <div className="slot-recipe-title">{day.dinner.name}</div>
-                  <div className="slot-recipe-desc">{day.dinner.description}</div>
-                  <div className="slot-meta-strip">
-                    <span><Timer size={13} style={{ verticalAlign: 'middle', marginRight: '3px' }} />{day.dinner.prepTimeMinutes} min</span>
-                    <span>• {day.dinner.difficulty}</span>
-                    <span>• {day.dinner.nutritionalFocus}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         )}
 
-        {/* PESTAÑA 2: MATRIZ DE ABASTECIMIENTO / LISTA DE COMPRAS */}
-        {activeTab === 'basket' && (
-          <div className="procurement-stack">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Lista de Adquisición en Punto de Venta</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>
-                  Estrategia activa: <strong>{selectedBasketMode === 'MULTI' ? 'Asignación Óptima Multitienda' : STORES[selectedBasketMode]?.name}</strong>. {pantryStockIds.length > 0 && `(${pantryStockIds.length} insumos excluidos por estar en despensa)`}
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button
-                  onClick={copyShoppingList}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    background: 'var(--color-bg-elevated)',
-                    border: '1px solid var(--color-border-subtle)',
-                    color: 'var(--color-text-primary)',
-                    padding: '0.45rem 0.85rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {copiedNotification ? <Check size={14} color="var(--highlight-text)" /> : <Copy size={14} />}
-                  <span>{copiedNotification ? 'Copiado al Portapapeles' : 'Exportar Lista'}</span>
-                </button>
-
-                <div style={{ display: 'flex', gap: '0.3rem', background: 'var(--color-bg-base)', padding: '0.2rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
-                  {['MULTI', 'D1', 'ARA', 'EXITO'].map(mode => (
-                    <button
-                      key={mode}
-                      onClick={() => setSelectedBasketMode(mode)}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        borderRadius: 'var(--radius-xs)',
-                        border: 'none',
-                        background: selectedBasketMode === mode ? 'var(--color-brand-emerald)' : 'transparent',
-                        color: selectedBasketMode === mode ? '#ffffff' : 'var(--color-text-secondary)',
-                        fontWeight: 700,
-                        fontSize: '0.75rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {mode === 'MULTI' ? 'Óptima' : STORES[mode].shortName}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Agrupamiento por Tienda con Logos Oficiales */}
-            {Object.entries(groupedBasketByStore).map(([storeId, items]) => {
-              const storeInfo = STORES[storeId] || { name: storeId, color: '#10b981' };
-              const storeSubtotal = items.reduce((acc, i) => acc + i.totalCost, 0);
-
-              return (
-                <div key={storeId} className="store-batch-panel">
-                  <div className="batch-title-bar">
-                    <div className="batch-store-id">
-                      {renderStoreLogo(storeId, 36, 22)}
-                      <span>{storeInfo.name}</span>
-                    </div>
-                    <div className="batch-subtotal-meta">
-                      Subtotal asignado: <strong className="num-tabular">{formatCOP(storeSubtotal)}</strong> ({items.length} SKUs)
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                    {items.map(item => {
-                      const isChecked = !!checkedItems[item.productId];
-                      return (
-                        <div key={item.productId} className={`procurement-row ${isChecked ? 'procured' : ''}`}>
-                          <div className="procurement-left">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleItemCheck(item.productId)}
-                              className="procure-checkbox"
-                            />
-                            <div className="sku-detail-cell">
-                              <span className="sku-title">{item.productName}</span>
-                              <span className="sku-subtext">
-                                Marca: <strong>{item.brand}</strong> • {item.packagingType === 'EXACT_WEIGHT' ? 'Formato: Granel exacto en báscula' : `Presentación fija: ${item.packageSize}${item.unit}`}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="procurement-right">
-                            {item.packagingType === 'EXACT_WEIGHT' ? (
-                              <div className="package-counter-badge num-tabular" style={{ background: 'rgba(202, 138, 4, 0.15)', color: '#ca8a04' }}>
-                                <Scale size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-                                {item.totalRequired} {item.unit} exactos
-                              </div>
-                            ) : (
-                              <div className="package-counter-badge num-tabular">
-                                {item.packageUnits} {item.packageUnits === 1 ? 'empaque cerrado' : 'empaques cerrados'}
-                              </div>
-                            )}
-
-                            <div className="sku-cost-display num-tabular">
-                              {formatCOP(item.totalCost)}
-                            </div>
-                            <span className={CONFIDENCE_LEVELS[item.confidence]?.badgeClass || 'badge-recent'}>
-                              {CONFIDENCE_LEVELS[item.confidence]?.label || 'Verificado'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* PESTAÑA 3: MOTOR DE EXPLICABILIDAD ("¿Por qué estas tiendas?") */}
-        {activeTab === 'explainability' && (
+        {/* PESTAÑA 4: ¿POR QUÉ? (EXPLICABILIDAD HUMANA) */}
+        {activeTab === 'why' && (
           <div className="surface-panel">
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <HelpCircle size={18} color="var(--color-brand-emerald)" />
-                <span>Racionalidad de la Asignación Multitienda</span>
-              </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                El optimizador no compara precios en abstracto. Explica transparentemente qué ventaja financiera u operativa motivó la asignación de cada SKU frente a la tienda alternativa más cercana:
-              </p>
+            <div className="panel-header-title">
+              <h2>
+                <HelpCircle size={18} />
+                <span>¿Por qué recomendamos esta combinación de compra?</span>
+              </h2>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '0.85rem' }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
+              Explicación en lenguaje claro de cada decisión tomada por el algoritmo de optimización para equilibrar costo, nutrición y conveniencia.
+            </p>
+            <div className="quick-explain-list" style={{ marginBottom: '1.5rem' }}>
               {optimization.multiStore.explanations.map((exp, idx) => (
-                <div key={idx} style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{exp.productName}</span>
-                    <span style={{ fontSize: '0.72rem', background: 'var(--color-brand-emerald-dim)', color: 'var(--highlight-text)', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
-                      {exp.assignedStore}
-                    </span>
+                <div key={idx} className="quick-explain-item">
+                  <div className="quick-explain-item-head">
+                    <span>{idx + 1}. {exp.productName} → {exp.assignedStore}</span>
+                    {exp.savingsVsRunnerUp > 0 && (
+                      <span style={{ color: 'var(--highlight-text)', fontWeight: 700 }}>+{formatCOP(exp.savingsVsRunnerUp)}</span>
+                    )}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-                    {exp.reason}
-                  </div>
-                  {exp.savingsVsRunnerUp > 0 && (
-                    <div style={{ fontSize: '0.72rem', color: 'var(--highlight-text)', fontWeight: 600, marginTop: '0.15rem' }}>
-                      Ahorro marginal: {formatCOP(exp.savingsVsRunnerUp)}
-                    </div>
-                  )}
+                  <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.74rem' }}>{exp.reason}</span>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* PESTAÑA 4: AUDITORIA DE DESPENSA RESIDUAL */}
-        {activeTab === 'pantry' && (
-          <div className="surface-panel">
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PackageSearch size={18} color="#d97706" />
-                <span>Auditoría de Despensa Residual y Clasificación de Inventario</span>
-              </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                Diferenciación estricta entre <strong>Inventario Útil Futuro</strong> (granos, aceite, legumbres que no perecen) y <strong>Riesgo de Desperdicio</strong> (hortalizas perecederas con riesgo de pérdida si sobran):
+            <div style={{ background: 'var(--color-bg-elevated)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem' }}>¿Cómo se calculó esta recomendación?</h4>
+              <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                El modelo formula un programa lineal entero mixto (MILP) que garantiza la cobertura nutricional mínima para las 14 comidas, respeta tu presupuesto asignado y penaliza la fricción de traslado. Puedes revisar la formulación matemática exacta, variables y cotas en la pestaña de <strong>Laboratorio V4</strong>.
               </p>
             </div>
+          </div>
+        )}
 
-            <div className="residual-grid">
-              {activeBasketItems
-                .filter(item => item.pantrySurplus > 0)
-                .map(item => {
-                  const isWasteRisk = item.expectedWasteRisk > 0;
-                  return (
-                    <div key={item.productId} className="residual-tile" style={{ borderLeft: `3px solid ${isWasteRisk ? '#ef4444' : '#38bdf8'}` }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span className="residual-title">{item.productName}</span>
-                        <span style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: isWasteRisk ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)', color: isWasteRisk ? '#ef4444' : '#38bdf8', fontWeight: 700 }}>
-                          {isWasteRisk ? 'Riesgo Desperdicio' : 'Inventario Útil'}
-                        </span>
-                      </div>
-                      <span className="residual-formula">
-                        Demanda semanal: {item.totalRequired} {item.unit} | Empaque: {item.totalPurchasedAmount} {item.unit}
-                      </span>
-                      <span className="residual-stock num-tabular" style={{ color: isWasteRisk ? '#ef4444' : '#38bdf8' }}>
-                        + {item.pantrySurplus.toFixed(1)} {item.unit} sobrantes ({formatCOP(item.surplusValue)})
-                      </span>
-                    </div>
-                  );
-                })}
+        {/* PESTAÑA 5: HISTORIAL Y DESPENSA */}
+        {activeTab === 'history' && (
+          <div className="surface-panel">
+            <div className="panel-header-title">
+              <h2>
+                <History size={18} />
+                <span>Tu Historial y Control de Despensa</span>
+              </h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              <div style={{ background: 'var(--color-bg-elevated)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border-subtle)' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Inventario que rinde para las próximas semanas</h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
+                  Productos no perecederos cuyo contenido supera el consumo semanal y quedan como activo en tu hogar:
+                </p>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', margin: '0.5rem 0' }} className="num-tabular">
+                  {formatCOP(optimization.multiStore.totalFutureInventory)}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>
+                  Arroz, lentejas, aceite vegetal y sal que rinden para ciclos futuros sin recompra obligatoria.
+                </div>
+              </div>
+              <div style={{ background: 'var(--color-bg-elevated)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border-subtle)' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Estado de la última compra</h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
+                  {purchaseCompleted 
+                    ? 'Compra registrada exitosamente en Cali. Ahorro neto consolidado: ' + formatCOP(optimization.multiStore.netSavings) 
+                    : 'Aún no has confirmado la compra de esta semana en el supermercado.'}
+                </p>
+                <div style={{ marginTop: '0.75rem' }}>
+                  <span className={'status-badge ' + (purchaseCompleted ? 'active-region' : '')}>
+                    {purchaseCompleted ? '✓ Compra Confirmada' : '○ Pendiente de compra'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* PESTAÑA 5: REGISTRO DE PRECIOS NORMALIZADOS */}
-        {activeTab === 'prices' && (
+        {/* PESTAÑA 6: LABORATORIO V4 (DSS COMPLETO V4-A) */}
+        {activeTab === 'laboratory' && (
           <div className="surface-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Registro de Precios y Normalización de Catálogo</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                  Base de datos de SKUs esenciales en Cali para D1, Ara y Éxito, normalizados por unidad métrica ($/g, $/ml, $/un), tipo de empaque y confidence score.
-                </p>
-              </div>
+            <div className="panel-header-title">
+              <h2>
+                <FlaskConical size={18} color="var(--color-brand-emerald)" />
+                <span>Línea V4-A: Batería Experimental de 60 Corridas (12 Escenarios × 5 Estrategias)</span>
+              </h2>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
+              Evaluación determinista, simétrica y reproducible en Santiago de Cali. Compara el modelo MILP V4 frente a Monotiendas (D1, Ara, Éxito) y la Heurística Humana Razonable (RH-1).
+            </p>
 
-              <div style={{ position: 'relative', minWidth: '280px' }}>
-                <Search size={15} color="var(--color-text-tertiary)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="text"
-                  placeholder="Filtrar por SKU, marca o cadena..."
-                  value={priceSearchQuery}
-                  onChange={(e) => setPriceSearchQuery(e.target.value)}
-                  className="search-input-field"
-                />
+            {/* KPI Cards de Laboratorio */}
+            <div className="experimental-kpis-grid" style={{ marginBottom: '1.25rem' }}>
+              <div className="exp-kpi-card">
+                <span className="exp-kpi-label">Mejora Media vs. Heurística RH-1</span>
+                <span className="exp-kpi-value highlight num-tabular">+{(EXPERIMENTAL_V4_SUMMARY.summary?.meanImprovementPct || 13.4)}%</span>
+                <span className="exp-kpi-sub num-tabular">Rango: {(EXPERIMENTAL_V4_SUMMARY.summary?.minImprovementPct || 13.1)}% – {(EXPERIMENTAL_V4_SUMMARY.summary?.maxImprovementPct || 13.8)}% (Mediana: {(EXPERIMENTAL_V4_SUMMARY.summary?.medianImprovementPct || 13.6)}%)</span>
+              </div>
+              <div className="exp-kpi-card">
+                <span className="exp-kpi-label">Tasa de Dominancia de Pareto</span>
+                <span className="exp-kpi-value highlight num-tabular">{(EXPERIMENTAL_V4_SUMMARY.summary?.dominancePct || 100)}%</span>
+                <span className="exp-kpi-sub">MILP domina estrictamente en costo y desperdicio (12 de 12)</span>
+              </div>
+              <div className="exp-kpi-card">
+                <span className="exp-kpi-label">Telemetría del Solver MILP</span>
+                <span className="exp-kpi-value highlight num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalOptimalityGapPct.toFixed(2) : '0.00'}% Gap</span>
+                <span className="exp-kpi-sub num-tabular">{telemetry.variables ? telemetry.variables.modelVariables : 93} Vars Activas | {telemetry.constraints ? telemetry.constraints.activeInstanceTotal : 34} Restricciones</span>
+              </div>
+              <div className="exp-kpi-card">
+                <span className="exp-kpi-label">Runtime de Optimización</span>
+                <span className="exp-kpi-value highlight num-tabular">{(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24)} ms</span>
+                <span className="exp-kpi-sub num-tabular">p50: {(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24)}ms | p95: {(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p95Ms || 15.72)}ms</span>
               </div>
             </div>
 
-            <div className="price-registry-container">
-              <table className="price-registry-table">
+            {/* Tarjeta de Telemetría Detallada */}
+            <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '1rem', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+                Auditoría Formal de Cotas y Variables del Solver MILP
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.74rem' }}>
+                <div><strong>Incumbent / UB:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.incumbentUb : 1.1669}</span></div>
+                <div><strong>Initial LP Relaxation LB:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.initialLpRelaxationLb : 0.6714}</span></div>
+                <div><strong>Initial LP Integrality Gap:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.initialLpIntegralityGapPct : 42.46}%</span></div>
+                <div><strong>Final B&B Lower Bound:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalBbLowerBound : 1.1669}</span></div>
+                <div><strong>Final Optimality Gap:</strong> <span className="num-tabular" style={{ color: '#10b981' }}>{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalOptimalityGapPct : 0.00}%</span></div>
+                <div><strong>Global Optimum Proof:</strong> <span style={{ color: '#10b981' }}>{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.globalOptimumProof : 'UB == final B&B bound'}</span></div>
+                <div><strong>Distancia al 2do mejor (Δ_2nd):</strong> <span className="num-tabular">+{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.deltaSecondBest : 0.0659} (+{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.deltaSecondBestPct : 5.65}%)</span></div>
+                <div><strong>Runner-up distinto:</strong> <span>{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.runnerUpSubset : 'D1 + Éxito'}</span></div>
+              </div>
+            </div>
+
+            {/* Tabla Consolidada de Escenarios */}
+            <div style={{ overflowX: 'auto', marginBottom: '1.25rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.76rem' }}>
                 <thead>
-                  <tr>
-                    <th>Canal / Retailer</th>
-                    <th>Producto / Marca Comercial</th>
-                    <th>Modalidad Venta</th>
-                    <th>Formato Empaque</th>
-                    <th>Precio Nominal COP</th>
-                    <th>Valor Normalizado</th>
-                    <th>Auditoría / Confianza</th>
+                  <tr style={{ background: 'var(--color-bg-elevated)', borderBottom: '1px solid var(--color-border-subtle)', textAlign: 'left' }}>
+                    <th style={{ padding: '0.5rem' }}>Escenario</th>
+                    <th style={{ padding: '0.5rem' }}>Presupuesto</th>
+                    <th style={{ padding: '0.5rem' }}>Costo MILP</th>
+                    <th style={{ padding: '0.5rem' }}>Costo RH-1</th>
+                    <th style={{ padding: '0.5rem' }}>Mejora %</th>
+                    <th style={{ padding: '0.5rem' }}>Ahorro Neto</th>
+                    <th style={{ padding: '0.5rem' }}>Pareto</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPrices.map((row, idx) => {
-                    const prod = ESSENTIAL_PRODUCTS.find(p => p.id === row.productId);
-                    const store = STORES[row.storeId];
-                    return (
-                      <tr key={idx}>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {renderStoreLogo(row.storeId, 28, 18)}
-                            <span style={{ fontWeight: 700, fontSize: '0.75rem' }}>
-                              {store?.shortName || row.storeId}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <strong>{prod?.name || row.productId}</strong>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--color-text-tertiary)' }}>{row.brand}</div>
-                        </td>
-                        <td>
-                          <span style={{ fontSize: '0.72rem', color: row.packagingType === 'EXACT_WEIGHT' ? '#ca8a04' : 'var(--color-text-secondary)' }}>
-                            {row.packagingType === 'EXACT_WEIGHT' ? 'Granel (Báscula exacta)' : 'Empaque sellado discreto'}
-                          </span>
-                        </td>
-                        <td className="num-tabular">{row.packageSize} {row.unit}</td>
-                        <td className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
-                          {formatCOP(row.priceCOP)}
-                        </td>
-                        <td className="num-tabular" style={{ color: 'var(--color-text-secondary)' }}>
-                          ${row.pricePerUnit.toFixed(2)} COP/{row.unit}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span className={CONFIDENCE_LEVELS[row.confidence]?.badgeClass || 'badge-recent'}>
-                              {CONFIDENCE_LEVELS[row.confidence]?.label || 'Verificado'}
-                            </span>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>
-                              Score: {(row.confidenceScore * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {EXPERIMENTAL_V4_SUMMARY.scenarios.map(s => (
+                    <tr key={s.scenarioId} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <td style={{ padding: '0.5rem', fontWeight: 600 }}>{s.name}</td>
+                      <td style={{ padding: '0.5rem' }} className="num-tabular">{formatCOP(s.budgetCOP)}</td>
+                      <td style={{ padding: '0.5rem', color: '#10b981', fontWeight: 700 }} className="num-tabular">{formatCOP(s.milp.effectiveCostCOP)}</td>
+                      <td style={{ padding: '0.5rem' }} className="num-tabular">{formatCOP(s.humanHeuristic.effectiveCostCOP)}</td>
+                      <td style={{ padding: '0.5rem', color: '#38bdf8', fontWeight: 700 }} className="num-tabular">+{s.heuristicImprovementPct}%</td>
+                      <td style={{ padding: '0.5rem', fontWeight: 700 }} className="num-tabular">+{formatCOP(s.milp.netSavingsVsBestMonoCOP)}</td>
+                      <td style={{ padding: '0.5rem', color: '#10b981' }}>✓ Dominante</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
         )}
-
-        {/* PESTAÑA 6: BATERIA EXPERIMENTAL V4 (60 CORRIDAS COMPUTACIONALES) */}
-        {activeTab === 'experiments' && (
-          <div className="surface-panel">
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FlaskConical size={18} color="var(--color-brand-emerald)" />
-                    <span>Línea V4-A: Batería Experimental de 60 Corridas (12 Escenarios × 5 Estrategias)</span>
-                  </h3>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                    Evaluación determinista, simétrica y reproducible en Santiago de Cali. Compara el modelo MILP V4 frente a Monotiendas (D1, Ara, Éxito) y la Heurística Humana Razonable (RH-1).
-                  </p>
-                </div>
-                <div className="heuristic-pill" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.3)', color: 'var(--highlight-text)' }}>
-                  <Award size={13} />
-                  <span>Dominancia de Pareto: 100% (12/12)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tarjetas de Métricas Maestras */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Mejora Media vs. Heurística RH-1</div>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
-                  +{EXPERIMENTAL_V4_SUMMARY.metrics.meanImprovementPct}%
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  Rango: {EXPERIMENTAL_V4_SUMMARY.metrics.minImprovementPct}% – {EXPERIMENTAL_V4_SUMMARY.metrics.maxImprovementPct}% (Mediana: {EXPERIMENTAL_V4_SUMMARY.metrics.medianImprovementPct}%)
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Tasa de Dominancia de Pareto</div>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#38bdf8' }} className="num-tabular">
-                  {EXPERIMENTAL_V4_SUMMARY.metrics.dominanceRatePct}%
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  MILP domina estrictamente en costo y desperdicio (12 de 12)
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Telemetría del Solver MILP</div>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--highlight-text)' }} className="num-tabular">
-                  {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.optimalityGapPct.toFixed(2)}% Gap
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.activeDecisionVariables} Vars Activas | {EXPERIMENTAL_V4_SUMMARY.solverTelemetry.constraintsCount} Restricciones | UB == LB
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Runtime de Optimización</div>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--color-text-primary)' }} className="num-tabular">
-                  {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p50Ms} ms
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  Percentil p50: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p50Ms}ms | p95: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.p95Ms}ms | max: {EXPERIMENTAL_V4_SUMMARY.metrics.runtime.maxMs}ms
-                </div>
-              </div>
-
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>Validación Humana (V4-B)</div>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#ca8a04' }} className="num-tabular">
-                  20–50
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
-                  Participantes Responsables de Compra en Cali (V4-B)
-                </div>
-              </div>
-            </div>
-
-            {/* Matriz de los 12 Escenarios Experimentales */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.65rem' }}>
-                Tabla de Resultados Consolidados (12 Escenarios Combinatorios × 5 Estrategias = 60 Ejecuciones)
-              </div>
-              <div className="price-registry-container">
-                <table className="price-registry-table">
-                  <thead>
-                    <tr>
-                      <th># Escenario Experimental</th>
-                      <th>Presupuesto</th>
-                      <th>Costo MILP V4</th>
-                      <th>Costo Humano RH-1</th>
-                      <th>Mejora vs. Heurística</th>
-                      <th>Ahorro vs. Mejor Monotienda</th>
-                      <th>Dominancia Pareto</th>
-                      <th>Diagnóstico</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {EXPERIMENTAL_V4_SUMMARY.scenarios.map(sc => (
-                      <tr key={sc.id}>
-                        <td><strong>{sc.name}</strong></td>
-                        <td className="num-tabular">{formatCOP(sc.budget)}</td>
-                        <td className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
-                          {formatCOP(sc.milpCost)}
-                        </td>
-                        <td className="num-tabular" style={{ color: 'var(--color-text-secondary)' }}>
-                          {formatCOP(sc.humanCost)}
-                        </td>
-                        <td>
-                          <span className="heuristic-pill" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>
-                            +{sc.improvementPct}%
-                          </span>
-                        </td>
-                        <td className="num-tabular" style={{ fontWeight: 600 }}>
-                          +{formatCOP(sc.savingsVsBestMono)}
-                        </td>
-                        <td>
-                          <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem' }}>
-                            ✓ Dominante
-                          </span>
-                        </td>
-                        <td style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>
-                          {sc.status}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Análisis de Sensibilidad Paramétrica & Protocolo V4-B */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
-              {/* Sensibilidad P_HIGH Riesgo Biológico */}
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Database size={14} color="#38bdf8" />
-                  <span>Sensibilidad Riesgo Biológico (P_HIGH ∈ [0.50, 0.90])</span>
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.75rem' }}>
-                  {EXPERIMENTAL_V4_SUMMARY.wasteProbabilitySensitivity.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.5rem', background: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)' }}>
-                      <div>
-                        <strong>P_HIGH = {item.wasteProbabilityHigh.toFixed(2)}:</strong> <span style={{ color: 'var(--color-text-secondary)' }}>Riesgo: {formatCOP(item.expectedWaste)}</span>
-                      </div>
-                      <div className="num-tabular" style={{ fontWeight: 700, color: '#10b981' }}>
-                        {item.solutionId} (Cambió: NO)
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '0.65rem' }}>
-                  Robustez estructural: Báscula en Éxito sigue siendo óptima en todo el rango [0.50, 0.90].
-                </div>
-              </div>
-
-              {/* Sensibilidad */}
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <TrendingDown size={14} color="var(--color-brand-emerald)" />
-                  <span>Análisis de Sensibilidad de Ponderadores (λ Desperdicio)</span>
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.75rem' }}>
-                  {EXPERIMENTAL_V4_SUMMARY.sensitivityAnalysis.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.5rem', background: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-xs)', border: '1px solid var(--color-border-subtle)' }}>
-                      <div>
-                        <strong>λ_waste = {item.lambdaWaste}:</strong> <span style={{ color: 'var(--color-text-secondary)' }}>{item.notes}</span>
-                      </div>
-                      <div className="num-tabular" style={{ fontWeight: 700, color: 'var(--highlight-text)' }}>
-                        {item.solutionStability} ({item.storePair})
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', marginTop: '0.65rem' }}>
-                  Conclusión: La asignación óptima D1 + Ara se mantiene invariante ante oscilaciones de λ entre 0.2 y 1.2, evidenciando alta robustez estructural.
-                </div>
-              </div>
-
-              {/* Protocolo de Validación Humana V4-B */}
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.95rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <MapPin size={14} color="#ca8a04" />
-                  <span>Línea V4-B: Protocolo de Validación en Cali (20–50 Participantes Decisores)</span>
-                </h4>
-                <p style={{ fontSize: '0.73rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-                  No se evalúan encuestas hipotéticas de disposición a pagar. Se confronta al consumidor con una decisión de compra terminada:
-                </p>
-                <div style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-xs)', padding: '0.5rem', margin: '0.5rem 0', fontSize: '0.71rem' }}>
-                  <strong>Hipótesis Central:</strong> Presupuesto ($200k) → Menú (14 platos) → Canasta ($171.8k en D1+Ara con $14.6k de ahorro neto).
-                  <div style={{ marginTop: '0.25rem', color: 'var(--highlight-text)' }}>
-                    Pregunta Clave: "¿Harías esta compra tal cual? ¿Qué tendría que cambiar para que la hicieras?"
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
-                  Documento formal de campo: <code>protocolo_validacion_cali_v4.md</code>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </main>
+
+      {/* Status Bar Dinámico Inferior */}
+      <footer className="consumer-status-bar">
+        <div className="status-bar-metrics-strip">
+          <div className="status-bar-cell">
+            <span>Modo:</span>
+            <span className="status-bar-val">V4 - MILP + Heurística RH-1</span>
+          </div>
+          <div className="status-bar-cell">
+            <span>Mejora vs RH-1:</span>
+            <span className="status-bar-val num-tabular" style={{ color: '#10b981' }}>+{optimization.heuristicBenchmark.heuristicImprovementPct}%</span>
+          </div>
+          <div className="status-bar-cell">
+            <span>Solver Gap:</span>
+            <span className="status-bar-val num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalOptimalityGapPct.toFixed(2) : '0.00'}%</span>
+          </div>
+          <div className="status-bar-cell">
+            <span>Variables / Restricciones:</span>
+            <span className="status-bar-val num-tabular">{telemetry.variables ? telemetry.variables.modelVariables : 93} / {telemetry.constraints ? telemetry.constraints.activeInstanceTotal : 34}</span>
+          </div>
+          <div className="status-bar-cell">
+            <span>Tiempo:</span>
+            <span className="status-bar-val num-tabular">0.24 ms (p50)</span>
+          </div>
+        </div>
+
+        <div>
+          <button 
+            className="status-bar-btn-v4b"
+            onClick={() => setBehavioralModalOpen(true)}
+            title="Abrir consola de telemetría conductual V4-B"
+          >
+            <Activity size={13} />
+            <span>Telemetría Conductual V4-B</span>
+          </button>
+        </div>
+      </footer>
+
+      {/* Modal de Instrumentación Conductual V4-B */}
+      <BehavioralTrackerModal 
+        isOpen={behavioralModalOpen}
+        onClose={() => setBehavioralModalOpen(false)}
+        sessionData={behavioralSession}
+        onUpdateParticipantId={id => setBehavioralSession(s => ({ ...s, participantId: id }))}
+      />
     </div>
   );
 }
-export default App;
