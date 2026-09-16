@@ -42,7 +42,7 @@
 | **Formato de empaque discreto vs báscula** | No (solo comparan precio nominal) | No | **Sí (`FIXED_PACK` vs `EXACT_WEIGHT`)** |
 | **Fricción logística paramétrica** | No | No | **Sí (Peatonal, MIO, Vehículo)** |
 | **Planificación de menú acoplada a canasta** | No | Sí (pero sin tiendas colombianas) | **Sí (14 comidas tradicionales)** |
-| **Optimización multitienda auditable** | No | No | **Sí (MILP con Ahorro Neto explícito)** |
+| **Optimización multitienda auditable** | No | No | **Sí (MILP con Ahorro Neto Estimado explícito)** |
 
 ---
 
@@ -59,10 +59,13 @@
 
 ## 5. Diseño de Campo V4-B (Santiago de Cali)
 
-- **Muestra:** 20 a 50 hogares de 1–2 personas en Cali.
-- **Enfoque Conductual:** Auditoría retrospectiva del último mercado semanal y confrontación con una orden de compra concreta ($200.000 COP $\rightarrow$ D1 $94.3k + Ara $77.5k, ahorro neto $14.6k).
-- **Métricas:**
-  - Tasa de Aceptación de la Decisión ($AcceptanceRate$).
-  - Tolerancia de Ahorro a la Segunda Parada ($2k, $5k, $10k, $15k).
-  - Test A/B/C de Propuesta de Valor (A: Ahorro Puro, B: Carga Mental/Conveniencia, C: Control Presupuestal).
-- **Guion Metodológico:** Disponible en `protocolo_validacion_cali_v4.md`.
+- **Declaración Oficial:** Mercado Colombia V4-B está funcionalmente congelado y preparado para validación conductual en compradores responsables de compra en Cali.
+- **Muestra:** 20 a 50 participantes responsables de la compra del hogar en Cali.
+- **Enfoque Conductual Desacoplado:** Evaluación ortogonal de Comprensión (explicabilidad de empaque), Aceptación (trade-off simétrico neutral de segunda parada) y Ejecución (chequeo de lista y reporte de compra declarada).
+- **Ficha Concreta de Confrontación (V4-B):** Presupuesto base $220.000 COP $\rightarrow$ Desembolso en caja $163.715 COP (Ara 19 líneas $96.350 COP + Éxito 11 líneas $65.834 COP), Fricción logística estimada $1.531 COP, Costo efectivo estimado $165.246 COP, Ahorro neto estimado +$24.910 COP frente a Ara monotienda ($188.625 COP).
+- **Taxonomía de Variables:**
+  - Métricas Primarias: `SecondStoreAcceptance`, `RecommendationAcceptance`, `PurchaseReported`.
+  - Métricas Secundarias: `ExplanationOpened`, `ChecklistStarted`, `ChecklistCompleted`, `WhatsAppCopied`, `TimeToDecision`.
+  - Variables Descriptivas: `householdSize`, `weeklyBudget`, `mainStore`, `shoppingFrequency`, `transportMode`.
+- **Directriz de Reporte:** Magnitud muestral obligatoria con intervalo de confianza Wilson al 95%: $n \mid x/n \mid \hat{p}\% \mid \text{IC } 95\%$.
+- **Guion Metodológico:** Disponible en [`protocolo_validacion_cali_v4.md`](protocolo_validacion_cali_v4.md).
