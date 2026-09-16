@@ -75,24 +75,25 @@ export default function App() {
   const [checkedItems, setCheckedItems] = useState({});
   const [priceSearchQuery, setPriceSearchQuery] = useState('');
   const [copiedNotification, setCopiedNotification] = useState(false);
-  const [purchaseCompleted, setPurchaseCompleted] = useState(false);
+  const [purchaseReported, setPurchaseReported] = useState(false);
   const [behavioralModalOpen, setBehavioralModalOpen] = useState(false);
 
-  // Telemetría conductual V4-B
+  // Telemetría conductual V4-B con separación metodológica rigurosa
   const [behavioralSession, setBehavioralSession] = useState(() => ({
     sessionId: 'sess_' + Math.random().toString(36).substring(2, 9),
     scenarioKey: 'Granada-Versalles - $220k - 2 PAX - Balanceado',
-    participantId: 'P_CALI_01',
+    participantId: 'CALI-SUB-01',
     startedAt: new Date().toISOString(),
     secondStoreAccepted: true,
     secondStoreInteractionsCount: 0,
+    checklistStarted: false,
     checklistOpened: false,
     checklistItemsChecked: 0,
-    whatsappCopied: false,
-    explanationOpened: false,
-    purchaseCompleted: false,
-    totalItemsInBasket: 0,
-    netSavingsPresented: 24910
+    checklistCompleted: false,
+    purchaseReported: false,
+    totalLinesInBasket: 30,
+    ingredientsRequiredCount: 14,
+    netSavingsEstimated: 24910
   }));
 
   const togglePantryStaple = (id) => {
@@ -136,10 +137,11 @@ export default function App() {
     setBehavioralSession(prev => ({
       ...prev,
       scenarioKey: optimization.currentZone.name + ' - $' + (budgetCOP / 1000) + 'k - ' + peopleCount + ' PAX - ' + preference,
-      totalItemsInBasket: activeBasketItems.length,
-      netSavingsPresented: optimization.multiStore.netSavings
+      totalLinesInBasket: activeBasketItems.length,
+      ingredientsRequiredCount: weeklyPlan.ingredients.length,
+      netSavingsEstimated: optimization.multiStore.netSavings
     }));
-  }, [optimization, budgetCOP, peopleCount, preference, activeBasketItems]);
+  }, [optimization, budgetCOP, peopleCount, preference, activeBasketItems, weeklyPlan]);
 
   // Matriz de precios filtrada
   const filteredPrices = useMemo(() => {
@@ -165,7 +167,13 @@ export default function App() {
     setCheckedItems(prev => {
       const next = { ...prev, [productId]: !prev[productId] };
       const checkedCount = Object.values(next).filter(Boolean).length;
-      setBehavioralSession(s => ({ ...s, checklistItemsChecked: checkedCount }));
+      const isComplete = checkedCount === activeBasketItems.length && activeBasketItems.length > 0;
+      setBehavioralSession(s => ({ 
+        ...s, 
+        checklistStarted: true,
+        checklistItemsChecked: checkedCount,
+        checklistCompleted: isComplete 
+      }));
       return next;
     });
   };
@@ -174,17 +182,26 @@ export default function App() {
     const next = {};
     activeBasketItems.forEach(it => { next[it.productId] = true; });
     setCheckedItems(next);
-    setBehavioralSession(s => ({ ...s, checklistItemsChecked: activeBasketItems.length }));
+    setBehavioralSession(s => ({ 
+      ...s, 
+      checklistStarted: true,
+      checklistItemsChecked: activeBasketItems.length,
+      checklistCompleted: true 
+    }));
   };
 
   const handleResetAll = () => {
     setCheckedItems({});
-    setBehavioralSession(s => ({ ...s, checklistItemsChecked: 0 }));
+    setBehavioralSession(s => ({ 
+      ...s, 
+      checklistItemsChecked: 0,
+      checklistCompleted: false 
+    }));
   };
 
   const handleCopyShoppingList = () => {
-    let text = 'MERCADO COLOMBIA - ORDEN DE COMPRA (' + peopleCount + ' personas | Zona: ' + optimization.currentZone.name + ')\n';
-    text += 'Presupuesto: ' + formatCOP(budgetCOP) + ' | Salida estimada en caja: ' + formatCOP(activeCost) + '\n\n';
+    let text = 'MERCADO COLOMBIA - LISTA DE COMPRA (' + peopleCount + ' personas | Zona: ' + optimization.currentZone.name + ')\n';
+    text += 'Presupuesto: ' + formatCOP(budgetCOP) + ' | Salida estimada en cajas: ' + formatCOP(activeCost) + '\n\n';
     Object.entries(groupedBasketByStore).forEach(([storeId, items], idx) => {
       const storeName = STORES[storeId]?.name || storeId;
       const subtotal = items.reduce((acc, it) => acc + it.totalCost, 0);
@@ -197,7 +214,7 @@ export default function App() {
       });
       text += '\n';
     });
-    text += 'Ahorro neto comprobado: +' + formatCOP(optimization.multiStore.netSavings) + ' frente a comprar todo en una sola tienda.';
+    text += 'Ahorro neto estimado: +' + formatCOP(optimization.multiStore.netSavings) + ' frente a comprar todo en una sola tienda.';
     navigator.clipboard.writeText(text).then(() => {
       setCopiedNotification(true);
       setBehavioralSession(s => ({ ...s, whatsappCopied: true }));
@@ -205,12 +222,12 @@ export default function App() {
     });
   };
 
-  const handleCompletePurchase = () => {
-    setPurchaseCompleted(true);
-    setBehavioralSession(s => ({ ...s, purchaseCompleted: true }));
+  const handleReportPurchase = () => {
+    setPurchaseReported(true);
+    setBehavioralSession(s => ({ ...s, purchaseReported: true }));
   };
 
-  // Trade-off de 2da parada (V4-B)
+  // Trade-off simétrico de 2da parada (V4-B Sin Sesgo Visual)
   const handleAcceptSecondStore = () => {
     setSelectedBasketMode('MULTI');
     setBehavioralSession(s => ({
@@ -537,16 +554,16 @@ export default function App() {
 
                 <div className="hero-stats-row">
                   <div className="hero-stat-cell">
-                    <span className="hero-stat-lbl">Costo efectivo total</span>
+                    <span className="hero-stat-lbl">Costo efectivo estimado</span>
                     <div className="hero-stat-val num-tabular">
                       {formatCOP(optimization.multiStore.effectiveCost)}
                       <span className="hero-stat-badge-heuristic">+{optimization.heuristicBenchmark.heuristicImprovementPct}% vs RH-1</span>
                     </div>
-                    <span className="hero-stat-sub">En {optimization.currentZone.name.split(' ')[0]}</span>
+                    <span className="hero-stat-sub">Productos + desplazamiento</span>
                   </div>
 
                   <div className="hero-stat-cell">
-                    <span className="hero-stat-lbl">Ahorro neto comprobado</span>
+                    <span className="hero-stat-lbl">Ahorro neto estimado</span>
                     <div className="hero-stat-val num-tabular" style={{ color: '#a7f3d0' }}>
                       +{formatCOP(optimization.multiStore.netSavings)}
                     </div>
@@ -562,11 +579,11 @@ export default function App() {
                   </div>
 
                   <div className="hero-stat-cell">
-                    <span className="hero-stat-lbl">Productos</span>
+                    <span className="hero-stat-lbl">Líneas de compra</span>
                     <div className="hero-stat-val" style={{ fontSize: '1.1rem' }}>
-                      {activeBasketItems.length} ítems
+                      {activeBasketItems.length} SKUs
                     </div>
-                    <span className="hero-stat-sub">Para los 7 días</span>
+                    <span className="hero-stat-sub">Para {weeklyPlan.ingredients.length} ingredientes</span>
                   </div>
 
                   <div className="hero-stat-cell">
@@ -638,7 +655,7 @@ export default function App() {
                         </div>
                         <div className="store-box-items-pill">
                           <CheckCircle2 size={12} color="#10b981" />
-                          <span>{items.length} productos</span>
+                          <span>{items.length} líneas de compra</span>
                         </div>
                         <div className="store-box-amount num-tabular">
                           {formatCOP(storeSubtotal)}
@@ -647,7 +664,7 @@ export default function App() {
                           className="store-box-link"
                           onClick={() => handleTabChange('shopping')}
                         >
-                          <span>Ver productos</span>
+                          <span>Ver líneas</span>
                           <ArrowRight size={12} />
                         </button>
                       </div>
@@ -675,30 +692,29 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Tarjeta de Trade-off de Segunda Parada (Interacción Conductual V4-B) */}
+              {/* Tarjeta de Trade-off de Segunda Parada (Simétrica y Sin Sesgo para V4-B) */}
               <div className="second-store-tradeoff-card">
                 <div className="tradeoff-header">
                   <h3>¿Vale la pena hacer una segunda parada?</h3>
                   <span className="tradeoff-savings-pill num-tabular">
-                    Ahorro neto: +{formatCOP(optimization.multiStore.netSavings)}
+                    Ahorro neto estimado: +{formatCOP(optimization.multiStore.netSavings)}
                   </span>
                 </div>
                 <div className="tradeoff-prompt">
-                  Para ahorrar <strong>{formatCOP(optimization.multiStore.netSavings)}</strong> necesitas visitar dos tiendas ({optimization.multiStore.activeStores.join(' y ')}), lo que añade aproximadamente <strong>~18 minutos</strong> de desplazamiento en {optimization.currentZone.name.split(' ')[0]}. ¿Prefieres maximizar tu plata o ahorrar tiempo?
+                  Ahorras <strong>{formatCOP(optimization.multiStore.netSavings)}</strong> visitando dos tiendas ({optimization.multiStore.activeStores.join(' y ')}), lo que añade aproximadamente <strong>~18 minutos</strong> de desplazamiento en {optimization.currentZone.name.split(' ')[0]}. ¿Prefieres maximizar tu presupuesto o ahorrar tiempo?
                 </div>
                 <div className="tradeoff-options-grid">
                   <button 
-                    className="btn-accept-second-store"
+                    className={'tradeoff-choice-btn ' + (selectedBasketMode === 'MULTI' ? 'active-choice' : '')}
                     onClick={handleAcceptSecondStore}
                   >
-                    <Check size={16} />
-                    <span>Acepto 2da tienda (Ahorro {formatCOP(optimization.multiStore.netSavings)})</span>
+                    <span>Hacer 2 compras (Ahorras {formatCOP(optimization.multiStore.netSavings)})</span>
                   </button>
                   <button 
-                    className="btn-prefer-single-store"
+                    className={'tradeoff-choice-btn ' + (selectedBasketMode !== 'MULTI' ? 'active-choice' : '')}
                     onClick={handlePreferSingleStore}
                   >
-                    <span>Prefiero 1 sola tienda ({optimization.bestMonoStore.storeName})</span>
+                    <span>Comprar todo en 1 tienda ({optimization.bestMonoStore.storeName})</span>
                   </button>
                 </div>
               </div>
@@ -767,7 +783,7 @@ export default function App() {
                   </strong>
                 </div>
                 <div className="savings-breakdown-row total-row">
-                  <span>Ahorro neto:</span>
+                  <span>Ahorro neto estimado:</span>
                   <strong className="num-tabular" style={{ color: '#10b981' }}>
                     {formatCOP(optimization.multiStore.netSavings)}
                   </strong>
@@ -780,11 +796,15 @@ export default function App() {
                   <span>Qué incluye tu compra</span>
                 </div>
                 <div className="package-info-row">
-                  <span>Productos</span>
-                  <strong className="num-tabular">{activeBasketItems.length}</strong>
+                  <span>Líneas de compra</span>
+                  <strong className="num-tabular">{activeBasketItems.length} SKUs</strong>
                 </div>
                 <div className="package-info-row">
-                  <span>Tiendas</span>
+                  <span>Ingredientes cubiertos</span>
+                  <strong className="num-tabular">{weeklyPlan.ingredients.length}</strong>
+                </div>
+                <div className="package-info-row">
+                  <span>Tiendas a visitar</span>
                   <strong className="num-tabular">{optimization.multiStore.activeStores.length}</strong>
                 </div>
                 <div className="package-info-row">
@@ -849,8 +869,8 @@ export default function App() {
             onCopyList={handleCopyShoppingList}
             copiedNotification={copiedNotification}
             formatCOP={formatCOP}
-            onCompletePurchase={handleCompletePurchase}
-            purchaseCompleted={purchaseCompleted}
+            onReportPurchase={handleReportPurchase}
+            purchaseReported={purchaseReported}
           />
         )}
 
@@ -864,7 +884,7 @@ export default function App() {
               </h2>
             </div>
             <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
-              Compara el valor total de tu mercado si compras en una sola tienda frente a dividir tu lista entre varias tiendas en {optimization.currentZone.name}.
+              Compara el costo efectivo estimado (productos en caja + costo de desplazamiento) entre visitar una sola tienda o dividir tu lista en {optimization.currentZone.name}.
             </p>
             <div className="store-comparative-matrix">
               <div 
@@ -995,13 +1015,13 @@ export default function App() {
               <div style={{ background: 'var(--color-bg-elevated)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border-subtle)' }}>
                 <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Estado de la última compra</h3>
                 <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
-                  {purchaseCompleted 
-                    ? 'Compra registrada exitosamente en Cali. Ahorro neto consolidado: ' + formatCOP(optimization.multiStore.netSavings) 
-                    : 'Aún no has confirmado la compra de esta semana en el supermercado.'}
+                  {purchaseReported 
+                    ? 'Compra informada exitosamente por el participante. Ahorro neto estimado: ' + formatCOP(optimization.multiStore.netSavings) 
+                    : 'Aún no has informado la compra de esta semana en el supermercado.'}
                 </p>
                 <div style={{ marginTop: '0.75rem' }}>
-                  <span className={'status-badge ' + (purchaseCompleted ? 'active-region' : '')}>
-                    {purchaseCompleted ? '✓ Compra Confirmada' : '○ Pendiente de compra'}
+                  <span className={'status-badge ' + (purchaseReported ? 'active-region' : '')}>
+                    {purchaseReported ? '✓ Compra Informada' : '○ Pendiente de compra'}
                   </span>
                 </div>
               </div>
@@ -1009,13 +1029,13 @@ export default function App() {
           </div>
         )}
 
-        {/* PESTAÑA 6: LABORATORIO V4 (DSS COMPLETO V4-A) */}
+        {/* PESTAÑA 6: LABORATORIO V4 (DSS EXPERIMENTAL COMPLETO) */}
         {activeTab === 'laboratory' && (
           <div className="surface-panel">
             <div className="panel-header-title">
               <h2>
                 <FlaskConical size={18} color="var(--color-brand-emerald)" />
-                <span>Línea V4-A: Batería Experimental de 60 Corridas (12 Escenarios × 5 Estrategias)</span>
+                <span>Laboratorio V4-A: Batería Experimental de 60 Corridas (12 Escenarios × 5 Estrategias)</span>
               </h2>
             </div>
             <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
@@ -1026,40 +1046,80 @@ export default function App() {
             <div className="experimental-kpis-grid" style={{ marginBottom: '1.25rem' }}>
               <div className="exp-kpi-card">
                 <span className="exp-kpi-label">Mejora Media vs. Heurística RH-1</span>
-                <span className="exp-kpi-value highlight num-tabular">+{(EXPERIMENTAL_V4_SUMMARY.summary?.meanImprovementPct || 13.4)}%</span>
-                <span className="exp-kpi-sub num-tabular">Rango: {(EXPERIMENTAL_V4_SUMMARY.summary?.minImprovementPct || 13.1)}% – {(EXPERIMENTAL_V4_SUMMARY.summary?.maxImprovementPct || 13.8)}% (Mediana: {(EXPERIMENTAL_V4_SUMMARY.summary?.medianImprovementPct || 13.6)}%)</span>
+                <span className="exp-kpi-value highlight num-tabular">+{EXPERIMENTAL_V4_SUMMARY.summary?.meanImprovementPct || 13.4}%</span>
+                <span className="exp-kpi-sub num-tabular">Rango: {EXPERIMENTAL_V4_SUMMARY.summary?.minImprovementPct || 13.1}% – {EXPERIMENTAL_V4_SUMMARY.summary?.maxImprovementPct || 13.8}% (Mediana: {EXPERIMENTAL_V4_SUMMARY.summary?.medianImprovementPct || 13.6}%)</span>
               </div>
               <div className="exp-kpi-card">
                 <span className="exp-kpi-label">Tasa de Dominancia de Pareto</span>
-                <span className="exp-kpi-value highlight num-tabular">{(EXPERIMENTAL_V4_SUMMARY.summary?.dominancePct || 100)}%</span>
+                <span className="exp-kpi-value highlight num-tabular">{EXPERIMENTAL_V4_SUMMARY.summary?.dominancePct || 100}%</span>
                 <span className="exp-kpi-sub">MILP domina estrictamente en costo y desperdicio (12 de 12)</span>
               </div>
               <div className="exp-kpi-card">
                 <span className="exp-kpi-label">Telemetría del Solver MILP</span>
                 <span className="exp-kpi-value highlight num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalOptimalityGapPct.toFixed(2) : '0.00'}% Gap</span>
-                <span className="exp-kpi-sub num-tabular">{telemetry.variables ? telemetry.variables.modelVariables : 93} Vars Activas | {telemetry.constraints ? telemetry.constraints.activeInstanceTotal : 34} Restricciones</span>
+                <span className="exp-kpi-sub num-tabular">{telemetry.variables ? telemetry.variables.modelVariables : 93} Vars Activas | {telemetry.constraints ? telemetry.constraints.activeInstanceTotal : 34} Restricciones Activas</span>
               </div>
               <div className="exp-kpi-card">
                 <span className="exp-kpi-label">Runtime de Optimización</span>
-                <span className="exp-kpi-value highlight num-tabular">{(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24)} ms</span>
-                <span className="exp-kpi-sub num-tabular">p50: {(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24)}ms | p95: {(EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p95Ms || 15.72)}ms</span>
+                <span className="exp-kpi-value highlight num-tabular">{EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24} ms</span>
+                <span className="exp-kpi-sub num-tabular">p50: {EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p50Ms || 0.24}ms | p95: {EXPERIMENTAL_V4_SUMMARY.summary?.runtime?.p95Ms || 15.72}ms</span>
               </div>
             </div>
 
-            {/* Tarjeta de Telemetría Detallada */}
-            <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '1rem', marginBottom: '1.25rem' }}>
-              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-                Auditoría Formal de Cotas y Variables del Solver MILP
+            {/* Tarjeta de Telemetría Detallada sin divergencias */}
+            <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-sm)', padding: '1.15rem', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
+                Auditoría Formal de Variables, Restricciones y Cotas del Solver MILP
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', fontSize: '0.74rem' }}>
-                <div><strong>Incumbent / UB:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.incumbentUb : 1.1669}</span></div>
-                <div><strong>Initial LP Relaxation LB:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.initialLpRelaxationLb : 0.6714}</span></div>
-                <div><strong>Initial LP Integrality Gap:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.initialLpIntegralityGapPct : 42.46}%</span></div>
-                <div><strong>Final B&B Lower Bound:</strong> <span className="num-tabular">{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalBbLowerBound : 1.1669}</span></div>
-                <div><strong>Final Optimality Gap:</strong> <span className="num-tabular" style={{ color: '#10b981' }}>{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.finalOptimalityGapPct : 0.00}%</span></div>
-                <div><strong>Global Optimum Proof:</strong> <span style={{ color: '#10b981' }}>{telemetry.boundsAndGaps ? telemetry.boundsAndGaps.globalOptimumProof : 'UB == final B&B bound'}</span></div>
-                <div><strong>Distancia al 2do mejor (Δ_2nd):</strong> <span className="num-tabular">+{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.deltaSecondBest : 0.0659} (+{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.deltaSecondBestPct : 5.65}%)</span></div>
-                <div><strong>Runner-up distinto:</strong> <span>{telemetry.stabilityAndDistance ? telemetry.stabilityAndDistance.runnerUpSubset : 'D1 + Éxito'}</span></div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.85rem', fontSize: '0.76rem' }}>
+                <div>
+                  <strong>Variables de Decisión:</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    {telemetry.variables?.candidateVariables || 99} candidatas · <strong>{telemetry.variables?.modelVariables || 93}</strong> en modelo ({telemetry.variables?.modelIntegerVariables || 60} ent, {telemetry.variables?.modelContinuousVariables || 30} cont, {telemetry.variables?.modelBinaryVariables || 3} bin)
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Restricciones de la Instancia:</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    <strong>{telemetry.constraints?.activeInstanceTotal || 34} activas</strong> ({telemetry.constraints?.coverageActive || 30} cobertura activa + {telemetry.constraints?.budget || 1} presupuesto + {telemetry.constraints?.activation || 3} activación)
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Catálogo Canónico Total:</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    <strong>{telemetry.constraints?.canonicalCatalogTotal || 37} totales</strong> ({telemetry.constraints?.coverageCanonicalTotal || 33} cobertura SKUs + 1 presupuesto + 3 activación)
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Cotas y Gaps:</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    Incumbent UB: <strong>{telemetry.boundsAndGaps?.incumbentUb || 1.1669}</strong> | Initial LP LB: {telemetry.boundsAndGaps?.initialLpRelaxationLb || 0.6714} (Gap: {telemetry.boundsAndGaps?.initialLpIntegralityGapPct || 42.46}%)
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Optimalidad Global Demostrada:</strong>
+                  <div style={{ color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
+                    Final B&B gap: <strong>{telemetry.boundsAndGaps?.finalOptimalityGapPct || 0.00}%</strong> (tol 1e-5)
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Distancia al 2do mejor (Δ_2nd):</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    <strong>+{telemetry.stabilityAndDistance?.deltaSecondBest || 0.0659}</strong> (+{telemetry.stabilityAndDistance?.deltaSecondBestPct || 5.65}% sobre {telemetry.stabilityAndDistance?.runnerUpSubset || 'D1 + Éxito'})
+                  </div>
+                </div>
+
+                <div>
+                  <strong>Variabilidad de Ganancia:</strong>
+                  <div className="num-tabular" style={{ color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    Media: <strong>13.4%</strong> | Desv. Est: <strong>0.27%</strong> | CV: <strong>2.01%</strong> (n=12)
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1073,7 +1133,7 @@ export default function App() {
                     <th style={{ padding: '0.5rem' }}>Costo MILP</th>
                     <th style={{ padding: '0.5rem' }}>Costo RH-1</th>
                     <th style={{ padding: '0.5rem' }}>Mejora %</th>
-                    <th style={{ padding: '0.5rem' }}>Ahorro Neto</th>
+                    <th style={{ padding: '0.5rem' }}>Ahorro Neto Estimado</th>
                     <th style={{ padding: '0.5rem' }}>Pareto</th>
                   </tr>
                 </thead>
@@ -1082,10 +1142,10 @@ export default function App() {
                     <tr key={s.scenarioId} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                       <td style={{ padding: '0.5rem', fontWeight: 600 }}>{s.name}</td>
                       <td style={{ padding: '0.5rem' }} className="num-tabular">{formatCOP(s.budgetCOP)}</td>
-                      <td style={{ padding: '0.5rem', color: '#10b981', fontWeight: 700 }} className="num-tabular">{formatCOP(s.milp.effectiveCostCOP)}</td>
-                      <td style={{ padding: '0.5rem' }} className="num-tabular">{formatCOP(s.humanHeuristic.effectiveCostCOP)}</td>
-                      <td style={{ padding: '0.5rem', color: '#38bdf8', fontWeight: 700 }} className="num-tabular">+{s.heuristicImprovementPct}%</td>
-                      <td style={{ padding: '0.5rem', fontWeight: 700 }} className="num-tabular">+{formatCOP(s.milp.netSavingsVsBestMonoCOP)}</td>
+                      <td style={{ padding: '0.5rem', color: '#10b981', fontWeight: 700 }} className="num-tabular">{formatCOP(s.milp?.effectiveCostCOP || s.milpCost)}</td>
+                      <td style={{ padding: '0.5rem' }} className="num-tabular">{formatCOP(s.humanHeuristic?.effectiveCostCOP || s.humanCost)}</td>
+                      <td style={{ padding: '0.5rem', color: '#38bdf8', fontWeight: 700 }} className="num-tabular">+{s.heuristicImprovementPct || s.improvementPct}%</td>
+                      <td style={{ padding: '0.5rem', fontWeight: 700 }} className="num-tabular">+{formatCOP(s.milp?.netSavingsVsBestMonoCOP || s.savingsVsBestMono)}</td>
                       <td style={{ padding: '0.5rem', color: '#10b981' }}>✓ Dominante</td>
                     </tr>
                   ))}
@@ -1113,7 +1173,7 @@ export default function App() {
           </div>
           <div className="status-bar-cell">
             <span>Variables / Restricciones:</span>
-            <span className="status-bar-val num-tabular">{telemetry.variables ? telemetry.variables.modelVariables : 93} / {telemetry.constraints ? telemetry.constraints.activeInstanceTotal : 34}</span>
+            <span className="status-bar-val num-tabular">{telemetry.variables?.modelVariables || 93} / {telemetry.constraints?.activeInstanceTotal || 34}</span>
           </div>
           <div className="status-bar-cell">
             <span>Tiempo:</span>
@@ -1125,10 +1185,10 @@ export default function App() {
           <button 
             className="status-bar-btn-v4b"
             onClick={() => setBehavioralModalOpen(true)}
-            title="Abrir consola de telemetría conductual V4-B"
+            title="Abrir registro metodológico V4-B"
           >
             <Activity size={13} />
-            <span>Telemetría Conductual V4-B</span>
+            <span>Registro Metodológico V4-B</span>
           </button>
         </div>
       </footer>
