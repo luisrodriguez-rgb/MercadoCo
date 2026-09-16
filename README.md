@@ -1,76 +1,138 @@
-# Mercado Colombia — Sistema de Apoyo a Decisiones para la Optimización del Abastecimiento Doméstico (V4)
+# Mercado Colombia — Asistente de Decisión y Optimización del Abastecimiento Doméstico (V4-B)
 
-> **Modelo de Investigación Operativa Aplicada a las Finanzas del Hogar y Retail Analytics**  
-> **Líneas Paralelas:** V4-A (Evaluación Experimental Computacional) y V4-B (Validación Comportamental de Campo en Cali).  
+> **Declaración Oficial del Sistema:**  
+> **«Mercado Colombia V4-B está funcionalmente congelado y preparado para validación conductual en compradores responsables de compra en Cali.»**  
+>  
+> **Líneas del Proyecto:**  
+> - **V4-A (Evaluación Experimental Computacional):** Evidencia formal completada (12 escenarios, 60 ejecuciones, gap Branch & Bound 0.00%, Pareto 12/12).  
+> - **V4-B (Validación Conductual de Campo en Cali):** Instrumentación empírica desacoplada y protocolo de registro pseudonimizado listo para trabajo de campo.  
+>  
 > **Hipótesis Central de Decisión:**  
-> $$\boxed{\text{Presupuesto Semanal} \longrightarrow \text{Plan de Comidas (14 Raciones)} \longrightarrow \text{Canasta Multitienda Óptima}}$$
+> $$\boxed{\text{Presupuesto Semanal} \longrightarrow \text{Plan de Menú (14 Raciones)} \longrightarrow \text{Asignación Óptima según el Modelo (Multitienda / Monotienda)}}$$
 
 ---
 
-## 1. Arquitectura Estratégica V4 (Bifurcación Metodológica)
+## 1. Arquitectura de Doble Modo (Consumo vs. Laboratorio DSS)
 
-A diferencia de proyectos que confunden la validación técnica con la validación de mercado, **Mercado Colombia V4** separa formalmente ambas preguntas:
+El sistema implementa una separación arquitectónica estricta entre la **experiencia cotidiana de compra** y la **consola de investigación de operaciones**:
 
 ```text
-                    MERCADO COLOMBIA (V4)
-                           │
-             ┌─────────────┴─────────────┐
-             ↓                           ↓
-      V4-A EXPERIMENTAL           V4-B VALIDACIÓN HUMANA
-      "¿Funciona el modelo?"      "¿La gente lo usaría?"
-             │                           │
-             ↓                           ↓
-       60 ejecuciones              Protocolo 20–50 usuarios
-       MILP vs Heurística RH-1     Cali (comportamiento real)
-       Sensibilidad de λ           3 propuestas de valor (A/B/C)
-       Dominancia de Pareto        Decisión de compra terminada
-       Runtime Benchmarking        Tolerancia a la 2da tienda
+                                MERCADO COLOMBIA (V4-B)
+                                           │
+             ┌─────────────────────────────┴─────────────────────────────┐
+             ↓                                                           ↓
+      MODO COMPRA (Consumidor)                                    MODO ANÁLISIS (Laboratorio DSS)
+      "¿Qué compro? ¿Dónde? ¿Cuánto?"                            "¿Cómo funciona? ¿Qué tan óptimo y robusto?"
+             │                                                           │
+   ┌─────────┼──────────┬──────────┐                           ┌─────────┼──────────┬──────────┐
+   ↓         ↓          ↓          ↓                           ↓         ↓          ↓          ↓
+Mi mercado  Compra   Comparar   ¿Por qué?                  Variables  Cotas/Gaps  Pareto   Sensibilidad
+(Decisión) (Checklist) (Matriz) (Explicación)              (93 en MILP) (B&B 0%) (12/12)   (\lambda_{waste})
 ```
 
 ---
 
-## 2. Formulación Matemática de Investigación de Operaciones (MILP V4)
+## 2. Modo Compra: Experiencia de Abastecimiento Operativa
 
-### 2.1. Partición Probabilística Continua de Excedentes ($Surplus$)
+Diseñado bajo estándares de diseño moderno y optimización táctil móvil (*Mobile-first*), organiza la toma de decisión en 5 vistas sin sobrecarga cognitiva:
 
-El excedente físico sobre la demanda semanal ($Surplus_i = q_{s,i} X_{s,i} - \text{Demanda}_i$) se modela mediante la **probabilidad intrínseca de pérdida biológica** ($WasteProbability_i \in [0, 1]$), evitando clasificaciones binarias rígidas:
+1. **Mi mercado (Panel de Decisión):**
+   - **Hero Banner:** Muestra el desembolso en caja ($163.715 COP), el **Ahorro neto estimado** (+$24.910 COP), tiendas asignadas (Ara y Éxito), líneas de compra (30) y tiempo estimado (~18 min).
+   - **Trade-off Simétrico de Segunda Parada:** Pregunta neutral con opciones de peso visual equivalente para reducir sesgos de presentación en la medición conductual:
+     ```text
+     ¿Vale la pena hacer una segunda parada?
+     Ahorras $24.910 visitando dos tiendas (+ ~18 min de recorrido).
 
-$$ExpectedWaste_i = Surplus_i \times WasteProbability_i$$
-
-$$UsefulFutureInventory_i = Surplus_i - ExpectedWaste_i = Surplus_i \times (1 - WasteProbability_i)$$
-
-- **$WasteProbability_i$:**
-  - `STABLE` (granos secos, lentejas, arroz, aceite, café, sal): $0.02$ (98% preservado como inventario útil futuro).
-  - `MEDIUM` (leche entera, carnes congelables, huevos): $0.18$ (82% inventario útil, 18% riesgo de deterioro).
-  - `HIGH` (tomate chonto, plátano maduro, cilantro): $0.70$ (70% riesgo de pérdida biológica si excede la semana).
-
-### 2.2. Función Objetivo Multiobjetivo Normalizada
-
-Desacoplamiento formal entre **optimización matemática** (adimensional) y **contabilidad financiera** ($ COP):
-
-$$\min \Big( \frac{\text{ProductCost}}{\text{Budget}} + \lambda_w \frac{\text{ExpectedWaste}}{\text{Budget}} + \lambda_f \frac{\text{Friction}}{\text{Budget}} + \lambda_u \frac{\text{FutureInventory}}{\text{Budget}} - \lambda_p \cdot \text{ProteinAdequacy} \Big)$$
-
-Donde:
-- **$\text{ProductCost}$:** Desembolso bruto estricto en góndola (caja registradora), sin computar dos veces la fricción.
-- **$\text{Friction}$:** Costo logístico paramétrico imputado (transporte monetario + valor del tiempo en transporte a pie, MIO o vehículo).
-- **$\lambda_w = 0.90, \lambda_f = 1.00, \lambda_u = 0.10, \lambda_p = 0.15$**.
-- **$\text{ProteinAdequacy}$ Acotada:** Función de adecuación nutricional restringida al intervalo fisiológico $[P_{\min}=1.2, P_{\max}=1.6]$ g/kg/día:
-  $$\text{ProteinAdequacy} = \min\left(1.0, \max\left(0.0, \frac{P_{\text{actual}} - P_{\min}}{P_{\text{target}} - P_{\min}}\right)\right)$$
-  Evita saturar o degenerar la canasta con cantidades desproporcionadas de un solo insumo.
-
-### 2.3. Evaluación Financiera Simétrica y Auditable
-
-$$\text{Costo Efectivo Total} = \text{ProductCost} + \text{Friction}$$
-
-$$\text{Ahorro Neto Auditable} = \text{Costo Efectivo}_{\text{MejorMonotienda}} - \text{Costo Efectivo}_{\text{MILP}}$$
+     [ Hacer 2 compras (Ahorras $24.910) ]      [ Comprar todo en 1 tienda (Ara) ]
+     ```
+   - **Decisiones Determinantes:** Explicabilidad en lenguaje común de asignaciones clave (papa en Éxito por báscula, huevos en Ara por bandeja económica, arroz en D1).
+2. **Compra (Checklist Operativo por Pasillo):**
+   - Agrupación por parada física: **Parada 1: Tiendas Ara** (19 líneas · $96.350 COP) y **Parada 2: Grupo Éxito** (11 líneas · $65.834 COP).
+   - Diferenciación explícita entre empaque cerrado y **báscula continua** (ej. *Éxito: 1.2 kg de papa exacta para recetas*).
+   - Exportación limpia y estructurada para mensajería (WhatsApp).
+   - **Doble Estado de Ejecución:** Distingue `checklistCompleted: true` (100% de la lista marcada en el supermercado) de `purchaseReported: true` (*"Informar compra efectuada"* declarada por el participante con método y timestamp).
+3. **Comparar (Costo Efectivo Transparente):**
+   - Matriz comparativa estilo WiseList/Tallo: Canasta Óptima Híbrida ($163.715) vs. Ara ($188.625) vs. D1 ($199.395) vs. Éxito ($208.516).
+   - Desglose auditable:
+     $$\text{Desembolso en Cajas (Góndola)} + \text{Fricción Logística Estimada (Desplazamiento)} = \text{Costo Efectivo Estimado}$$
+4. **¿Por qué? (Explicabilidad Humana):**
+   - Justificación producto por producto del por qué se eligió cada tienda, vinculando el gramaje de la receta con la presentación comercial.
+5. **Historial & Despensa:**
+   - Registro de compras anteriores y seguimiento del **Inventario remanente estimado** para ciclos futuros.
 
 ---
 
-## 3. Resultados de la Batería Experimental V4-A (60 Ejecuciones)
+## 3. Modo Análisis: Laboratorio DSS y Rigor Matemático
 
-Ejecución determinista de **12 escenarios combinatorios** ($3 \text{ presupuestos} \times 2 \text{ zonas} \times 2 \text{ perfiles nutricionales}$) contra **5 estrategias de abastecimiento** (D1, Ara, Éxito, Heurística Humana RH-1, MILP V4):
+El **Laboratorio V4** expone la telemetría dinámica completa del solver y la auditoría de investigación de operaciones:
 
-| # Escenario | Presupuesto | Zona Cali | Perfil | Costo MILP V4 | Costo Humano RH-1 | Mejora vs. RH-1 | Dominancia Pareto | Ahorro vs. Mejor Mono |
+### 3.1. Formulación Matemática del Modelo MILP V4
+
+#### A. Partición Probabilística de Excedentes ($Surplus$)
+Evita clasificaciones rígidas mediante el riesgo biológico intrínseco ($WasteProbability_i \in [0, 1]$):
+$$ExpectedWaste_i = Surplus_i \times WasteProbability_i$$
+$$UsefulFutureInventory_i = Surplus_i \times (1 - WasteProbability_i)$$
+- **STABLE** (arroz, sal, lentejas, aceite): $p = 0.02$ (98% preservado como inventario útil).
+- **MEDIUM** (leche, huevos, carnes congelables): $p = 0.18$.
+- **HIGH** (tomate chonto, plátano maduro, hierbas): $p = 0.70$ (alto riesgo si supera la semana).
+
+#### B. Función Objetivo Multiobjetivo Normalizada
+Desacoplamiento formal entre optimización adimensional y contabilidad financiera ($ COP):
+$$\min \left( \frac{\text{ProductCost}}{\text{Budget}} + \lambda_w \frac{\text{ExpectedWaste}}{\text{Budget}} + \lambda_f \frac{\text{Friction}}{\text{Budget}} + \lambda_u \frac{\text{FutureInventory}}{\text{Budget}} - \lambda_p \cdot \text{ProteinAdequacy} \right)$$
+
+Parámetros calibrados: $\lambda_w = 0.90, \lambda_f = 1.00, \lambda_u = 0.10, \lambda_p = 0.15$.
+
+Adecuación proteica acotada al intervalo fisiológico $[P_{\min}=1.2, P_{\max}=1.6]$ g/kg/día:
+$$\text{ProteinAdequacy} = \min\left(1.0, \max\left(0.0, \frac{P_{\text{actual}} - P_{\min}}{P_{\text{target}} - P_{\min}}\right)\right)$$
+
+---
+
+## 4. Trazabilidad Formal de Cesta y Auditoría de Restricciones
+
+### 4.1. Trazabilidad de la Canasta Familiar
+Para evitar confusiones entre necesidades de recetas y presentaciones comerciales, el sistema formaliza tres niveles:
+
+$$\text{Ingrediente Requerido} \longrightarrow \text{Requerimiento Nutricional} \longrightarrow \text{Asignación de SKU y Modalidad}$$
+
+```text
+Ingrediente Requerido: Papa Pastusa
+├── Requerimiento del Menú Semanal: 1.200 g
+└── Asignación Modelo: Éxito · 1.2 kg · Venta continua por báscula ($5.160 COP)
+
+Ingrediente Requerido: Sal Refinada
+├── Requerimiento del Menú Semanal: 200 g
+└── Asignación Modelo: D1 · 1 paquete cerrado · 1.000 g ($1.850 COP, 800 g remanente estimado)
+```
+
+- **14 Ingredientes Requeridos:** Insumos culinarios para 14 comidas semanales completas (2 personas).
+- **30 Líneas de Compra (SKUs):** Opciones asignadas en la solución óptima (19 en Ara, 11 en Éxito).
+- **Unidades / Gramos:** Cantidades exactas en báscula continua o paquetes discretos cerrados.
+
+### 4.2. Desglose Auditable de Restricciones (30 / 33 Coberturas)
+
+La telemetría del solver calcula dinámicamente las restricciones sin cifras rígidas en código:
+
+```text
+Catálogo Canónico del Sistema: 37 Restricciones Totales
+├── Cobertura de SKUs Canónicos: 33
+├── Presupuesto Global Semanal: 1
+└── Activación de Costo Fijo por Tienda (D1, Ara, Éxito): 3
+
+Instancia de Menú Resuelta: 34 Restricciones Activas
+├── Cobertura Considerada en la Instancia: 30 / 33
+│   ├── 30 SKUs demandados activamente por las recetas de la semana (RHS > 0)
+│   └── 3 SKUs canónicos restantes no requeridos en este menú (RHS = 0, no vinculantes)
+├── Presupuesto Máximo Disponible: 1
+└── Activación de Tiendas: 3
+```
+
+---
+
+## 5. Resultados de la Batería Experimental V4-A (60 Ejecuciones)
+
+Ejecución determinista de **12 escenarios combinatorios** ($3 \text{ presupuestos} \times 2 \text{ zonas de Cali} \times 2 \text{ perfiles nutricionales}$) frente a 5 estrategias de abastecimiento:
+
+| # Escenario | Presupuesto | Zona Cali | Perfil | Costo MILP V4 | Costo Humano RH-1 | Mejora % vs RH-1 | Dominancia Pareto | Ahorro Neto Estimado |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **E1** | $150.000 COP | Granada | Balanceado | $163.715 COP | $189.881 COP | **+13.8%** | ✓ Dominante | +$24.910 COP |
 | **E2** | $150.000 COP | Granada | Proteína | $163.715 COP | $189.881 COP | **+13.8%** | ✓ Dominante | +$24.910 COP |
@@ -85,54 +147,69 @@ Ejecución determinista de **12 escenarios combinatorios** ($3 \text{ presupuest
 | **E11** | $280.000 COP | San Fdo | Balanceado | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
 | **E12** | $280.000 COP | San Fdo | Proteína | $147.121 COP | $169.540 COP | **+13.2%** | ✓ Dominante | +$20.290 COP |
 
-### Métricas Maestras de Investigación Operativa
-
-$$\boxed{\text{Mejora Media vs. Heurística RH-1: } \mathbf{+13.4\%} \quad (\text{Mediana: } 13.6\%, \text{ Rango: } 13.1\% - 13.8\%)}$$
-
-$$\boxed{\text{Tasa de Dominancia de Pareto: } \mathbf{100.0\%} \quad (12 \text{ de } 12 \text{ escenarios con menor costo y menor desperdicio})}$$
-
-$$\boxed{\text{Runtime Benchmarks: } \text{p50} = \mathbf{0.21 \text{ ms}}, \quad \text{p95} = \mathbf{14.7 \text{ ms}}, \quad \text{max} = \mathbf{14.7 \text{ ms}}}$$
-
-### Análisis de Sensibilidad Paramétrica ($\lambda_{\text{waste}}$)
-
-| $\lambda_{\text{waste}}$ | Asignación de Tiendas | Costo Promedio COP | Desperdicio Esperado | Estabilidad Estructural |
-| :---: | :---: | :---: | :---: | :--- |
-| **0.20** | D1 + Ara | $145.120 COP | $7.200 COP | Estable (tolera excedente perecedero) |
-| **0.50** | D1 + Ara | $144.990 COP | $5.623 COP | Estable (balance estándar) |
-| **0.90** | D1 + Ara | $144.990 COP | $5.623 COP | **Óptima Base (penalización biológica rigurosa)** |
-| **1.20** | D1 + Ara | $145.830 COP | $4.100 COP | Estable (forzaría báscula Éxito si delta de precio disminuye) |
+### Métricas Maestras de Optimización:
+- **Mejora Media frente a Heurística RH-1:** $\mathbf{+13.4\%}$ ($\sigma = 0.27\%$, $\text{CV} = 2.01\%$, rango $13.1\% - 13.8\%$).
+- **Tasa de Dominancia de Pareto:** $\mathbf{100.0\%}$ (12/12 escenarios dominantes en menor costo y menor desperdicio).
+- **Optimalidad Global Demostrada:** Gap de relajación lineal inicial del $42.46\%$ reducido a un **gap final de Branch & Bound de $0.00\%$** (tolerancia $10^{-5}$).
+- **Distancia al Segundo Mejor Vector:** $\Delta_{\text{2nd}} = +0.0659$ ($+5.65\%$ sobre la combinación runner-up D1 + Éxito).
+- **Latencia de Solución:** $\text{p50} = 0.21\text{ ms}, \; \text{p95} = 14.7\text{ ms}$.
 
 ---
 
-## 4. Línea V4-B: Protocolo de Validación Humana en Cali
+## 6. Validación Conductual de Campo (Línea V4-B en Cali)
 
-Para verificar si los consumidores reales adoptarían la solución, se diseñó un protocolo de campo estructurado en [protocolo_validacion_cali_v4.md](file:///Users/leonfeliperodriguez/Desktop/Trabajos/Mercado:Colombia/protocolo_validacion_cali_v4.md):
+El protocolo de campo se encuentra detallado en [`protocolo_validacion_cali_v4.md`](protocolo_validacion_cali_v4.md).
 
-1. **Fase 1 (Comportamiento Retrospectivo):** Auditoría de cómo mercó el usuario la semana anterior sin sesgos.
-2. **Fase 2 (Confrontación de Decisión Concreta):** Presentación de una orden real ($200k presupuesto $\rightarrow$ D1 8 prod + Ara 6 prod, $171.800 costo, $14.600 ahorro neto).
-   - Pregunta clave: *"¿Harías esta compra tal cual está planificada? ¿Qué tendría que cambiar para que la hicieras?"*
-3. **Métricas Conductuales:**
-   - **Tasa de Aceptación de la Decisión:**
-     $$AcceptanceRate = \frac{\text{Usuarios que harían la compra}}{\text{Usuarios expuestos}}$$
-   - **Tolerancia a la Segunda Tienda:** Elasticidad de ahorro requerida ($2k, $5k, $10k, $15k) para realizar una parada adicional.
+### 6.1. Protocolo de Registro y Pseudonimización
+- **Código Pseudónimo:** Identificador unívoco del participante (`participantId: CALI-SUB-01`).
+- **Sin Datos Personales:** El dataset experimental no almacena nombres, números de identificación, direcciones privadas ni medios de pago.
+- **Instrumentación Conductual:** Registro de decisiones intermedias (apertura de explicación, copia a WhatsApp, inicio de checklist, completitud y reporte).
+
+### 6.2. Taxonomía de Métricas de Validación Humana
+1. **Métricas Primarias:**
+   - `SecondStoreAcceptance`: Aceptación declarada de la segunda tienda ante el trade-off simétrico.
+   - `RecommendationAcceptance`: Elección de la canasta híbrida sugerida frente a monotienda.
+   - `PurchaseReported`: Confirmación declarada por el participante de haber ejecutado la compra (`purchaseReportMethod: "participant_confirmation"`).
+2. **Métricas Secundarias:**
+   - `ExplanationOpened`, `ChecklistStarted`, `ChecklistCompleted`, `WhatsAppCopied`, `TimeToDecision`.
+3. **Variables Descriptivas:**
+   - `householdSize`, `weeklyBudget`, `mainStore`, `shoppingFrequency`, `transportMode`.
+
+### 6.3. Directriz de Reporte Estadístico: Magnitud de Evidencia
+Todo reporte de resultados de campo presentará conjuntamente:
+$$\text{Soporte Muestral } (n) \quad \mid \quad \text{Casos } (x/n) \quad \mid \quad \text{Proporción } (\hat{p}\%) \quad \mid \quad \text{IC 95\% (Wilson Score)}$$
+
+### 6.4. Tratamiento del Inventario Remanente (Hipótesis V5)
+El excedente de empaque no se computa como ahorro realizado inmediato, sino como **Inventario remanente estimado**, sujeto a la ecuación de balance con merma biológica:
+$$\text{Inventory}_{t+1,i} = \text{Inventory}_{t,i} + \text{Purchases}_{t,i} - \text{Consumption}_{t,i} - \text{Spoilage}_{t,i}$$
 
 ---
 
-## 5. Ejecución Local y Artefactos
+## 7. Pila Tecnológica y Ejecución Local
+
+- **Frontend & Lógica:** React 19, JavaScript ES Modules, Lucide React.
+- **Estilos:** Vanilla CSS con variables de diseño, temas Dark/Light y layouts adaptados a dispositivos móviles.
+- **Servidor y Build:** Vite 6.
+
+### Comandos de Ejecución
 
 ```bash
-# 1. Ejecución de la batería experimental completa CLI (60 corridas)
-pnpm experiment:v4
+# 1. Instalar dependencias
+npm install
 
-# 2. Servidor interactivo de desarrollo (puerto 3001)
-pnpm dev
+# 2. Iniciar servidor interactivo de desarrollo (puerto 3000)
+npm run dev
 
-# 3. Compilación de producción
-pnpm build
+# 3. Validar compilación de producción
+npm run build
+
+# 4. Ejecutar batería experimental de laboratorio (CLI)
+node experiments/run_v4_experiment.js
 ```
 
-### Artefactos Generados:
-- `experiments/results/v4_results.json` (Detalle de las 60 corridas)
-- `experiments/results/v4_summary.json` (Resumen de métricas y sensibilidad)
-- `experiments/results/v4_audit.json` (Conciliación contable y aritmética)
-- `protocolo_validacion_cali_v4.md` (Guion metodológico para Cali)
+---
+
+## 8. Licencia y Cita Académica
+
+Proyecto de investigación académica en Sistemas de Apoyo a Decisiones (DSS) e Investigación de Operaciones aplicada al abastecimiento minorista en Colombia.  
+Desarrollado en Santiago de Cali, Colombia.
